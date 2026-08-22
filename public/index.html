@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0E2A47" />
+  <title>Kisan Procurement Management System (KPMS) | Government of India</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
+
+  <!-- External Libraries: Font Awesome, Leaflet CSS & JS, Chart.js, GSAP, Socket.IO -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/animations.css" />
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <!-- SIH Hackathon Presentation Bar for Judges -->
+  <div class="sih-presentation-bar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="sih-badge">SIH 2026 EDITION</span>
+      <span style="font-weight:600;"><i class="fas fa-trophy"></i> Smart India Hackathon Live Presentation Mode</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <button class="btn btn-sm" style="background:#F59E0B; color:#000; padding:4px 10px; font-size:0.8rem;" onclick="startJudgeGuidedTour()">
+        <i class="fas fa-compass"></i> Guided Tour
+      </button>
+      <button class="btn btn-sm" style="background:#10B981; color:#FFF; padding:4px 10px; font-size:0.8rem;" onclick="triggerSIHSimulation()">
+        <i class="fas fa-play"></i> Run 30s Simulation
+      </button>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,0.2); color:#FFF; padding:4px 10px; font-size:0.8rem;" onclick="trigger1ClickDemoReset()">
+        <i class="fas fa-rotate-left"></i> Reset Demo Data
+      </button>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="font-size:0.75rem; text-transform:uppercase;">Judge Timer:</span>
+        <span id="sih-judge-timer" class="sih-timer">05:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Government Official Top Flag Strip -->
+  <div class="gov-top-bar">
+    <div class="gov-flag-strip">
+      <span class="flag-colors"></span>
+      <span data-i18n="gov_badge">Government of India | Ministry of Agriculture & Farmers Welfare</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:18px;">
+      <!-- Multi-Language Switcher (9 Languages) -->
+      <div style="display:flex; align-items:center; gap:6px;">
+        <i class="fas fa-language" style="color:var(--saffron);"></i>
+        <select id="lang-selector" onchange="setLanguage(this.value)" style="background:transparent; color:#E2E8F0; border:1px solid rgba(255,255,255,0.3); border-radius:4px; padding:2px 6px; font-size:0.8rem; outline:none; cursor:pointer;">
+          <option value="en" style="color:#000;">English</option>
+          <option value="hi" style="color:#000;">हिन्दी (Hindi)</option>
+          <option value="gu" style="color:#000;">ગુજરાતી (Gujarati)</option>
+          <option value="mr" style="color:#000;">मराठी (Marathi)</option>
+          <option value="pa" style="color:#000;">ਪੰਜਾਬੀ (Punjabi)</option>
+          <option value="ta" style="color:#000;">தமிழ் (Tamil)</option>
+          <option value="te" style="color:#000;">తెలుగు (Telugu)</option>
+          <option value="kn" style="color:#000;">ಕನ್ನಡ (Kannada)</option>
+          <option value="bn" style="color:#000;">বাংলা (Bengali)</option>
+        </select>
+      </div>
+      <!-- Dark / Light Mode Toggle -->
+      <button class="btn-icon" style="width:28px; height:28px; font-size:0.8rem; background:transparent; border-color:rgba(255,255,255,0.3); color:#FFF;" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        <i id="theme-icon" class="fas fa-moon"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="main-header">
+    <a class="brand-logo" onclick="routeTo('#landing')">
+      <div class="brand-emblem"><i class="fas fa-wheat-awn"></i></div>
+      <div class="brand-title">
+        <span>KPMS AGRI-PORTAL</span>
+        <span class="brand-subtitle">Kisan Procurement Management System</span>
+      </div>
+    </a>
+
+    <div class="nav-actions">
+      <button class="btn btn-outline btn-sm" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> Mandi Display Board</button>
+      <button class="btn btn-outline btn-sm" onclick="routeTo('#ai-insights')"><i class="fas fa-brain"></i> AI Insights</button>
+      <button class="btn btn-outline btn-sm" onclick="openKisanAIChat()"><i class="fas fa-robot"></i> Kisan Sahayak</button>
+      <div id="nav-auth-actions" style="display:flex; align-items:center; gap:8px;">
+        <!-- Dynamically rendered based on session -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Dynamic SPA View Container -->
+  <div id="app-view-container"></div>
+
+  <!-- Global Modal Container -->
+  <div id="auth-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="modal-title" style="color:var(--primary-navy); font-weight:800; font-size:1.25rem;">KPMS Portal</h3>
+        <button class="btn-icon" onclick="closeModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="modal-content-slot"></div>
+    </div>
+  </div>
+
+  <!-- Global Toast Alerts Container -->
+  <div id="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="/js/i18n.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/farmer-portal.js"></script>
+  <script src="/js/booking-portal.js"></script>
+  <script src="/js/queue-portal.js"></script>
+  <script src="/js/officer-portal.js"></script>
+  <script src="/js/procurement-workflow.js"></script>
+  <script src="/js/payment-portal.js"></script>
+  <script src="/js/admin-portal.js"></script>
+  <script src="/js/display-board.js"></script>
+  <script src="/js/ai-assistant.js"></script>
+  <script src="/js/sih-tour.js"></script>
+  <script src="/js/app.js"></script>
+
+  <!-- Service Worker Registration for PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration note:', err));
+    }
+  </script>
+</body>
+</html>
