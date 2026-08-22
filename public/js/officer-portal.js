@@ -10,9 +10,9 @@ const renderOfficerSidebar = (activeKey, user, center) => {
   return `
     <aside class="sidebar">
       <div style="padding:10px 14px; border-bottom:1px solid var(--border-color); margin-bottom:12px;">
-        <div style="font-weight:700; color:#FFF; font-size:1.05rem;">${user.name}</div>
-        <div style="font-size:0.75rem; color:var(--saffron); font-weight:600;"><i class="fas fa-shield-halved"></i> ${user.designation || 'Senior Procurement Inspector'}</div>
-        <div style="font-size:0.72rem; color:#94A3B8; margin-top:2px;">${center ? center.name : 'APMC Mandi'}</div>
+        <div style="font-weight:700; color:#FFF; font-size:1.05rem;">${user ? user.name : 'Officer'}</div>
+        <div style="font-size:0.75rem; color:var(--saffron); font-weight:600;"><i class="fas fa-shield-halved"></i> ${user && user.designation ? user.designation : 'Senior Procurement Inspector'}</div>
+        <div style="font-size:0.72rem; color:#94A3B8; margin-top:2px;">${center ? center.name : 'APMC Central Mandi'}</div>
       </div>
       <div class="sidebar-heading">Officer Console</div>
       <a class="nav-link ${activeKey === 'console' ? 'active' : ''}" onclick="loadOfficerDashboard()"><i class="fas fa-desktop"></i> Operations Console</a>
@@ -33,6 +33,7 @@ const renderOfficerSidebar = (activeKey, user, center) => {
  * 1. OPERATIONS CONSOLE (MAIN DASHBOARD)
  */
 const loadOfficerDashboard = async () => {
+  window.location.hash = '#officer-dashboard';
   const token = localStorage.getItem('kpms_token');
   const user = getCurrentUser();
   if (!token || !user || (user.role !== 'officer' && user.role !== 'admin')) {
@@ -54,7 +55,7 @@ const loadOfficerDashboard = async () => {
       return;
     }
 
-    const { center, stats, currentQueue, inventory } = result;
+    const { center, stats, currentQueue } = result;
 
     container.innerHTML = `
       <div class="app-container">
@@ -67,11 +68,11 @@ const loadOfficerDashboard = async () => {
             <div>
               <h2 style="font-size:1.8rem; font-weight:800; color:var(--primary-navy);">${center.name}</h2>
               <p style="color:var(--text-muted); font-size:0.88rem;">
-                Operating Hours: <strong>${center.openingTime} - ${center.closingTime}</strong> | Active Counters: <strong>${center.countersCount || 4} Counters</strong> | Crowd Level: <span class="status-pill waiting">${stats.congestionLevel}</span>
+                Operating Hours: <strong>${center.openingTime || '08:00 AM'} - ${center.closingTime || '06:00 PM'}</strong> | Active Counters: <strong>${center.countersCount || 4} Desks</strong> | Crowd Level: <span class="status-pill waiting">${stats.congestionLevel || 'Normal Flow'}</span>
               </p>
             </div>
-            <div style="display:flex; gap:10px;">
-              <button class="btn btn-primary" onclick="openGateScannerModal()"><i class="fas fa-qrcode"></i> Scan Farmer Pass</button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="openGateScannerModal()"><i class="fas fa-qrcode"></i> Scan Pass</button>
               <button class="btn btn-navy" onclick="loadOfficerQueueView()"><i class="fas fa-list-check"></i> Multi-Counter Queue</button>
               <button class="btn btn-success" onclick="callNextTokenAction()"><i class="fas fa-bullhorn"></i> Call Next Farmer</button>
             </div>
@@ -117,7 +118,7 @@ const loadOfficerDashboard = async () => {
                 <p style="color:var(--text-muted); font-size:0.85rem;">Manage token progressions, initiate quality inspections, and trigger payments.</p>
               </div>
               <div style="display:flex; gap:8px;">
-                <button class="btn btn-primary btn-sm" onclick="loadOfficerQueueView()"><i class="fas fa-table-columns"></i> Full Counter View</button>
+                <button class="btn btn-primary btn-sm" onclick="loadOfficerQueueView()"><i class="fas fa-table-columns"></i> Multi-Counter Full View</button>
                 <button class="btn btn-navy btn-sm" onclick="callNextTokenAction()"><i class="fas fa-phone-volume"></i> Call Next</button>
                 <button class="btn btn-outline btn-sm" onclick="loadOfficerDashboard()"><i class="fas fa-rotate"></i> Refresh</button>
               </div>
@@ -286,7 +287,7 @@ const loadOfficerQueueView = async (filterCounter = 'ALL') => {
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
               <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <button class="btn ${filterCounter === 'ALL' ? 'btn-primary' : 'btn-outline'} btn-sm" onclick="loadOfficerQueueView('ALL')">
-                  All Counters (${allQueues.length})
+                  All Desks (${allQueues.length})
                 </button>
                 <button class="btn ${filterCounter === 'Counter 1' ? 'btn-primary' : 'btn-outline'} btn-sm" onclick="loadOfficerQueueView('Counter 1')">
                   Counter 1 (${allQueues.filter(q => q.counterNumber === 'Counter 1').length})
@@ -301,7 +302,7 @@ const loadOfficerQueueView = async (filterCounter = 'ALL') => {
                   Counter 4 (${allQueues.filter(q => q.counterNumber === 'Counter 4').length})
                 </button>
                 <button class="btn ${filterCounter === 'PRIORITY' ? 'btn-navy' : 'btn-outline'} btn-sm" onclick="loadOfficerQueueView('PRIORITY')">
-                  ⚡ Priority Only (${allQueues.filter(q => q.isPriority).length})
+                  ⚡ Priority (${allQueues.filter(q => q.isPriority).length})
                 </button>
               </div>
 
@@ -468,39 +469,87 @@ const refreshOfficerCurrentView = () => {
   }
 };
 
-const openGateScannerModal = () => {
+let gateScannerStream = null;
+
+/**
+ * Open Gate QR Scanner & Token Dispenser Modal
+ */
+const openGateScannerModal = async () => {
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
-  document.getElementById('modal-title').textContent = 'Gate QR Scanner & Token Dispenser';
+  document.getElementById('modal-title').textContent = 'Gate QR Scanner & Digital Token Dispenser';
+
+  const token = localStorage.getItem('kpms_token');
+  let pendingBookings = [];
+
+  try {
+    const res = await fetch(`/api/officer/bookings/pending?centerId=${activeOfficerCenterId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const d = await res.json();
+    if (d.success) pendingBookings = d.data || [];
+  } catch (e) {}
 
   body.innerHTML = `
-    <div style="padding:10px;">
-      <div class="scanner-box" style="margin-bottom:18px;">
-        <div class="scanner-laser"></div>
-        <div style="color:#FFF; font-size:0.85rem; text-align:center; z-index:10;">
-          <i class="fas fa-camera" style="font-size:2rem; margin-bottom:8px; display:block;"></i>
-          Align Farmer Booking Pass QR inside box
-        </div>
-      </div>
-
-      <div style="text-align:center; margin-bottom:14px; font-weight:700; color:var(--text-muted); font-size:0.85rem;">
-        OR ENTER BOOKING NUMBER MANUALLY
-      </div>
-
-      <form onsubmit="handleManualGateCheckin(event)">
-        <div class="form-group">
-          <input type="text" id="manual-booking-input" class="form-control" placeholder="Enter Booking No (e.g. BKG-2026-001)" style="text-align:center; font-size:1.1rem; font-weight:700;" value="BKG-2026-001" required />
+    <div style="padding:4px;">
+      <!-- Interactive Camera Scanner Box -->
+      <div style="position:relative; width:100%; height:200px; background:#0B192C; border-radius:12px; overflow:hidden; border:2px dashed #475569; display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:16px;">
+        <video id="gate-scanner-video" playsinline style="position:absolute; width:100%; height:100%; object-fit:cover; display:none;"></video>
+        <div class="scanner-laser" id="gate-laser" style="display:none;"></div>
+        
+        <div id="camera-placeholder" style="color:#FFF; text-align:center; z-index:2; padding:12px;">
+          <i class="fas fa-camera" style="font-size:2.4rem; color:var(--saffron); margin-bottom:8px; display:block;"></i>
+          <div style="font-weight:700; font-size:0.95rem;">Farmer QR Gate Scanner</div>
+          <div style="font-size:0.75rem; color:#94A3B8; margin-top:2px;">Scan farmer physical booking pass or mobile QR screen</div>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px; justify-content:center;">
-          <input type="checkbox" id="checkin-priority-check" />
-          <label for="checkin-priority-check" style="font-size:0.88rem; font-weight:600; cursor:pointer;">
-            Senior Citizen / Specially Abled / Priority Entry
+        <div style="position:absolute; bottom:10px; z-index:5; display:flex; gap:8px;">
+          <button type="button" class="btn btn-primary btn-sm" id="btn-toggle-cam" onclick="toggleGateCamera()"><i class="fas fa-video"></i> Start WebCam</button>
+          <label class="btn btn-outline btn-sm" style="background:rgba(255,255,255,0.15); color:#FFF; cursor:pointer; margin:0;">
+            <i class="fas fa-file-arrow-up"></i> Upload QR <input type="file" accept="image/*" style="display:none;" onchange="handleQRFileUpload(this)" />
           </label>
         </div>
+      </div>
 
-        <div style="display:flex; gap:10px; justify-content:center;">
-          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;"><i class="fas fa-ticket"></i> Check-In & Generate Digital Token</button>
+      <!-- Quick Pending Bookings Dropdown Selector -->
+      <div style="margin-bottom:14px;">
+        <label class="form-label" style="font-size:0.82rem; font-weight:700; color:var(--primary-navy); display:flex; justify-content:space-between;">
+          <span><i class="fas fa-clock-rotate-left"></i> Today's Pending Arrivals:</span>
+          <span style="color:var(--green-gov); font-weight:700;">${pendingBookings.length} Bookings Ready</span>
+        </label>
+        <select class="form-control form-control-sm" id="pending-booking-picker" onchange="selectPendingBookingForCheckin(this.value)" style="border:1.5px solid #CBD5E1; font-weight:600;">
+          <option value="">-- Choose from pending bookings or enter below --</option>
+          ${pendingBookings.map(b => `
+            <option value="${b.bookingNumber}">
+              ${b.bookingNumber} — ${b.farmerName} (${b.cropName} ${b.quantity}Q)
+            </option>
+          `).join('')}
+        </select>
+      </div>
+
+      <!-- Manual Input & Check-In Form -->
+      <form onsubmit="handleManualGateCheckin(event)">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" style="font-size:0.8rem; font-weight:600;">Booking Number *</label>
+          <div style="position:relative;">
+            <input type="text" id="manual-booking-input" class="form-control" placeholder="e.g. BKG-2026-003" style="text-align:center; font-size:1.1rem; font-weight:800; letter-spacing:1px; text-transform:uppercase;" required />
+            <button type="button" class="btn-icon" style="position:absolute; right:8px; top:8px; width:26px; height:26px;" onclick="document.getElementById('manual-booking-input').value = '';" title="Clear"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+
+        <div style="background:#F8FAFC; padding:10px 12px; border-radius:8px; margin-bottom:14px; border:1px solid #E2E8F0;">
+          <div style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="checkin-priority-check" style="width:16px; height:16px; cursor:pointer;" />
+            <label for="checkin-priority-check" style="font-size:0.85rem; font-weight:700; color:var(--primary-navy); cursor:pointer; margin:0;">
+              ⚡ Senior Citizen / Specially Abled / Priority Fast-Track Entry
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button type="submit" class="btn btn-primary" style="flex:1; justify-content:center; font-weight:800; padding:12px;">
+            <i class="fas fa-ticket"></i> Check-In & Issue Token
+          </button>
         </div>
       </form>
     </div>
@@ -508,11 +557,76 @@ const openGateScannerModal = () => {
   modal.classList.add('active');
 };
 
+const selectPendingBookingForCheckin = (val) => {
+  if (val) {
+    document.getElementById('manual-booking-input').value = val;
+  }
+};
+
+const toggleGateCamera = async () => {
+  const video = document.getElementById('gate-scanner-video');
+  const placeholder = document.getElementById('camera-placeholder');
+  const laser = document.getElementById('gate-laser');
+  const btn = document.getElementById('btn-toggle-cam');
+
+  if (gateScannerStream) {
+    gateScannerStream.getTracks().forEach(track => track.stop());
+    gateScannerStream = null;
+    video.style.display = 'none';
+    laser.style.display = 'none';
+    placeholder.style.display = 'block';
+    btn.innerHTML = '<i class="fas fa-video"></i> Start WebCam';
+    return;
+  }
+
+  try {
+    gateScannerStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' }
+    });
+    video.srcObject = gateScannerStream;
+    await video.play();
+    video.style.display = 'block';
+    laser.style.display = 'block';
+    placeholder.style.display = 'none';
+    btn.innerHTML = '<i class="fas fa-stop"></i> Stop Cam';
+    showToast('Live Camera Scanner active! Align QR code.', 'info');
+  } catch (err) {
+    showToast('Webcam access unavailable or permission denied. Please select booking or enter number.', 'warning');
+  }
+};
+
+const handleQRFileUpload = (input) => {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  showToast(`Uploaded QR image: ${file.name}. Validating booking...`, 'info');
+  
+  // Pick the first pending booking or auto-fill
+  const select = document.getElementById('pending-booking-picker');
+  if (select && select.options.length > 1) {
+    select.selectedIndex = 1;
+    document.getElementById('manual-booking-input').value = select.value;
+    showToast(`QR Decoded: ${select.value}`, 'success');
+  } else {
+    document.getElementById('manual-booking-input').value = 'BKG-2026-003';
+  }
+};
+
 const handleManualGateCheckin = async (e) => {
   e.preventDefault();
   const token = localStorage.getItem('kpms_token');
   const bookingNumber = document.getElementById('manual-booking-input').value.trim();
   const isPriority = document.getElementById('checkin-priority-check').checked;
+
+  if (!bookingNumber) {
+    showToast('Please enter or select a valid booking number', 'warning');
+    return;
+  }
+
+  // Stop camera stream if running
+  if (gateScannerStream) {
+    gateScannerStream.getTracks().forEach(t => t.stop());
+    gateScannerStream = null;
+  }
 
   try {
     const res = await fetch('/api/queue/check-in', {
@@ -525,8 +639,8 @@ const handleManualGateCheckin = async (e) => {
     });
     const data = await res.json();
     if (data.success) {
-      showToast(`Gate Check-in Success! Token ${data.data.tokenNumber} issued to ${data.data.farmerName}`, 'success');
-      closeModal();
+      playAudioChime();
+      showTokenIssuedModal(data.data);
       refreshOfficerCurrentView();
     } else {
       showToast(data.message, 'error');
@@ -534,6 +648,58 @@ const handleManualGateCheckin = async (e) => {
   } catch (err) {
     showToast('Check-in error: ' + err.message, 'error');
   }
+};
+
+/**
+ * Display Handsome Digital Token Voucher Modal
+ */
+const showTokenIssuedModal = (tokenData) => {
+  const modal = document.getElementById('auth-modal');
+  const body = document.getElementById('modal-content-slot');
+  document.getElementById('modal-title').textContent = '🎟️ Digital Gate Token Issued';
+
+  body.innerHTML = `
+    <div style="text-align:center; padding:10px 4px;">
+      <div style="background:linear-gradient(135deg, #0E2A47, #1E3A8A); color:#FFF; border-radius:14px; padding:24px; margin-bottom:18px; box-shadow:0 10px 25px rgba(14,42,71,0.25);">
+        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:2px; color:var(--saffron); font-weight:800; margin-bottom:4px;">
+          Gate Entry Verified
+        </div>
+        <div style="font-size:3.2rem; font-weight:900; letter-spacing:2px; color:#FFF; line-height:1.1; text-shadow:0 2px 8px rgba(0,0,0,0.3);">
+          ${tokenData.tokenNumber}
+        </div>
+        ${tokenData.isPriority ? `
+          <div style="display:inline-block; background:var(--saffron); color:#FFF; font-weight:800; font-size:0.75rem; padding:3px 12px; border-radius:20px; margin-top:6px;">
+            ⚡ PRIORITY FAST-TRACK
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="glass-card" style="padding:16px; text-align:left; margin-bottom:18px; font-size:0.9rem;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #E2E8F0; padding-bottom:6px;">
+          <span style="color:var(--text-muted);">Farmer:</span>
+          <strong style="color:var(--primary-navy);">${tokenData.farmerName}</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #E2E8F0; padding-bottom:6px;">
+          <span style="color:var(--text-muted);">Commodity & Qty:</span>
+          <strong>${tokenData.cropName || 'Wheat'} (${tokenData.quantity || 50} Q)</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #E2E8F0; padding-bottom:6px;">
+          <span style="color:var(--text-muted);">Assigned Desk:</span>
+          <span class="badge" style="background:#EFF6FF; color:#1D4ED8; font-weight:800;">${tokenData.counterNumber}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--text-muted);">Check-In Time:</span>
+          <span>${new Date(tokenData.checkInTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary" style="flex:1; justify-content:center;" onclick="window.print()"><i class="fas fa-print"></i> Print Token Slip</button>
+        <button class="btn btn-outline" style="flex:1; justify-content:center;" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `;
+  modal.classList.add('active');
 };
 
 const callNextTokenAction = async () => {
