@@ -76,6 +76,17 @@
       "password": "$2a$10$TgdFTNbYErgkwKwUIOsU6OjRm02Bq2YGltg1LIMAvXuAzPW1xGQem",
       "role": "farmer",
       "isVerified": true
+    },
+    {
+      "_id": "usr_f_mt3wfpuy67ulk",
+      "createdAt": "2026-08-22T04:49:37.534Z",
+      "updatedAt": "2026-08-22T04:49:37.534Z",
+      "name": "Ramdas Solanki",
+      "email": "ramdas@farmer.in",
+      "mobile": "9823456789",
+      "password": "$2a$10$pn6pZdFjXiH0HlRjgX571u57fExp0gPaVUQ.RtuCBPXDo0H2MpjrG",
+      "role": "farmer",
+      "isVerified": false
     }
   ],
   "farmers": [
@@ -240,6 +251,41 @@
           "uploadDate": "2026-08-10"
         }
       ]
+    },
+    {
+      "_id": "usr_f_mt3wfpuy67ulk",
+      "createdAt": "2026-08-22T04:49:37.537Z",
+      "updatedAt": "2026-08-22T04:49:37.537Z",
+      "userId": "usr_f_mt3wfpuy67ulk",
+      "farmerId": "FARM000004",
+      "fullName": "Ramdas Solanki",
+      "fatherName": "Gokul Solanki",
+      "dob": "",
+      "gender": "Male",
+      "mobile": "9823456789",
+      "email": "ramdas@farmer.in",
+      "aadhaarNumber": "482910482918",
+      "state": "Madhya Pradesh",
+      "district": "Bhopal",
+      "taluka": "",
+      "village": "Ratibad",
+      "address": "House 8, Kisan Mohalla, Ratibad",
+      "pinCode": "462044",
+      "bankName": "SBI",
+      "branch": "Bhopal Main",
+      "ifscCode": "SBIN0001234",
+      "accountNumber": "39482910482",
+      "accountHolderName": "Ramdas Solanki",
+      "totalLandArea": 7.5,
+      "landOwnershipType": "Owned",
+      "primaryCrop": "Wheat (Sharbati)",
+      "estimatedQuantity": 55,
+      "preferredCenterId": "CTR-01",
+      "documents": [],
+      "isVerified": false,
+      "verificationStatus": "Pending",
+      "isPriorityCategory": false,
+      "priorityReason": ""
     }
   ],
   "farms": [
@@ -448,7 +494,7 @@
     {
       "_id": "bkg_001",
       "createdAt": "2026-08-22T00:34:38.787Z",
-      "updatedAt": "2026-08-22T00:34:38.787Z",
+      "updatedAt": "2026-08-22T04:43:13.241Z",
       "bookingNumber": "BKG-2026-001",
       "farmerId": "FARM000001",
       "userId": "usr_farmer_01",
@@ -458,7 +504,7 @@
       "date": "2026-08-22",
       "timeSlot": "09:00 AM - 09:30 AM",
       "vehicleNumber": "MP-04-HE-4920",
-      "status": "Processing",
+      "status": "Procurement Complete",
       "qrCodeDataUrl": "data:image/png;base64,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",
       "timeline": [
         {
@@ -478,18 +524,18 @@
         },
         {
           "stage": "Quality Inspection",
-          "timestamp": "2026-08-22T09:05:00Z",
+          "timestamp": "2026-08-22T04:43:13.241Z",
           "done": true
         },
         {
           "stage": "Weight Verification",
-          "timestamp": "2026-08-22T09:15:00Z",
+          "timestamp": "2026-08-22T04:43:13.241Z",
           "done": true
         },
         {
           "stage": "Procurement Complete",
-          "timestamp": null,
-          "done": false
+          "timestamp": "2026-08-22T04:43:13.241Z",
+          "done": true
         },
         {
           "stage": "Payment Completed",
@@ -563,13 +609,69 @@
           "done": true
         }
       ]
+    },
+    {
+      "_id": "bkg_mt3w2yvx75zrm",
+      "createdAt": "2026-08-22T04:39:42.662Z",
+      "updatedAt": "2026-08-22T04:39:42.662Z",
+      "bookingNumber": "BKG-2026-0104",
+      "farmerId": "FARM000001",
+      "userId": "usr_farmer_01",
+      "farmerName": "Ramesh Patel",
+      "centerId": "CTR-03",
+      "centerName": "Nashik Krishi Utpanna Bazar",
+      "cropName": "Wheat (Sharbati)",
+      "quantity": 45,
+      "date": "2026-08-23",
+      "timeSlot": "08:00 AM - 08:30 AM",
+      "vehicleNumber": "Farmer Transport",
+      "remarks": "",
+      "status": "Confirmed",
+      "qrCodeDataUrl": "data:image/png;base64,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1cOKxadeXNf1tV5c1/W1fviHYnFSPaxYrOphxeKkelixeFI9nMRiVQ9PqocVi3dUD7+helix+FQsVvWwYrGqhxWLT1UPKxarenhHLE6qh5PqYcViVQ/viMVJ9fCpWPyGWDypHk6qh5NYPHlxXdfXenFd19f64W9UDyexWLFY1cNJ9bBi8Y5YrOphxWJVDysWJ9XDisWqHlYsVixOqocVi1U9rFis6uG3xeIkFqt6OKkeVixW9bBisaqHFYsnsXhSPaxYnMTipHpYsXhSPaxYPInFqh5WLE6qhxWLk1is6mHFYlUPJ7H4VPWwYnHy4rqur/Xiuq6v9cPfiMVviMWT6mHFYlUPKxbvqB6exGJVDysWq3pYsTiJxaoensTipHo4icWqHlYsVvWwYrGqhxWLVT08icWqHp5UDyexeEf18BtisaqHFYsVi1U9PKkenlQPT6qHFYtVPbyjelixeMeL67q+1ovrur7WH3/+hf+gengSi1U9rFis6uEkFifVw4rFqh5WLE6qhxWLk+phxWJVDysW76gensRiVQ8rFqt6WLFY1cNJLJ5UDyexWNXDk1is6mHFYlUPT2LxpHp4EotVPaxYrOphxWJVD09isaqHFYtVPZzE4qR6+FQsVvXwjlicvLiu62u9uK7ra/3wN2KxqocnsVjVw4rFb4jFSfVwUj28IxafisWqHlYsVvWwYrGqh09VDysWJ7E4qR5OYvGpWKzq4aR6WLF4EotVPZzEYlUPKxZPYnFSPaxYrOphxWJVD6t6WLF4EotPxeJTL67r+lovruv6Wj98IBarelixOKkensRixWJVDyexeEcsTqqHk1is6mHF4qR6WLF4Uj18KharejipHk5isWLx26qHFYuT6mFVDysWKxarelixeBKLVT2sWHyqejipHlYsVvVwEot3VA8nsTipHlYsnry4rutrvbiu62v98Deqh98Qi3dUDysW74jFO2KxqodVPfy2WDypHp5UDyfVw2+oHk5icVI9/JtisaqHFYuT6uGkelixOKkeVixOqocViyfVw4rFO2JxUj2sWHzqxXVdX+vFdV1f648//8L/h+rhU7FY1cNviMWT6uEkFqt6WLF4Uj08icWqHlYsTqqHT8ViVQ8rFifVw4rFb6gensTi31Q9PInFqh6exOKkelixWNXDisWqHlYsVvXw22Jx8uK6rq/14rqur/XH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",
+      "timeline": [
+        {
+          "stage": "Booked",
+          "timestamp": "2026-08-22T04:39:42.662Z",
+          "done": true
+        },
+        {
+          "stage": "Confirmed",
+          "timestamp": "2026-08-22T04:39:42.662Z",
+          "done": true
+        },
+        {
+          "stage": "Checked In",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Quality Inspection",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Weight Verification",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Procurement Complete",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Payment Completed",
+          "timestamp": null,
+          "done": false
+        }
+      ]
     }
   ],
   "queues": [
     {
       "_id": "q_mt3nbtc6zvuva",
       "createdAt": "2026-08-22T00:34:38.790Z",
-      "updatedAt": "2026-08-22T00:34:38.790Z",
+      "updatedAt": "2026-08-22T04:43:13.243Z",
       "tokenNumber": "A001",
       "bookingId": "bkg_001",
       "bookingNumber": "BKG-2026-001",
@@ -578,12 +680,13 @@
       "centerId": "CTR-01",
       "counterNumber": "Counter 1",
       "officerId": "OFF-BPL-101",
-      "status": "processing",
+      "status": "completed",
       "checkInTime": "2026-08-22T08:50:00Z",
       "calledTime": "2026-08-22T09:00:00Z",
       "isPriority": false,
       "cropName": "Wheat (Sharbati)",
-      "quantity": 50
+      "quantity": 50,
+      "completionTime": "2026-08-22T04:43:13.243Z"
     },
     {
       "_id": "q_mt3nbtc6gom1b",
@@ -674,6 +777,42 @@
       "farmerSignature": "",
       "officerRemarks": "Procurement verified under MSP scheme 2025-26.",
       "date": "2026-08-22"
+    },
+    {
+      "_id": "p_mt3w7hedmjguq",
+      "createdAt": "2026-08-22T04:43:13.237Z",
+      "updatedAt": "2026-08-22T04:43:13.237Z",
+      "procurementId": "PROC-2026-0103",
+      "receiptNumber": "RCP-2026-0503",
+      "bookingNumber": "BKG-2026-001",
+      "farmerId": "FARM000001",
+      "farmerName": "Ramesh Patel",
+      "centerId": "CTR-01",
+      "officerId": "OFF-BPL-101",
+      "cropName": "Wheat (Sharbati)",
+      "variety": "FAQ Standard",
+      "grade": "A",
+      "moisturePercentage": 11.2,
+      "foreignMaterial": 0.4,
+      "brokenGrain": 1,
+      "damagedGrain": 0.5,
+      "color": "Good",
+      "odor": "Normal",
+      "inspectionNotes": "Grain lustrous, sound, no infestation detected.",
+      "grossWeight": 52.5,
+      "tareWeight": 2.5,
+      "netWeight": 50,
+      "acceptedQuantity": 50,
+      "rejectedQuantity": 0,
+      "msp": 2275,
+      "bonus": 2500,
+      "deductions": 0,
+      "totalAmount": 116250,
+      "status": "Accepted",
+      "officerSignature": "data:image/png;base64,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",
+      "farmerSignature": "",
+      "officerRemarks": "Procurement verified under MSP scheme 2025-26.",
+      "date": "2026-08-22"
     }
   ],
   "inspectionReports": [],
@@ -733,7 +872,7 @@
     {
       "_id": "p_mt3uc5gvkntlq",
       "createdAt": "2026-08-22T03:50:51.823Z",
-      "updatedAt": "2026-08-22T03:50:51.823Z",
+      "updatedAt": "2026-08-22T04:46:06.949Z",
       "paymentId": "PAY-2026-0202",
       "transactionId": "TXN-DBT-70651823",
       "utrNumber": "SBIN156133228086",
@@ -751,7 +890,7 @@
       "bankName": "Bank of Baroda",
       "accountNumber": "9482019284729",
       "ifscCode": "BARB0BERASI",
-      "status": "Verified",
+      "status": "Completed",
       "createdDate": "2026-08-22",
       "timeline": [
         {
@@ -766,20 +905,75 @@
         },
         {
           "stage": "Approved",
-          "timestamp": null,
-          "done": false
+          "timestamp": "2026-08-22T04:46:06.949Z",
+          "done": true
         },
         {
           "stage": "Released",
-          "timestamp": null,
-          "done": false
+          "timestamp": "2026-08-22T04:46:06.949Z",
+          "done": true
         },
         {
           "stage": "Completed",
-          "timestamp": null,
-          "done": false
+          "timestamp": "2026-08-22T04:46:06.949Z",
+          "done": true
         }
-      ]
+      ],
+      "releasedBy": "Dr. Rajesh Verma (IAS)",
+      "paymentDate": "2026-08-22"
+    },
+    {
+      "_id": "p_mt3w7heefu60w",
+      "createdAt": "2026-08-22T04:43:13.238Z",
+      "updatedAt": "2026-08-22T04:46:03.784Z",
+      "paymentId": "PAY-2026-0203",
+      "transactionId": "TXN-DBT-73793238",
+      "utrNumber": "SBIN562981151477",
+      "receiptNumber": "RCP-2026-0503",
+      "farmerId": "FARM000001",
+      "farmerName": "Ramesh Patel",
+      "procurementId": "PROC-2026-0103",
+      "centerId": "CTR-01",
+      "officerId": "OFF-BPL-101",
+      "acceptedQuantity": 50,
+      "msp": 2275,
+      "bonus": 2500,
+      "deductions": 0,
+      "amount": 116250,
+      "bankName": "State Bank of India",
+      "accountNumber": "30294819284",
+      "ifscCode": "SBIN0001234",
+      "status": "Completed",
+      "createdDate": "2026-08-22",
+      "timeline": [
+        {
+          "stage": "Requested",
+          "timestamp": "2026-08-22T04:43:13.238Z",
+          "done": true
+        },
+        {
+          "stage": "Verified",
+          "timestamp": "2026-08-22T04:43:13.238Z",
+          "done": true
+        },
+        {
+          "stage": "Approved",
+          "timestamp": "2026-08-22T04:46:03.784Z",
+          "done": true
+        },
+        {
+          "stage": "Released",
+          "timestamp": "2026-08-22T04:46:03.784Z",
+          "done": true
+        },
+        {
+          "stage": "Completed",
+          "timestamp": "2026-08-22T04:46:03.784Z",
+          "done": true
+        }
+      ],
+      "releasedBy": "Dr. Rajesh Verma (IAS)",
+      "paymentDate": "2026-08-22"
     }
   ],
   "transactions": [],
@@ -787,12 +981,12 @@
     {
       "_id": "i_mt3nbtc96ja67",
       "createdAt": "2026-08-22T00:34:38.793Z",
-      "updatedAt": "2026-08-22T00:34:38.793Z",
+      "updatedAt": "2026-08-22T04:43:13.240Z",
       "centerId": "CTR-01",
       "cropName": "Wheat (Sharbati)",
-      "totalStockQuintals": 1450,
+      "totalStockQuintals": 1500,
       "warehouseCapacity": 5000,
-      "acceptedToday": 50,
+      "acceptedToday": 100,
       "rejectedToday": 0
     },
     {
@@ -880,6 +1074,90 @@
         "mobile": "9876543211",
         "email": "suresh@farmer.in"
       }
+    },
+    {
+      "_id": "notif_mt3w2z6nrh2ab",
+      "createdAt": "2026-08-22T04:39:43.007Z",
+      "updatedAt": "2026-08-22T04:39:43.007Z",
+      "userId": "usr_farmer_01",
+      "role": "farmer",
+      "title": "Slot Booking Confirmed",
+      "message": "Your slot for Wheat (Sharbati) (45 Q) at Nashik Krishi Utpanna Bazar on 2026-08-23 (08:00 AM - 08:30 AM) is confirmed. Booking No: BKG-2026-0104",
+      "type": "booking",
+      "isRead": false,
+      "metadata": {
+        "bookingNumber": "BKG-2026-0104",
+        "date": "2026-08-23",
+        "timeSlot": "08:00 AM - 08:30 AM",
+        "mobile": "9876543210",
+        "email": "ramesh@farmer.in"
+      }
+    },
+    {
+      "_id": "notif_mt3w7herzhbmi",
+      "createdAt": "2026-08-22T04:43:13.251Z",
+      "updatedAt": "2026-08-22T04:43:13.251Z",
+      "userId": "usr_farmer_01",
+      "role": "farmer",
+      "title": "Procurement Completed & Payment DBT Initiated",
+      "message": "Your Wheat (Sharbati) (50 Q) was accepted (Grade A). Voucher RCP-2026-0503 generated for ₹1,16,250. DBT initiated.",
+      "type": "procurement",
+      "isRead": false,
+      "metadata": {
+        "receiptNumber": "RCP-2026-0503",
+        "amount": 116250,
+        "mobile": "9876543210",
+        "email": "ramesh@farmer.in"
+      }
+    },
+    {
+      "_id": "notif_mt3wb4zu8h4hi",
+      "createdAt": "2026-08-22T04:46:03.786Z",
+      "updatedAt": "2026-08-22T04:46:03.786Z",
+      "userId": "usr_farmer_01",
+      "role": "farmer",
+      "title": "DBT Payment Transferred to Bank Account",
+      "message": "₹1,16,250 successfully credited to your State Bank of India account (UTR: SBIN562981151477).",
+      "type": "payment",
+      "isRead": false,
+      "metadata": {
+        "utr": "SBIN562981151477",
+        "amount": 116250,
+        "mobile": "9876543210",
+        "email": "ramesh@farmer.in"
+      }
+    },
+    {
+      "_id": "notif_mt3wb7ftu50x9",
+      "createdAt": "2026-08-22T04:46:06.953Z",
+      "updatedAt": "2026-08-22T04:46:06.953Z",
+      "userId": "usr_farmer_02",
+      "role": "farmer",
+      "title": "DBT Payment Transferred to Bank Account",
+      "message": "₹4,37,700 successfully credited to your Bank of Baroda account (UTR: SBIN156133228086).",
+      "type": "payment",
+      "isRead": false,
+      "metadata": {
+        "utr": "SBIN156133228086",
+        "amount": 437700,
+        "mobile": "9876543211",
+        "email": "suresh@farmer.in"
+      }
+    },
+    {
+      "_id": "notif_mt3wfpxgchfj7",
+      "createdAt": "2026-08-22T04:49:37.540Z",
+      "updatedAt": "2026-08-22T04:49:37.540Z",
+      "userId": "usr_f_mt3wfpuy67ulk",
+      "role": "farmer",
+      "title": "Registration Initiated",
+      "message": "Your KPMS Farmer Registration was received. Your verification OTP is: 252862",
+      "type": "system",
+      "isRead": false,
+      "metadata": {
+        "mobile": "9823456789",
+        "email": "ramdas@farmer.in"
+      }
     }
   ],
   "smsLogs": [
@@ -916,6 +1194,51 @@
       "updatedAt": "2026-08-22T03:50:52.243Z",
       "to": "9876543211",
       "message": "[KPMS GOVT] Procurement Completed & Payment DBT Initiated: Your Gram (Chana) (80 Q) was accepted (Grade A). Voucher RCP-2026-0502 generated for ₹4,37,700. DBT initiated.",
+      "status": "DELIVERED",
+      "provider": "Twilio Gateway"
+    },
+    {
+      "_id": "s_mt3w2z6ri5dl5",
+      "createdAt": "2026-08-22T04:39:43.011Z",
+      "updatedAt": "2026-08-22T04:39:43.011Z",
+      "to": "9876543210",
+      "message": "[KPMS GOVT] Slot Booking Confirmed: Your slot for Wheat (Sharbati) (45 Q) at Nashik Krishi Utpanna Bazar on 2026-08-23 (08:00 AM - 08:30 AM) is confirmed. Booking No: BKG-2026-0104",
+      "status": "DELIVERED",
+      "provider": "Twilio Gateway"
+    },
+    {
+      "_id": "s_mt3w7ho4djghb",
+      "createdAt": "2026-08-22T04:43:13.588Z",
+      "updatedAt": "2026-08-22T04:43:13.588Z",
+      "to": "9876543210",
+      "message": "[KPMS GOVT] Procurement Completed & Payment DBT Initiated: Your Wheat (Sharbati) (50 Q) was accepted (Grade A). Voucher RCP-2026-0503 generated for ₹1,16,250. DBT initiated.",
+      "status": "DELIVERED",
+      "provider": "Twilio Gateway"
+    },
+    {
+      "_id": "s_mt3wb4zvc87gj",
+      "createdAt": "2026-08-22T04:46:03.787Z",
+      "updatedAt": "2026-08-22T04:46:03.787Z",
+      "to": "9876543210",
+      "message": "[KPMS GOVT] DBT Payment Transferred to Bank Account: ₹1,16,250 successfully credited to your State Bank of India account (UTR: SBIN562981151477).",
+      "status": "DELIVERED",
+      "provider": "Twilio Gateway"
+    },
+    {
+      "_id": "s_mt3wb7fv994o5",
+      "createdAt": "2026-08-22T04:46:06.955Z",
+      "updatedAt": "2026-08-22T04:46:06.955Z",
+      "to": "9876543211",
+      "message": "[KPMS GOVT] DBT Payment Transferred to Bank Account: ₹4,37,700 successfully credited to your Bank of Baroda account (UTR: SBIN156133228086).",
+      "status": "DELIVERED",
+      "provider": "Twilio Gateway"
+    },
+    {
+      "_id": "s_mt3wfpxisecwc",
+      "createdAt": "2026-08-22T04:49:37.542Z",
+      "updatedAt": "2026-08-22T04:49:37.542Z",
+      "to": "9823456789",
+      "message": "[KPMS GOVT] Registration Initiated: Your KPMS Farmer Registration was received. Your verification OTP is: 252862",
       "status": "DELIVERED",
       "provider": "Twilio Gateway"
     }
@@ -958,6 +1281,56 @@
       "to": "suresh@farmer.in",
       "subject": "KPMS Alert: Procurement Completed & Payment DBT Initiated",
       "body": "Your Gram (Chana) (80 Q) was accepted (Grade A). Voucher RCP-2026-0502 generated for ₹4,37,700. DBT initiated.",
+      "status": "SENT",
+      "provider": "Nodemailer SMTP"
+    },
+    {
+      "_id": "e_mt3w2z6xlltxc",
+      "createdAt": "2026-08-22T04:39:43.017Z",
+      "updatedAt": "2026-08-22T04:39:43.017Z",
+      "to": "ramesh@farmer.in",
+      "subject": "KPMS Alert: Slot Booking Confirmed",
+      "body": "Your slot for Wheat (Sharbati) (45 Q) at Nashik Krishi Utpanna Bazar on 2026-08-23 (08:00 AM - 08:30 AM) is confirmed. Booking No: BKG-2026-0104",
+      "status": "SENT",
+      "provider": "Nodemailer SMTP"
+    },
+    {
+      "_id": "e_mt3w7ho6k82in",
+      "createdAt": "2026-08-22T04:43:13.590Z",
+      "updatedAt": "2026-08-22T04:43:13.590Z",
+      "to": "ramesh@farmer.in",
+      "subject": "KPMS Alert: Procurement Completed & Payment DBT Initiated",
+      "body": "Your Wheat (Sharbati) (50 Q) was accepted (Grade A). Voucher RCP-2026-0503 generated for ₹1,16,250. DBT initiated.",
+      "status": "SENT",
+      "provider": "Nodemailer SMTP"
+    },
+    {
+      "_id": "e_mt3wb4zwzukbk",
+      "createdAt": "2026-08-22T04:46:03.788Z",
+      "updatedAt": "2026-08-22T04:46:03.788Z",
+      "to": "ramesh@farmer.in",
+      "subject": "KPMS Alert: DBT Payment Transferred to Bank Account",
+      "body": "₹1,16,250 successfully credited to your State Bank of India account (UTR: SBIN562981151477).",
+      "status": "SENT",
+      "provider": "Nodemailer SMTP"
+    },
+    {
+      "_id": "e_mt3wb7fx0kvbf",
+      "createdAt": "2026-08-22T04:46:06.957Z",
+      "updatedAt": "2026-08-22T04:46:06.957Z",
+      "to": "suresh@farmer.in",
+      "subject": "KPMS Alert: DBT Payment Transferred to Bank Account",
+      "body": "₹4,37,700 successfully credited to your Bank of Baroda account (UTR: SBIN156133228086).",
+      "status": "SENT",
+      "provider": "Nodemailer SMTP"
+    },
+    {
+      "_id": "e_mt3wfpxk8ud1p",
+      "createdAt": "2026-08-22T04:49:37.544Z",
+      "updatedAt": "2026-08-22T04:49:37.544Z",
+      "to": "ramdas@farmer.in",
+      "subject": "KPMS Alert: Registration Initiated",
+      "body": "Your KPMS Farmer Registration was received. Your verification OTP is: 252862",
       "status": "SENT",
       "provider": "Nodemailer SMTP"
     }
@@ -1287,6 +1660,83 @@
       "action": "LOGIN",
       "details": "User logged in from ::1",
       "timestamp": "2026-08-22T04:17:56.692Z"
+    },
+    {
+      "_id": "a_mt3vuepx5cqfh",
+      "createdAt": "2026-08-22T04:33:03.237Z",
+      "updatedAt": "2026-08-22T04:33:03.237Z",
+      "userId": "usr_farmer_01",
+      "userName": "Ramesh Patel",
+      "role": "farmer",
+      "action": "LOGIN",
+      "details": "User logged in from ::1",
+      "timestamp": "2026-08-22T04:33:03.237Z"
+    },
+    {
+      "_id": "a_mt3w44z785yjb",
+      "createdAt": "2026-08-22T04:40:37.171Z",
+      "updatedAt": "2026-08-22T04:40:37.171Z",
+      "userId": "usr_officer_01",
+      "userName": "Vikram Singh Rathore",
+      "role": "officer",
+      "action": "LOGIN",
+      "details": "User logged in from ::1",
+      "timestamp": "2026-08-22T04:40:37.171Z"
+    },
+    {
+      "_id": "a_mt3wau4w8nbtn",
+      "createdAt": "2026-08-22T04:45:49.712Z",
+      "updatedAt": "2026-08-22T04:45:49.712Z",
+      "userId": "usr_admin_01",
+      "userName": "Dr. Rajesh Verma (IAS)",
+      "role": "admin",
+      "action": "LOGIN",
+      "details": "User logged in from ::1",
+      "timestamp": "2026-08-22T04:45:49.712Z"
+    },
+    {
+      "_id": "a_mt3wb4zxeph6a",
+      "createdAt": "2026-08-22T04:46:03.789Z",
+      "updatedAt": "2026-08-22T04:46:03.789Z",
+      "userId": "usr_admin_01",
+      "userName": "Dr. Rajesh Verma (IAS)",
+      "role": "admin",
+      "action": "PAYMENT_RELEASED",
+      "details": "Released DBT payout of ₹116250 for Farmer FARM000001 (UTR: SBIN562981151477)",
+      "timestamp": "2026-08-22T04:46:03.789Z"
+    },
+    {
+      "_id": "a_mt3wb7fzyton3",
+      "createdAt": "2026-08-22T04:46:06.959Z",
+      "updatedAt": "2026-08-22T04:46:06.959Z",
+      "userId": "usr_admin_01",
+      "userName": "Dr. Rajesh Verma (IAS)",
+      "role": "admin",
+      "action": "PAYMENT_RELEASED",
+      "details": "Released DBT payout of ₹437700 for Farmer FARM000002 (UTR: SBIN156133228086)",
+      "timestamp": "2026-08-22T04:46:06.958Z"
+    },
+    {
+      "_id": "a_mt3wg6d4x4bd2",
+      "createdAt": "2026-08-22T04:49:58.840Z",
+      "updatedAt": "2026-08-22T04:49:58.840Z",
+      "userId": "usr_farmer_01",
+      "userName": "Ramesh Patel",
+      "role": "farmer",
+      "action": "LOGIN",
+      "details": "User logged in from ::1",
+      "timestamp": "2026-08-22T04:49:58.840Z"
+    },
+    {
+      "_id": "a_mt3xljwkhxcbn",
+      "createdAt": "2026-08-22T05:22:09.284Z",
+      "updatedAt": "2026-08-22T05:22:09.284Z",
+      "userId": "usr_farmer_01",
+      "userName": "Ramesh Patel",
+      "role": "farmer",
+      "action": "LOGIN",
+      "details": "User logged in from ::1",
+      "timestamp": "2026-08-22T05:22:09.283Z"
     }
   ],
   "holidays": [],
