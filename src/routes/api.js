@@ -16,6 +16,7 @@ const adminCtrl = require('../controllers/adminController');
 const aiCtrl = require('../controllers/aiController');
 const demoCtrl = require('../controllers/demoController');
 const mandiPriceCtrl = require('../controllers/mandiPriceController');
+const emailCtrl = require('../controllers/emailController');
 
 // ----------------------------------------------------
 // 1. AUTHENTICATION & KYC ROUTES
@@ -137,5 +138,12 @@ router.post('/demo/simulate', demoCtrl.simulateLiveCycle);
 // ----------------------------------------------------
 router.get('/mandi-prices/commodities', mandiPriceCtrl.getCommoditiesList);
 router.get('/mandi-prices', mandiPriceCtrl.getNearbyMandiPrices);
+
+// ----------------------------------------------------
+// 12. BREVO TRANSACTIONAL EMAIL ROUTES
+// ----------------------------------------------------
+router.get('/email/status', emailCtrl.getEmailConfigStatus);
+router.post('/email/send-test', emailCtrl.sendTestEmail);
+router.post('/email/send', emailCtrl.sendCustomEmailEndpoint);
 
 module.exports = router;

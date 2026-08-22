@@ -1,4 +1,5 @@
 const { Notifications, SMSLogs, EmailLogs, generateId } = require('../models/dbStore');
+const { sendCustomEmail } = require('./emailService');
 
 const sendNotification = async ({ userId, role, title, message, type = 'info', metadata = {} }) => {
   try {
@@ -14,7 +15,7 @@ const sendNotification = async ({ userId, role, title, message, type = 'info', m
       createdAt: new Date().toISOString()
     });
 
-    // Also log simulated SMS
+    // Also log SMS
     if (metadata.mobile) {
       await SMSLogs.create({
         to: metadata.mobile,
@@ -24,14 +25,21 @@ const sendNotification = async ({ userId, role, title, message, type = 'info', m
       });
     }
 
-    // Also log simulated Email
+    // Real Email dispatch via Brevo
     if (metadata.email) {
+      const emailResult = await sendCustomEmail({
+        to: metadata.email,
+        title,
+        message,
+        recipientName: metadata.fullName || metadata.name
+      });
+
       await EmailLogs.create({
         to: metadata.email,
         subject: `KPMS Alert: ${title}`,
         body: message,
-        status: 'SENT',
-        provider: 'Nodemailer SMTP'
+        status: emailResult.success ? 'DELIVERED' : 'FAILED',
+        provider: emailResult.provider || 'Brevo SMTP'
       });
     }
 
