@@ -17,10 +17,10 @@ const loadFarmerQueuePage = async () => {
       container.innerHTML = `
         <div class="app-container">
           <aside class="sidebar">
-            <div class="sidebar-heading">Queue Navigation</div>
-            <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> Dashboard</a>
-            <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> Book Slot</a>
-            <a class="nav-link active" onclick="loadFarmerQueuePage()"><i class="fas fa-users-line"></i> Live Queue</a>
+            <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
+            <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard', 'Dashboard')}</a>
+            <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot', 'Book Slot')}</a>
+            <a class="nav-link active" onclick="loadFarmerQueuePage()"><i class="fas fa-users-line"></i> ${getT('live_queue_tracker', 'Live Queue')}</a>
           </aside>
           <main class="main-content">
             <div class="glass-panel" style="padding:40px; text-align:center; max-width:700px; margin:40px auto;">

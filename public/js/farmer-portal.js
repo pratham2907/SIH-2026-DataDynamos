@@ -6,18 +6,18 @@ const getFarmerSidebar = (farmer, activeRoute) => `
       <div style="font-weight:700; color:#FFF; font-size:1.05rem;">${farmer ? (farmer.fullName || farmer.name || 'Farmer') : 'Farmer'}</div>
       <div style="font-size:0.75rem; color:var(--saffron); font-weight:600;"><i class="fas fa-id-card"></i> ${farmer ? (farmer.farmerId || 'FARM000001') : 'FARM000001'}</div>
     </div>
-    <div class="sidebar-heading">${getT('nav_portal')}</div>
-    <a class="nav-link ${activeRoute === 'dashboard' ? 'active' : ''}" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-tachometer-alt"></i> ${getT('nav_dashboard')}</a>
-    <a class="nav-link ${activeRoute === 'smart-booking' ? 'active' : ''}" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> ${getT('btn_smart_mandi_finder')}</a>
-    <a class="nav-link ${activeRoute === 'mandi-prices' ? 'active' : ''}" onclick="routeTo('#mandi-prices')"><i class="fas fa-carrot" style="color:var(--green-gov);"></i> ${getT('nav_mandi_prices')}</a>
-    <a class="nav-link ${activeRoute === 'book-slot' ? 'active' : ''}" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot')}</a>
-    <a class="nav-link ${activeRoute === 'farmer-queue' ? 'active' : ''}" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('queue_tracker_title')}</a>
-    <a class="nav-link ${activeRoute === 'my-bookings' ? 'active' : ''}" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> ${getT('status_booked')}</a>
-    <a class="nav-link ${activeRoute === 'farmer-payments' ? 'active' : ''}" onclick="routeTo('#farmer-payments')"><i class="fas fa-money-check-dollar"></i> DBT Tracker</a>
-    <a class="nav-link ${activeRoute === 'farmer-farms' ? 'active' : ''}" onclick="routeTo('#farmer-farms')"><i class="fas fa-tractor"></i> My Farms & Crops</a>
-    <a class="nav-link ${activeRoute === 'farmer-profile' ? 'active' : ''}" onclick="routeTo('#farmer-profile')"><i class="fas fa-user-circle"></i> KYC Profile & Docs</a>
+    <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
+    <a class="nav-link ${activeRoute === 'dashboard' ? 'active' : ''}" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-tachometer-alt"></i> ${getT('nav_dashboard', 'Dashboard')}</a>
+    <a class="nav-link ${activeRoute === 'smart-booking' ? 'active' : ''}" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> ${getT('btn_smart_mandi_finder', 'Smart Mandi Finder')}</a>
+    <a class="nav-link ${activeRoute === 'mandi-prices' ? 'active' : ''}" onclick="routeTo('#mandi-prices')"><i class="fas fa-carrot" style="color:var(--green-gov);"></i> ${getT('nav_mandi_prices', 'Mandi Prices')}</a>
+    <a class="nav-link ${activeRoute === 'book-slot' ? 'active' : ''}" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('manual_slot_booking', 'Slot Booking')}</a>
+    <a class="nav-link ${activeRoute === 'farmer-queue' ? 'active' : ''}" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('live_queue_tracker', 'Live Queue Tracker')}</a>
+    <a class="nav-link ${activeRoute === 'my-bookings' ? 'active' : ''}" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> ${getT('my_bookings', 'My Bookings')}</a>
+    <a class="nav-link ${activeRoute === 'farmer-payments' ? 'active' : ''}" onclick="routeTo('#farmer-payments')"><i class="fas fa-money-check-dollar"></i> ${getT('dbt_tracker', 'DBT Payment Tracker')}</a>
+    <a class="nav-link ${activeRoute === 'farmer-farms' ? 'active' : ''}" onclick="routeTo('#farmer-farms')"><i class="fas fa-tractor"></i> ${getT('my_farms', 'My Farms & Crops')}</a>
+    <a class="nav-link ${activeRoute === 'farmer-profile' ? 'active' : ''}" onclick="routeTo('#farmer-profile')"><i class="fas fa-user-circle"></i> ${getT('kyc_profile', 'KYC Profile & Docs')}</a>
     <div style="margin-top:auto; padding-top:16px;">
-      <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ${getT('nav_logout')}</a>
+      <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ${getT('nav_logout', 'Logout')}</a>
     </div>
   </aside>
 `;

@@ -32,22 +32,22 @@ const loadSmartBookingPage = async () => {
             <div style="font-weight:700; color:#FFF; font-size:1.05rem;">${user.name}</div>
             <div style="font-size:0.75rem; color:var(--saffron); font-weight:600;"><i class="fas fa-id-card"></i> ${user.farmerId || 'Farmer'}</div>
           </div>
-          <div class="sidebar-heading">Navigation</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-          <a class="nav-link active" onclick="loadSmartBookingPage()"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> Smart Mandi Finder</a>
-          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> Manual Slot Booking</a>
-          <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> Live Queue Tracker</a>
-          <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> My Bookings</a>
+          <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
+          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('back_to_dashboard', 'Back to Dashboard')}</a>
+          <a class="nav-link active" onclick="loadSmartBookingPage()"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> ${getT('btn_smart_mandi_finder', 'Smart Mandi Finder')}</a>
+          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('manual_slot_booking', 'Manual Slot Booking')}</a>
+          <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('live_queue_tracker', 'Live Queue Tracker')}</a>
+          <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> ${getT('my_bookings', 'My Bookings')}</a>
           <div style="margin-top:auto; padding-top:16px;">
-            <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ${getT('nav_logout', 'Logout')}</a>
           </div>
         </aside>
       ` : `
         <aside class="sidebar">
-          <div class="sidebar-heading">Smart Mandi Engine</div>
-          <a class="nav-link" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> Home</a>
-          <a class="nav-link active" onclick="loadSmartBookingPage()"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> Smart Mandi Finder</a>
-          <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> Mandi Display Board</a>
+          <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
+          <a class="nav-link" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> ${getT('nav_home', 'Home')}</a>
+          <a class="nav-link active" onclick="loadSmartBookingPage()"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> ${getT('btn_smart_mandi_finder', 'Smart Mandi Finder')}</a>
+          <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> ${getT('nav_display_board', 'Mandi Display Board')}</a>
           <a class="nav-link" onclick="routeTo('#ai-insights')"><i class="fas fa-brain"></i> AI Insights</a>
         </aside>
       `}

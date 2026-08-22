@@ -22,11 +22,11 @@ const loadFarmerPaymentsPage = async () => {
     container.innerHTML = `
       <div class="app-container">
         <aside class="sidebar">
-          <div class="sidebar-heading">Farmer Menu</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> Dashboard</a>
-          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> Book Slot</a>
-          <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> My Bookings</a>
-          <a class="nav-link active" onclick="loadFarmerPaymentsPage()"><i class="fas fa-money-check-dollar"></i> DBT Payment Tracker</a>
+          <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
+          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard', 'Dashboard')}</a>
+          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot', 'Book Slot')}</a>
+          <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> ${getT('my_bookings', 'My Bookings')}</a>
+          <a class="nav-link active" onclick="loadFarmerPaymentsPage()"><i class="fas fa-money-check-dollar"></i> ${getT('dbt_tracker', 'DBT Payment Tracker')}</a>
         </aside>
 
         <main class="main-content">
