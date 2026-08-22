@@ -49,14 +49,14 @@ const openLoginModal = () => {
 
   body.innerHTML = `
     <div>
-      <!-- Demo Quick Login Bar -->
+      <!-- Quick Login Bar -->
       <div style="background:var(--bg-main); padding:12px; border-radius:8px; margin-bottom:18px;">
         <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">
-          ⚡ 1-Click Quick Demo Login:
+          ⚡ 1-Click Quick Login:
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-primary btn-sm" onclick="demoLogin('farmer')"><i class="fas fa-tractor"></i> Demo Farmer</button>
-          <button class="btn btn-navy btn-sm" onclick="demoLogin('officer')"><i class="fas fa-shield-halved"></i> Demo Officer</button>
+          <button class="btn btn-primary btn-sm" onclick="demoLogin('farmer')"><i class="fas fa-tractor"></i> Farmer</button>
+          <button class="btn btn-navy btn-sm" onclick="demoLogin('officer')"><i class="fas fa-shield-halved"></i> Officer</button>
           <button class="btn btn-outline btn-sm" onclick="demoLogin('admin')"><i class="fas fa-landmark"></i> Super Admin</button>
         </div>
       </div>
@@ -232,6 +232,10 @@ const renderRoute = (hash = window.location.hash || '#landing') => {
     loadMyBookings();
   } else if (hash === '#farmer-payments') {
     loadFarmerPaymentsPage();
+  } else if (hash === '#farmer-farms') {
+    loadFarmerFarmsPage();
+  } else if (hash === '#farmer-profile') {
+    loadFarmerProfilePage();
   } else if (hash === '#officer-dashboard' || hash === '#officer-queue') {
     loadOfficerDashboard();
   } else if (hash === '#admin-dashboard') {

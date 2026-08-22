@@ -26,7 +26,7 @@ const demoLogin = async (role) => {
     password = 'Admin@123';
   }
 
-  showToast(`Logging in as Demo ${role.toUpperCase()}...`, 'info');
+  showToast(`Logging in as ${role.toUpperCase()}...`, 'info');
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
