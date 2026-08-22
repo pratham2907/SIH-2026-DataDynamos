@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { Users, Farmers, generateId, AuditLogs } = require('../models/dbStore');
 const { JWT_SECRET } = require('../middleware/auth');
 const { sendNotification } = require('../services/notificationService');
+const { sendOtpEmail } = require('../services/emailService');
 
 // OTP Storage container for active verifications
 const pendingOTPs = new Map();
@@ -127,24 +128,28 @@ const registerFarmer = async (req, res) => {
 
     console.log(`🔑 [OTP DISPATCH] Generated OTP for ${mobile} (${fullName}): ${otp}`);
 
+    if (email) {
+      sendOtpEmail({ to: email, fullName, otp }).catch(e =>
+        console.error('Brevo OTP email dispatch error:', e.message)
+      );
+    }
+
     await sendNotification({
       userId,
       role: 'farmer',
       title: 'Registration Initiated',
       message: `Your KPMS Farmer Registration was received. Your verification OTP is: ${otp}`,
       type: 'system',
-      metadata: { mobile, email }
+      metadata: { mobile, email, fullName }
     });
 
     return res.status(201).json({
       success: true,
-      message: 'Farmer registered successfully. Please verify OTP to activate account.',
+      message: 'Farmer registered successfully. Please check your email and mobile for the verification OTP.',
       data: {
         userId,
         farmerId,
-        mobile,
-        // Include OTP in response for seamless demo & testing
-        demoOtp: otp
+        mobile
       }
     });
   } catch (err) {

@@ -123,8 +123,8 @@ const submitRegistration = async () => {
     const data = await res.json();
     if (data.success) {
       pendingMobileForOtp = data.data.mobile;
-      showToast('Registration received! Please enter verification OTP.', 'success');
-      openOtpModal(data.data.demoOtp);
+      showToast('Registration received! Please enter the OTP sent to your email/mobile.', 'success');
+      openOtpModal();
     } else {
       showToast(data.message, 'error');
     }
@@ -133,7 +133,7 @@ const submitRegistration = async () => {
   }
 };
 
-const openOtpModal = (demoOtp) => {
+const openOtpModal = () => {
   closeModal();
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
@@ -142,20 +142,26 @@ const openOtpModal = (demoOtp) => {
   body.innerHTML = `
     <div style="text-align:center; padding: 10px;">
       <div style="font-size:3rem; color:var(--green-gov); margin-bottom:12px;"><i class="fas fa-shield-alt"></i></div>
-      <h4>Verify Mobile Number</h4>
+      <h4>Verify Identity</h4>
       <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:18px;">
-        A 6-digit OTP has been dispatched to <strong>${pendingMobileForOtp}</strong>
+        A 6-digit verification code has been dispatched to your registered email & mobile <strong>${pendingMobileForOtp}</strong>
       </p>
-      ${demoOtp ? `<div style="background:#FEF3C7; color:#92400E; padding:8px; border-radius:6px; font-size:0.85rem; margin-bottom:16px; font-weight:600;">Demo Verification OTP: ${demoOtp}</div>` : ''}
       <form onsubmit="handleOtpSubmit(event)">
         <div class="form-group" style="max-width:240px; margin:0 auto 20px;">
-          <input type="text" id="otp-input-field" class="form-control" placeholder="Enter 6-digit OTP" maxlength="6" style="text-align:center; font-size:1.4rem; letter-spacing:6px; font-weight:700;" value="${demoOtp || ''}" required />
+          <input type="text" id="otp-input-field" class="form-control" placeholder="______" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" autofocus style="text-align:center; font-size:1.5rem; letter-spacing:8px; font-weight:700;" value="" required />
         </div>
         <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Verify & Activate Account</button>
       </form>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:14px;">
+        Did not receive the OTP? Please check your email inbox and spam folder.
+      </p>
     </div>
   `;
   modal.classList.add('active');
+  setTimeout(() => {
+    const input = document.getElementById('otp-input-field');
+    if (input) input.focus();
+  }, 100);
 };
 
 const handleOtpSubmit = async (e) => {
