@@ -25,7 +25,8 @@ const getFarmerSidebar = (farmer, activeRoute) => `
 const loadFarmerDashboard = async () => {
   const token = localStorage.getItem('kpms_token');
   if (!token) {
-    routeTo('#landing');
+    openLoginModal('farmer');
+    showToast('Please log in to access the Farmer Dashboard', 'info');
     return;
   }
 

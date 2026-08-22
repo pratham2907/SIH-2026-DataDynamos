@@ -7,7 +7,8 @@ const loadAdminDashboard = async () => {
   const token = localStorage.getItem('kpms_token');
   const user = getCurrentUser();
   if (!token || !user || user.role !== 'admin') {
-    routeTo('#landing');
+    openLoginModal('admin');
+    showToast('Please log in with Super Admin credentials', 'info');
     return;
   }
 

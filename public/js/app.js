@@ -42,32 +42,53 @@ const toggleTheme = () => {
   }
 };
 
-const openLoginModal = () => {
+const openLoginModal = (presetRole = 'farmer') => {
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
   document.getElementById('modal-title').textContent = getT('login_title');
 
+  let defaultId = '9876543210';
+  let defaultPass = 'Kisan@123';
+  if (presetRole === 'officer') {
+    defaultId = 'officer@kpms.gov.in';
+    defaultPass = 'Officer@123';
+  } else if (presetRole === 'admin') {
+    defaultId = 'admin@kpms.gov.in';
+    defaultPass = 'Admin@123';
+  }
+
   body.innerHTML = `
     <div>
+      <!-- Role Selection Tabs -->
+      <div style="display:flex; gap:6px; margin-bottom:16px; background:var(--bg-main); padding:4px; border-radius:8px;">
+        <button type="button" class="btn btn-sm ${presetRole === 'farmer' ? 'btn-primary' : 'btn-outline'}" style="flex:1; font-size:0.8rem; padding:8px 4px; justify-content:center;" onclick="openLoginModal('farmer')">👨‍🌾 ${getT('btn_farmer_login')}</button>
+        <button type="button" class="btn btn-sm ${presetRole === 'officer' ? 'btn-primary' : 'btn-outline'}" style="flex:1; font-size:0.8rem; padding:8px 4px; justify-content:center;" onclick="openLoginModal('officer')">👮 ${getT('btn_officer_login')}</button>
+        <button type="button" class="btn btn-sm ${presetRole === 'admin' ? 'btn-primary' : 'btn-outline'}" style="flex:1; font-size:0.8rem; padding:8px 4px; justify-content:center;" onclick="openLoginModal('admin')">🏛️ ${getT('btn_admin_login')}</button>
+      </div>
+
       <form onsubmit="handleLoginForm(event)">
         <div class="form-group">
           <label class="form-label"><i class="fas fa-user"></i> ${getT('login_identifier')}</label>
-          <input type="text" name="identifier" class="form-control" placeholder="e.g. 9876543210 or ramesh@farmer.in" required autocomplete="username" />
+          <input id="login-identifier" type="text" name="identifier" class="form-control" value="${defaultId}" placeholder="e.g. 9876543210, officer@kpms.gov.in, admin" required autocomplete="username" />
         </div>
         <div class="form-group">
           <label class="form-label"><i class="fas fa-lock"></i> ${getT('login_password')}</label>
-          <input type="password" name="password" class="form-control" placeholder="Enter your portal password" required autocomplete="current-password" />
+          <input id="login-password" type="password" name="password" class="form-control" value="${defaultPass}" placeholder="Enter password" required autocomplete="current-password" />
         </div>
-        <div class="form-group">
-          <label class="form-label"><i class="fas fa-shield"></i> ${getT('login_role')}</label>
-          <select name="role" class="form-control">
-            <option value="farmer">${getT('btn_farmer_login')}</option>
-            <option value="officer">${getT('btn_officer_login')}</option>
-            <option value="admin">${getT('btn_admin_login')}</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;"><i class="fas fa-right-to-bracket"></i> ${getT('login_btn')}</button>
+        <input type="hidden" name="role" value="${presetRole}" />
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; margin-top:8px;"><i class="fas fa-right-to-bracket"></i> ${getT('login_btn')}</button>
       </form>
+
+      <!-- Instant 1-Click Demo Login Bar -->
+      <div style="margin-top:16px; padding:12px; background:var(--bg-main); border-radius:8px; border:1px dashed var(--border-color); font-size:0.82rem;">
+        <div style="font-weight:700; color:var(--primary-navy); margin-bottom:8px;"><i class="fas fa-bolt" style="color:var(--saffron);"></i> 1-Click Instant Demo Login:</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; padding:4px 8px;" onclick="demoLogin('farmer')">👨‍🌾 Farmer (Ramesh)</button>
+          <button type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; padding:4px 8px;" onclick="demoLogin('officer')">👮 Officer (Vikram)</button>
+          <button type="button" class="btn btn-outline btn-sm" style="font-size:0.75rem; padding:4px 8px;" onclick="demoLogin('admin')">🏛️ Admin (Rajesh)</button>
+        </div>
+      </div>
+
       <div style="text-align:center; margin-top:16px; font-size:0.88rem;">
         <a onclick="closeModal(); openRegisterModal();" style="color:var(--saffron); cursor:pointer; font-weight:700;">${getT('login_new_farmer')}</a>
       </div>

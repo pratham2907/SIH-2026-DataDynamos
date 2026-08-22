@@ -37,7 +37,8 @@ const loadOfficerDashboard = async () => {
   const token = localStorage.getItem('kpms_token');
   const user = getCurrentUser();
   if (!token || !user || (user.role !== 'officer' && user.role !== 'admin')) {
-    routeTo('#landing');
+    openLoginModal('officer');
+    showToast('Please log in to access the Officer Portal', 'info');
     return;
   }
 
