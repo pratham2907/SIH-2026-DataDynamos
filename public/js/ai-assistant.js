@@ -1,6 +1,4 @@
-// AI Insights, Kisan Sahayak Chatbot & Voice Assistant Controller
-
-let recognitionInstance = null;
+// AI Insights & Kisan Sahayak Knowledge Controller
 
 const loadAIInsightsDashboard = async () => {
   const container = document.getElementById('app-view-container');
@@ -18,7 +16,6 @@ const loadAIInsightsDashboard = async () => {
           <a class="nav-link" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> Main Portal</a>
           <a class="nav-link active" onclick="loadAIInsightsDashboard()"><i class="fas fa-brain"></i> Mandi Insights</a>
           <a class="nav-link" onclick="openKisanFAQ()"><i class="fas fa-circle-question"></i> Kisan Sahayak FAQ</a>
-          <a class="nav-link" onclick="startVoiceAssistant()"><i class="fas fa-microphone"></i> Voice Assistant</a>
         </aside>
 
         <main class="main-content">
@@ -198,46 +195,134 @@ const FAQ_DATA = [
   },
 ];
 
-const openKisanFAQ = () => {
+let currentFaqCategory = 'ALL';
+
+/**
+ * Interactive Kisan Sahayak FAQ & Knowledge Helpdesk
+ */
+const openKisanFAQ = (categoryFilter = 'ALL') => {
+  currentFaqCategory = categoryFilter;
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
-  document.getElementById('modal-title').textContent = 'Kisan Sahayak FAQ / किसान सहायक';
+  document.getElementById('modal-title').textContent = '🌾 Kisan Sahayak / किसान सहायक — Mandi Guide & FAQ';
+
+  const categories = ['ALL', ...FAQ_DATA.map(c => c.category)];
 
   body.innerHTML = `
-    <div style="max-height:520px; overflow-y:auto; padding-right:4px;">
-      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">Find answers to the most common questions about KPMS — slot booking, payments, queue system, and more.</p>
-      ${FAQ_DATA.map((cat, ci) => `
-        <div style="margin-bottom:14px; border:1px solid var(--border-color); border-radius:12px; overflow:hidden;">
-          <div style="background:var(--bg-main); padding:12px 16px; display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:700; color:var(--primary-navy); font-size:0.93rem;" onclick="toggleFaqCat(${ci})">
-            <span style="width:30px; height:30px; border-radius:50%; background:${cat.color}20; display:flex; align-items:center; justify-content:center;">
-              <i class="fas ${cat.icon}" style="color:${cat.color}; font-size:0.85rem;"></i>
+    <div style="max-height:560px; display:flex; flex-direction:column; gap:12px; font-family:'Plus Jakarta Sans', sans-serif;">
+      <!-- Search Bar -->
+      <div style="position:relative;">
+        <input type="text" id="faq-live-search" class="form-control" placeholder="🔍 Search any topic (e.g., MSP rate, slot booking, payment delay, gate token)..." oninput="handleFaqSearch(this.value)" style="border-radius:20px; padding:10px 18px 10px 40px; font-size:0.9rem;" />
+        <i class="fas fa-search" style="position:absolute; left:16px; top:12px; color:var(--text-muted);"></i>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none;">
+        ${categories.map(cat => `
+          <button type="button" class="btn ${currentFaqCategory === cat ? 'btn-primary' : 'btn-outline'} btn-sm" style="border-radius:14px; font-size:0.75rem; white-space:nowrap; padding:4px 12px;" onclick="openKisanFAQ('${cat}')">
+            ${cat === 'ALL' ? '🌐 All Questions' : cat}
+          </button>
+        `).join('')}
+      </div>
+
+      <!-- FAQ Accordion List -->
+      <div id="faq-accordion-container" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px; max-height:360px; padding-right:4px;">
+        ${renderFaqList('')}
+      </div>
+
+      <!-- Toll-Free Helpline Footer -->
+      <div style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-headset" style="color:var(--green-gov); font-size:1.2rem;"></i>
+          <div>
+            <div style="font-weight:700; font-size:0.82rem; color:var(--primary-navy);">National Kisan Helpline</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">Toll-Free (Mon–Sat, 6:00 AM – 10:00 PM)</div>
+          </div>
+        </div>
+        <a href="tel:18001801551" class="btn btn-success btn-sm" style="font-weight:700; font-size:0.8rem;">
+          <i class="fas fa-phone"></i> 1800-180-1551
+        </a>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('active');
+  setTimeout(() => {
+    const searchInput = document.getElementById('faq-live-search');
+    if (searchInput) searchInput.focus();
+  }, 100);
+};
+
+// Render FAQ Accordion items
+const renderFaqList = (query = '') => {
+  const q = query.toLowerCase().trim();
+  let categoriesToRender = FAQ_DATA;
+
+  if (currentFaqCategory !== 'ALL') {
+    categoriesToRender = FAQ_DATA.filter(c => c.category === currentFaqCategory);
+  }
+
+  let html = '';
+  let matchCount = 0;
+
+  categoriesToRender.forEach((cat, ci) => {
+    const matchingQuestions = cat.questions.filter(item => {
+      if (!q) return true;
+      return item.q.toLowerCase().includes(q) || item.a.toLowerCase().includes(q) || cat.category.toLowerCase().includes(q);
+    });
+
+    if (matchingQuestions.length > 0) {
+      matchCount += matchingQuestions.length;
+      html += `
+        <div class="faq-category-card" style="border:1px solid var(--border-color); border-radius:10px; overflow:hidden; background:var(--bg-card);">
+          <div style="background:var(--bg-main); padding:10px 14px; display:flex; align-items:center; gap:8px; font-weight:700; color:var(--primary-navy); font-size:0.9rem; cursor:pointer;" onclick="toggleFaqCat(${ci})">
+            <span style="width:26px; height:26px; border-radius:50%; background:${cat.color}20; display:flex; align-items:center; justify-content:center;">
+              <i class="fas ${cat.icon}" style="color:${cat.color}; font-size:0.8rem;"></i>
             </span>
-            ${cat.category}
+            <span>${cat.category}</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">(${matchingQuestions.length})</span>
             <i class="fas fa-chevron-down" id="faq-chevron-${ci}" style="margin-left:auto; font-size:0.75rem; color:var(--text-muted); transition:transform 0.2s;"></i>
           </div>
-          <div id="faq-cat-${ci}" style="display:none;">
-            ${cat.questions.map((faq, qi) => `
-              <div style="border-top:1px solid var(--border-color); padding:12px 16px;">
-                <div style="font-weight:600; color:var(--primary-navy); font-size:0.88rem; margin-bottom:6px; cursor:pointer; display:flex; justify-content:space-between; align-items:flex-start; gap:8px;" onclick="toggleFaqItem(${ci},${qi})">
-                  <span><i class="fas fa-circle-question" style="color:${cat.color}; font-size:0.7rem; margin-right:6px;"></i>${faq.q}</span>
-                  <i class="fas fa-plus" id="faq-item-${ci}-${qi}" style="font-size:0.7rem; color:var(--text-muted); flex-shrink:0; margin-top:3px;"></i>
+          <div id="faq-cat-${ci}" style="display:${q ? 'block' : (ci === 0 ? 'block' : 'none')};">
+            ${matchingQuestions.map((faq, qi) => `
+              <div style="border-top:1px solid var(--border-color); padding:10px 14px;">
+                <div style="font-weight:600; color:var(--primary-navy); font-size:0.88rem; margin-bottom:4px; cursor:pointer; display:flex; justify-content:space-between; align-items:flex-start; gap:8px;" onclick="toggleFaqItem(${ci}, ${qi})">
+                  <span><i class="fas fa-circle-question" style="color:${cat.color}; font-size:0.75rem; margin-right:6px;"></i>${faq.q}</span>
+                  <i class="fas ${q ? 'fa-minus' : 'fa-plus'}" id="faq-item-${ci}-${qi}" style="font-size:0.72rem; color:var(--text-muted); flex-shrink:0; margin-top:3px;"></i>
                 </div>
-                <div id="faq-ans-${ci}-${qi}" style="display:none; font-size:0.84rem; color:var(--text-muted); line-height:1.6; padding:8px 12px; background:var(--bg-main); border-radius:8px; border-left:3px solid ${cat.color};">
+                <div id="faq-ans-${ci}-${qi}" style="display:${q ? 'block' : 'none'}; font-size:0.84rem; color:var(--text-muted); line-height:1.55; padding:8px 12px; background:var(--bg-main); border-radius:6px; border-left:3px solid ${cat.color}; margin-top:4px;">
                   ${faq.a}
                 </div>
               </div>
             `).join('')}
           </div>
         </div>
-      `).join('')}
-    </div>
-  `;
-  modal.classList.add('active');
+      `;
+    }
+  });
+
+  if (matchCount === 0) {
+    return `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:0.9rem;">
+      <i class="fas fa-magnifying-glass" style="font-size:2rem; margin-bottom:8px; display:block;"></i>
+      No matching questions found for "<strong>${query}</strong>". Call Kisan Helpline at <strong>1800-180-1551</strong>.
+    </div>`;
+  }
+
+  return html;
+};
+
+// Filter FAQ questions live on keystroke
+const handleFaqSearch = (query) => {
+  const container = document.getElementById('faq-accordion-container');
+  if (container) {
+    container.innerHTML = renderFaqList(query);
+  }
 };
 
 const toggleFaqCat = (ci) => {
   const el = document.getElementById('faq-cat-' + ci);
   const chevron = document.getElementById('faq-chevron-' + ci);
+  if (!el) return;
   const open = el.style.display !== 'none';
   el.style.display = open ? 'none' : 'block';
   if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
@@ -246,47 +331,17 @@ const toggleFaqCat = (ci) => {
 const toggleFaqItem = (ci, qi) => {
   const ans = document.getElementById('faq-ans-' + ci + '-' + qi);
   const icon = document.getElementById('faq-item-' + ci + '-' + qi);
+  if (!ans) return;
   const open = ans.style.display !== 'none';
   ans.style.display = open ? 'none' : 'block';
-  if (icon) { icon.className = open ? 'fas fa-plus' : 'fas fa-minus'; icon.style.color = open ? 'var(--text-muted)' : '#3B82F6'; }
-};
-
-const startVoiceAssistant = () => {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast('Voice speech recognition not supported in this browser. Please use the AI Chatbot.', 'info');
-    openKisanAIChat();
-    return;
+  if (icon) {
+    icon.className = open ? 'fas fa-plus' : 'fas fa-minus';
+    icon.style.color = open ? 'var(--text-muted)' : '#3B82F6';
   }
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognitionInstance = new SpeechRecognition();
-  recognitionInstance.lang = 'hi-IN'; // Default Hindi / English
-  recognitionInstance.continuous = false;
-
-  showToast('🎙️ Listening... Speak now (e.g., "Book Slot", "Check Queue", "Payment Status")', 'info');
-
-  recognitionInstance.onresult = async (event) => {
-    const transcript = event.results[0][0].transcript;
-    showToast(`You said: "${transcript}"`, 'success');
-
-    try {
-      const res = await fetch('/api/ai/voice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ voiceText: transcript })
-      });
-      const data = await res.json();
-      showToast(data.reply, 'info');
-
-      if (data.action === 'NAVIGATE_BOOKING') routeTo('#book-slot');
-      else if (data.action === 'NAVIGATE_QUEUE') routeTo('#farmer-queue');
-      else if (data.action === 'NAVIGATE_PAYMENTS') routeTo('#farmer-payments');
-    } catch (e) {}
-  };
-
-  recognitionInstance.onerror = () => {
-    showToast('Voice input ended. Try again.', 'info');
-  };
-
-  recognitionInstance.start();
 };
+
+// Alias openKisanAIChat to openKisanFAQ so all buttons open the clean FAQ helpdesk
+const openKisanAIChat = openKisanFAQ;
+
+
+

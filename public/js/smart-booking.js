@@ -502,48 +502,86 @@ const executeSmartBookingAlgorithm = () => {
 
       </div>
 
-      <!-- TRANSPARENT FINANCIAL BREAKDOWN ACCORDION -->
+      <!-- TRANSPARENT FINANCIAL BREAKDOWN & RELATIVE DETERIORATION ACCORDION -->
       <div class="glass-panel" style="border-radius:14px; overflow:hidden; margin-bottom:24px;">
         <div 
           style="padding:16px 22px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); user-select:none;"
           onclick="toggleTransparentBreakdown()"
         >
           <div style="display:flex; align-items:center; gap:10px;">
-            <i class="fas fa-circle-question" style="color:var(--saffron); font-size:1.1rem;"></i>
+            <i class="fas fa-calculator" style="color:var(--saffron); font-size:1.1rem;"></i>
             <span style="font-weight:800; font-size:1rem; color:var(--primary-navy);">
-              Why was this recommended? (पारदर्शी वित्तीय विवरण देखें)
+              Why was this recommended? (पारदर्शी वित्तीय विवरण एवं अनुमानित फसल जोखिम)
             </span>
           </div>
           <i id="breakdown-toggle-icon" class="fas fa-chevron-down" style="color:var(--text-muted); transition:transform 0.3s ease;"></i>
         </div>
 
         <div id="breakdown-content-slot" style="display:none; padding:22px; border-top:1px solid var(--border-color); background:var(--bg-main);">
+          
+          <!-- 5-Step Linear Model Explanation Card -->
+          <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:12px; padding:16px 20px; margin-bottom:20px;">
+            <div style="font-weight:800; color:#1E40AF; font-size:0.95rem; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+              <i class="fas fa-circle-info"></i> How is Relative Crop Loss Estimated? (Simulated estimate)
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; font-size:0.8rem; color:#1E3A8A; margin-bottom:10px;">
+              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
+                <strong>1. Extra Exposure:</strong><br/>
+                Travel distance + Mandi yard wait + Processing time
+              </div>
+              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
+                <strong>2. Crop Sensitivity:</strong><br/>
+                Crop simulated base rate (${recommended.deterioration.cropBaseRatePercent || '0.1%'} / ref unit)
+              </div>
+              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
+                <strong>3. Weather Factor:</strong><br/>
+                Live weather multiplier (${recommended.deterioration.weatherFactor}x)
+              </div>
+              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
+                <strong>4. Deterioration %:</strong><br/>
+                Base Rate × Exposure × Weather (Capped at ${recommended.deterioration.maxDeteriorationCapPercent})
+              </div>
+              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
+                <strong>5. Estimated Money Loss:</strong><br/>
+                Crop Value × Deterioration %
+              </div>
+            </div>
+            <div style="font-size:0.75rem; color:#3B82F6; font-style:italic;">
+              * Note: This is a relative/simulated estimate to compare options, not an exact prediction of physical crop deterioration.
+            </div>
+          </div>
+
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
             
             <!-- Recommended Option Breakdown -->
             <div style="background:var(--bg-card); padding:18px; border-radius:12px; border:1px solid var(--saffron);">
-              <div style="font-weight:800; color:var(--saffron); margin-bottom:12px; font-size:0.95rem;">
-                ⭐ ${recommended.shortName || recommended.centerName} Breakdown
+              <div style="font-weight:800; color:var(--saffron); margin-bottom:12px; font-size:0.95rem; display:flex; justify-content:space-between;">
+                <span>⭐ ${recommended.shortName || recommended.centerName}</span>
+                <span class="status-pill completed" style="font-size:0.7rem;">RECOMMENDED</span>
               </div>
               <div style="display:flex; flex-direction:column; gap:8px; font-size:0.88rem;">
                 <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">Expected produce accepted:</span>
+                  <span style="color:var(--text-muted);">Accepted Produce:</span>
                   <strong>${recommended.acceptedQuantity} Quintals</strong>
                 </div>
                 <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">Expected procurement value:</span>
+                  <span style="color:var(--text-muted);">Expected Gross Revenue:</span>
                   <strong>${recommended.formattedRevenue} <span style="font-size:0.75rem; color:var(--text-muted);">(@ ₹${recommended.pricePerQuintal}/Q)</span></strong>
                 </div>
                 <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">Estimated transport:</span>
+                  <span style="color:var(--text-muted);">Estimated Transport Cost:</span>
                   <strong style="color:#EF4444;">- ${recommended.formattedTransport}</strong>
                 </div>
                 <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">Estimated delay & storage impact:</span>
-                  <strong style="color:#EF4444;">- ${recommended.formattedDelay}</strong>
+                  <span style="color:var(--text-muted);">Estimated Storage & Waiting Cost:</span>
+                  <strong style="color:#EF4444;">- ${recommended.formattedStorage}</strong>
                 </div>
-                <div style="display:flex; justify-content:space-between; padding-top:8px; margin-top:4px; border-top:1px dashed var(--border-color); font-size:1.05rem; font-weight:900; color:var(--green-gov);">
-                  <span>Estimated overall outcome:</span>
+                <div style="display:flex; justify-content:space-between; background:rgba(239,68,68,0.06); padding:4px 8px; border-radius:6px;">
+                  <span style="color:#991B1B; font-weight:600;">Estimated Crop Loss (${recommended.deterioration.deteriorationPercentDisplay}):</span>
+                  <strong style="color:#DC2626;">- ${recommended.formattedDeterioration}</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding-top:10px; margin-top:4px; border-top:1px dashed var(--border-color); font-size:1.05rem; font-weight:900; color:var(--green-gov);">
+                  <span>Expected Net Economic Value (NEV):</span>
                   <span>${recommended.formattedNev}</span>
                 </div>
               </div>
@@ -552,28 +590,33 @@ const executeSmartBookingAlgorithm = () => {
             <!-- Alternative Breakdown (If exists) -->
             ${alternative ? `
               <div style="background:var(--bg-card); padding:18px; border-radius:12px; border:1px solid var(--border-color);">
-                <div style="font-weight:800; color:var(--primary-navy); margin-bottom:12px; font-size:0.95rem;">
-                  🚜 ${alternative.shortName || alternative.centerName} Breakdown
+                <div style="font-weight:800; color:var(--primary-navy); margin-bottom:12px; font-size:0.95rem; display:flex; justify-content:space-between;">
+                  <span>🚜 ${alternative.shortName || alternative.centerName}</span>
+                  <span class="status-pill waiting" style="font-size:0.7rem;">ALTERNATIVE</span>
                 </div>
                 <div style="display:flex; flex-direction:column; gap:8px; font-size:0.88rem;">
                   <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">Expected produce accepted:</span>
+                    <span style="color:var(--text-muted);">Accepted Produce:</span>
                     <strong>${alternative.acceptedQuantity} Quintals</strong>
                   </div>
                   <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">Expected procurement value:</span>
+                    <span style="color:var(--text-muted);">Expected Gross Revenue:</span>
                     <strong>${alternative.formattedRevenue} <span style="font-size:0.75rem; color:var(--text-muted);">(@ ₹${alternative.pricePerQuintal}/Q)</span></strong>
                   </div>
                   <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">Estimated transport:</span>
+                    <span style="color:var(--text-muted);">Estimated Transport Cost:</span>
                     <strong style="color:#EF4444;">- ${alternative.formattedTransport}</strong>
                   </div>
                   <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">Estimated delay & storage impact:</span>
-                    <strong style="color:#EF4444;">- ${alternative.formattedDelay}</strong>
+                    <span style="color:var(--text-muted);">Estimated Storage & Waiting Cost:</span>
+                    <strong style="color:#EF4444;">- ${alternative.formattedStorage}</strong>
                   </div>
-                  <div style="display:flex; justify-content:space-between; padding-top:8px; margin-top:4px; border-top:1px dashed var(--border-color); font-size:1.05rem; font-weight:900; color:var(--primary-navy);">
-                    <span>Estimated overall outcome:</span>
+                  <div style="display:flex; justify-content:space-between; background:rgba(239,68,68,0.06); padding:4px 8px; border-radius:6px;">
+                    <span style="color:#991B1B; font-weight:600;">Estimated Crop Loss (${alternative.deterioration.deteriorationPercentDisplay}):</span>
+                    <strong style="color:#DC2626;">- ${alternative.formattedDeterioration}</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding-top:10px; margin-top:4px; border-top:1px dashed var(--border-color); font-size:1.05rem; font-weight:900; color:var(--primary-navy);">
+                    <span>Expected Net Economic Value (NEV):</span>
                     <span>${alternative.formattedNev}</span>
                   </div>
                 </div>

@@ -191,7 +191,7 @@ const DEFAULT_PROCUREMENT_CENTRES = [
   }
 ];
 
-// 2. Crop Metadata Catalog
+// 2. Crop Metadata Catalog with Relative Sensitivity & Maximum Simulation Caps
 const SMART_CROP_CATALOG = [
   {
     name: "Wheat",
@@ -200,9 +200,10 @@ const SMART_CROP_CATALOG = [
     icon: "fa-wheat-awn",
     color: "#E06D14",
     bg: "#FFF7ED",
-    baseMsp: 2275,
+    baseMsp: 2425,
     defaultPrice: 2500,
-    perishabilityRate: 0.002, // 0.2% per day of waiting
+    baseDeteriorationRate: 0.001, // 0.1% per reference exposure unit (simulated base rate)
+    maxDeteriorationCap: 0.10,    // 10% maximum simulated crop loss cap
     defaultQty: 100
   },
   {
@@ -212,10 +213,50 @@ const SMART_CROP_CATALOG = [
     icon: "fa-seedling",
     color: "#16A34A",
     bg: "#F0FDF4",
-    baseMsp: 2300,
-    defaultPrice: 2320,
-    perishabilityRate: 0.003,
+    baseMsp: 2369,
+    defaultPrice: 2380,
+    baseDeteriorationRate: 0.001, // 0.1% per reference exposure unit
+    maxDeteriorationCap: 0.12,    // 12% maximum simulated cap
     defaultQty: 80
+  },
+  {
+    name: "Potato",
+    displayName: "Potato (आलू)",
+    variety: "Kufri Jyoti / Table",
+    icon: "fa-bowl-rice",
+    color: "#B45309",
+    bg: "#FEF3C7",
+    baseMsp: 1800,
+    defaultPrice: 1950,
+    baseDeteriorationRate: 0.003, // 0.3% per reference exposure unit
+    maxDeteriorationCap: 0.20,    // 20% max simulated cap
+    defaultQty: 75
+  },
+  {
+    name: "Tomato",
+    displayName: "Tomato (टमाटर)",
+    variety: "Desi / Hybrid Red",
+    icon: "fa-apple-whole",
+    color: "#DC2626",
+    bg: "#FEE2E2",
+    baseMsp: 2100,
+    defaultPrice: 2200,
+    baseDeteriorationRate: 0.008, // 0.8% per reference exposure unit
+    maxDeteriorationCap: 0.35,    // 35% max simulated cap
+    defaultQty: 50
+  },
+  {
+    name: "Leafy vegetables",
+    displayName: "Vegetables (सब्जियां / साग)",
+    variety: "Spinach / Methi / Seasonal",
+    icon: "fa-leaf",
+    color: "#15803D",
+    bg: "#DCFCE7",
+    baseMsp: 2400,
+    defaultPrice: 2600,
+    baseDeteriorationRate: 0.012, // 1.2% per reference exposure unit
+    maxDeteriorationCap: 0.45,    // 45% max simulated cap
+    defaultQty: 30
   },
   {
     name: "Maize",
@@ -226,7 +267,8 @@ const SMART_CROP_CATALOG = [
     bg: "#FFFBEB",
     baseMsp: 2225,
     defaultPrice: 2250,
-    perishabilityRate: 0.0025,
+    baseDeteriorationRate: 0.002, // 0.2% per reference exposure unit
+    maxDeteriorationCap: 0.15,    // 15% max simulated cap
     defaultQty: 60
   },
   {
@@ -238,7 +280,8 @@ const SMART_CROP_CATALOG = [
     bg: "#FAF5FF",
     baseMsp: 5440,
     defaultPrice: 5500,
-    perishabilityRate: 0.0015,
+    baseDeteriorationRate: 0.0015, // 0.15% per reference exposure unit
+    maxDeteriorationCap: 0.15,     // 15% max simulated cap
     defaultQty: 40
   },
   {
@@ -250,7 +293,8 @@ const SMART_CROP_CATALOG = [
     bg: "#FEF9C3",
     baseMsp: 5650,
     defaultPrice: 5700,
-    perishabilityRate: 0.002,
+    baseDeteriorationRate: 0.002,  // 0.2% per reference exposure unit
+    maxDeteriorationCap: 0.15,     // 15% max simulated cap
     defaultQty: 30
   },
   {
@@ -262,7 +306,8 @@ const SMART_CROP_CATALOG = [
     bg: "#ECFDF5",
     baseMsp: 4892,
     defaultPrice: 4950,
-    perishabilityRate: 0.0025,
+    baseDeteriorationRate: 0.0025, // 0.25% per reference exposure unit
+    maxDeteriorationCap: 0.15,     // 15% max simulated cap
     defaultQty: 50
   }
 ];
@@ -273,6 +318,9 @@ const normalizeCropName = (crop) => {
   const lower = crop.toLowerCase();
   if (lower.includes('wheat') || lower.includes('गेहूं')) return 'Wheat';
   if (lower.includes('paddy') || lower.includes('धान') || lower.includes('rice')) return 'Paddy';
+  if (lower.includes('potato') || lower.includes('आलू')) return 'Potato';
+  if (lower.includes('tomato') || lower.includes('टमाटर')) return 'Tomato';
+  if (lower.includes('vegetable') || lower.includes('सब्जियां') || lower.includes('leafy')) return 'Leafy vegetables';
   if (lower.includes('maize') || lower.includes('मक्का') || lower.includes('corn')) return 'Maize';
   if (lower.includes('gram') || lower.includes('चना') || lower.includes('chana')) return 'Gram';
   if (lower.includes('mustard') || lower.includes('सरसों') || lower.includes('sarson')) return 'Mustard';
@@ -314,8 +362,6 @@ const calculateAcceptedQuantity = (quantity, centre) => {
 /**
  * 5. Transport Cost Model
  * Centralized logistics formula.
- * Supports exact benchmark data (Centre A: ₹1000 for 10km/100Q, Centre B: ₹2000 for 25km/100Q, Centre C: ₹1500 for 18km/100Q)
- * or dynamic model for arbitrary inputs.
  */
 const calculateTransportCost = (farmer, centre, quantity) => {
   // If centre has predefined fixed benchmark for standard demo test case (100 Q)
@@ -337,7 +383,6 @@ const calculateTransportCost = (farmer, centre, quantity) => {
 
 /**
  * 6. Waiting Time Calculation (Days)
- * Estimated based on current queue count, daily processing throughput, and batch load.
  */
 const calculateWaitingTime = (centre, quantity) => {
   if (typeof centre.waitingDays === 'number') {
@@ -351,45 +396,123 @@ const calculateWaitingTime = (centre, quantity) => {
 };
 
 /**
- * 7. Delay Impact Calculation
- * Dᵢ = Storage Impact + Quality/Perishability Impact + Capital Opportunity Impact
- * 
- * Benchmark cases for Wheat 100 Q:
- * Centre A (5 days): ₹10,000 (₹20/Q/day = ₹10,000)
- * Centre B (1 day): ₹4,000 (₹40/Q/day = ₹4,000)
- * Centre C (2 days): ₹6,000 (₹30/Q/day = ₹6,000)
+ * 7. Weather Factor Calculation (W_i)
+ * Converts weather severity into a moderate relative multiplier (no double-counting)
+ * Low / Clear: 1.0, Moderate: 1.15, High / Rain: 1.35, Severe / Storm: 1.60
  */
-const calculateDelayImpact = ({ crop, quantity, waitingDays, centre, pricePerQuintal }) => {
+const getWeatherFactor = (weatherCondition = 'Favorable') => {
+  const cond = (weatherCondition || '').toLowerCase();
+  if (cond.includes('storm') || cond.includes('hail') || cond.includes('severe') || cond.includes('extreme') || cond.includes('heavy rain')) {
+    return 1.60;
+  }
+  if (cond.includes('rain') || cond.includes('high') || cond.includes('wind') || cond.includes('flood')) {
+    return 1.35;
+  }
+  if (cond.includes('moderate') || cond.includes('cloud') || cond.includes('fog') || cond.includes('drizzle')) {
+    return 1.15;
+  }
+  return 1.0; // Low / Favorable / Normal weather baseline
+};
+
+/**
+ * 8. Relative Crop Deterioration & Risk Model (Transparent Linear Model)
+ * 
+ * Formula:
+ * 1. Additional Exposure = max(0, Actual Expected Exposure - Normal Expected Exposure)
+ * 2. Exposure Factor = Additional Exposure / Reference Exposure
+ * 3. Weather Exposure = Exposure Factor * Weather Factor
+ * 4. Deterioration % = min(Crop Maximum Loss %, Crop Base Rate * Weather Exposure)
+ * 5. Deterioration Loss = Crop Value * Deterioration %
+ */
+const calculateRelativeDeterioration = ({ crop, quantity, pricePerQuintal, distance, waitingDays, weatherCondition = 'Favorable' }) => {
   const normCrop = normalizeCropName(crop);
   const cropMeta = SMART_CROP_CATALOG.find(c => c.name === normCrop) || SMART_CROP_CATALOG[0];
 
-  // If centre has specific storage cost rate per day per quintal
+  const cropValue = quantity * pricePerQuintal;
+
+  // Travel transit exposure (e.g. 50km = 1 transit unit)
+  const travelExposure = distance / 50; 
+  // Waiting exposure in days
+  const waitingExposure = waitingDays;
+  // Total expected exposure time
+  const expectedExposure = travelExposure + waitingExposure;
+
+  // Reference / Normal expected baseline exposure (standard same-day 1 unit)
+  const normalExposure = 1.0; 
+  const referenceExposure = 1.0;
+
+  // Additional exposure beyond normal baseline
+  const additionalExposure = Math.max(0, expectedExposure - normalExposure);
+  const exposureFactor = additionalExposure / referenceExposure;
+
+  // Weather Factor (moderate relative scaling)
+  const weatherFactor = getWeatherFactor(weatherCondition);
+
+  // Weather-Adjusted Exposure
+  const weatherAdjustedExposure = exposureFactor * weatherFactor;
+
+  // Estimated Relative Deterioration Percentage (capped at crop-specific maximum limit)
+  const rawDeterioration = cropMeta.baseDeteriorationRate * weatherAdjustedExposure;
+  const deteriorationPercent = Math.min(cropMeta.maxDeteriorationCap, Math.max(0, rawDeterioration));
+
+  // Monetary loss in ₹
+  const deteriorationLoss = Math.round(cropValue * deteriorationPercent);
+
+  return {
+    cropValue,
+    travelExposure: Math.round(travelExposure * 10) / 10,
+    waitingExposure,
+    expectedExposure: Math.round(expectedExposure * 10) / 10,
+    normalExposure,
+    additionalExposure: Math.round(additionalExposure * 10) / 10,
+    exposureFactor: Math.round(exposureFactor * 100) / 100,
+    weatherFactor,
+    weatherAdjustedExposure: Math.round(weatherAdjustedExposure * 100) / 100,
+    cropBaseRate: cropMeta.baseDeteriorationRate,
+    cropBaseRatePercent: `${(cropMeta.baseDeteriorationRate * 100).toFixed(1)}%`,
+    maxDeteriorationCap: cropMeta.maxDeteriorationCap,
+    maxDeteriorationCapPercent: `${(cropMeta.maxDeteriorationCap * 100).toFixed(0)}%`,
+    deteriorationPercent,
+    deteriorationPercentDisplay: `${(deteriorationPercent * 100).toFixed(1)}%`,
+    deteriorationLoss,
+    formattedDeteriorationLoss: `₹${deteriorationLoss.toLocaleString('en-IN')}`
+  };
+};
+
+/**
+ * 9. Delay & Storage Impact Calculation
+ */
+const calculateDelayImpact = ({ crop, quantity, waitingDays, centre, pricePerQuintal, distance = 15, weatherCondition = 'Favorable' }) => {
+  // If centre has specific benchmark rate for standard test scenarios
   if (centre && centre.storageCostPerDayPerQ) {
     const directStorageImpact = waitingDays * centre.storageCostPerDayPerQ * quantity;
     return directStorageImpact;
   }
 
-  // General economic model:
-  // 1. Storage & holding cost: ₹15 per quintal per day
+  // Storage cost: ₹15 per quintal per day
   const storageCost = waitingDays * 15 * quantity;
-  // 2. Perishability & moisture/quality loss:
-  const produceVal = quantity * (pricePerQuintal || cropMeta.defaultPrice);
-  const qualityLoss = produceVal * (cropMeta.perishabilityRate * waitingDays);
-  // 3. Working capital opportunity loss (12% p.a. / 365 days):
-  const capitalLoss = produceVal * (0.12 / 365) * waitingDays;
 
-  return Math.round(storageCost + qualityLoss + capitalLoss);
+  // Relative Deterioration Loss
+  const detResult = calculateRelativeDeterioration({
+    crop,
+    quantity,
+    pricePerQuintal,
+    distance,
+    waitingDays,
+    weatherCondition
+  });
+
+  return Math.round(storageCost + detResult.deteriorationLoss);
 };
 
 /**
- * 8. Applicable Procurement Price
+ * 10. Applicable Procurement Price
  */
 const getApplicablePrice = (centre, crop) => {
   const normCrop = normalizeCropName(crop);
   if (centre.cropPrices) {
     if (centre.cropPrices[crop]) return centre.cropPrices[crop];
     if (centre.cropPrices[normCrop]) return centre.cropPrices[normCrop];
-    // Find partial match
     for (const key in centre.cropPrices) {
       if (normalizeCropName(key) === normCrop) return centre.cropPrices[key];
     }
@@ -398,26 +521,48 @@ const getApplicablePrice = (centre, crop) => {
 };
 
 /**
- * 9. Calculate Centre Result
- * Performs the complete mathematical evaluation for a single procurement centre.
+ * 11. Calculate Centre Result
+ * Computes the complete transparent economic & deterioration evaluation.
  */
-const calculateCentreResult = (centre, crop, quantity, farmer = { location: 'Bhopal' }) => {
+const calculateCentreResult = (centre, crop, quantity, farmer = { location: 'Bhopal' }, weatherCondition = 'Favorable') => {
   const numQuantity = Number(quantity);
   const acceptedQuantity = calculateAcceptedQuantity(numQuantity, centre);
   const pricePerQuintal = getApplicablePrice(centre, crop);
   const expectedRevenue = acceptedQuantity * pricePerQuintal;
   const transportCost = calculateTransportCost(farmer, centre, numQuantity);
   const waitingDays = calculateWaitingTime(centre, numQuantity);
+  const distance = centre.distance || 15;
+
+  // Calculate Relative Deterioration Risk & Money Loss
+  const deterioration = calculateRelativeDeterioration({
+    crop,
+    quantity: acceptedQuantity,
+    pricePerQuintal,
+    distance,
+    waitingDays,
+    weatherCondition
+  });
+
+  // Calculate Storage Cost
+  const storageRate = centre.storageCostPerDayPerQ || 15;
+  const storageCost = waitingDays * storageRate * acceptedQuantity;
+
+  // Total Delay & Risk Impact
   const delayImpact = calculateDelayImpact({
     crop,
     quantity: acceptedQuantity,
     waitingDays,
     centre,
-    pricePerQuintal
+    pricePerQuintal,
+    distance,
+    weatherCondition
   });
 
-  // Net Economic Value
-  const nev = expectedRevenue - transportCost - delayImpact;
+  // Total Expected Loss = Transport Cost + Delay & Storage Impact
+  const totalExpectedLoss = transportCost + delayImpact;
+
+  // Expected Net Economic Value (NEV)
+  const nev = expectedRevenue - totalExpectedLoss;
   const capacityExceeded = numQuantity > centre.availableCapacity;
 
   return {
@@ -427,7 +572,7 @@ const calculateCentreResult = (centre, crop, quantity, farmer = { location: 'Bho
     shortName: centre.shortName || centre.name,
     district: centre.district,
     state: centre.state,
-    distance: centre.distance || 15,
+    distance,
     crop,
     requestedQuantity: numQuantity,
     acceptedQuantity,
@@ -435,14 +580,22 @@ const calculateCentreResult = (centre, crop, quantity, farmer = { location: 'Bho
     availableCapacity: centre.availableCapacity,
     pricePerQuintal,
     expectedRevenue,
+    cropValue: expectedRevenue,
     transportCost,
     waitingDays,
+    storageCost,
+    deterioration,
+    deteriorationLoss: deterioration.deteriorationLoss,
+    deteriorationPercentDisplay: deterioration.deteriorationPercentDisplay,
     delayImpact,
+    totalExpectedLoss,
     nev,
     formattedNev: `₹${nev.toLocaleString('en-IN')}`,
     formattedRevenue: `₹${expectedRevenue.toLocaleString('en-IN')}`,
     formattedTransport: `₹${transportCost.toLocaleString('en-IN')}`,
-    formattedDelay: `₹${delayImpact.toLocaleString('en-IN')}`
+    formattedDelay: `₹${delayImpact.toLocaleString('en-IN')}`,
+    formattedStorage: `₹${storageCost.toLocaleString('en-IN')}`,
+    formattedDeterioration: deterioration.formattedDeteriorationLoss
   };
 };
 
@@ -607,6 +760,8 @@ if (typeof window !== 'undefined') {
     calculateAcceptedQuantity,
     calculateTransportCost,
     calculateWaitingTime,
+    getWeatherFactor,
+    calculateRelativeDeterioration,
     calculateDelayImpact,
     calculateCentreResult,
     rankCentres,
@@ -625,6 +780,8 @@ if (typeof module !== 'undefined' && module.exports) {
     calculateAcceptedQuantity,
     calculateTransportCost,
     calculateWaitingTime,
+    getWeatherFactor,
+    calculateRelativeDeterioration,
     calculateDelayImpact,
     calculateCentreResult,
     rankCentres,
