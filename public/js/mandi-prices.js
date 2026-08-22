@@ -40,23 +40,23 @@ const loadMandiPricesPage = async () => {
             <div style="font-weight:700; color:#FFF; font-size:1.05rem;">${user.name}</div>
             <div style="font-size:0.75rem; color:var(--saffron); font-weight:600;"><i class="fas fa-id-card"></i> ${user.farmerId || 'Farmer'}</div>
           </div>
-          <div class="sidebar-heading">Navigation</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-          <a class="nav-link active" onclick="loadMandiPricesPage()"><i class="fas fa-carrot" style="color:var(--saffron);"></i> Mandi Live Prices</a>
-          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> Smart Mandi Finder</a>
-          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> Slot Booking</a>
-          <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> Live Queue</a>
+          <div class="sidebar-heading">${getT('nav_portal')}</div>
+          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard')}</a>
+          <a class="nav-link active" onclick="loadMandiPricesPage()"><i class="fas fa-carrot" style="color:var(--saffron);"></i> ${getT('nav_mandi_prices')}</a>
+          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> ${getT('btn_smart_mandi_finder')}</a>
+          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot')}</a>
+          <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('queue_tracker_title')}</a>
           <div style="margin-top:auto; padding-top:16px;">
-            <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ${getT('nav_logout')}</a>
           </div>
         </aside>
       ` : `
         <aside class="sidebar">
           <div class="sidebar-heading">Market Intelligence</div>
           <a class="nav-link" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> Home</a>
-          <a class="nav-link active" onclick="loadMandiPricesPage()"><i class="fas fa-carrot" style="color:var(--saffron);"></i> Mandi Live Prices</a>
-          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> Smart Mandi Finder</a>
-          <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> Mandi Display Board</a>
+          <a class="nav-link active" onclick="loadMandiPricesPage()"><i class="fas fa-carrot" style="color:var(--saffron);"></i> ${getT('nav_mandi_prices')}</a>
+          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> ${getT('btn_smart_mandi_finder')}</a>
+          <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> ${getT('nav_display_board')}</a>
           <a class="nav-link" onclick="routeTo('#ai-insights')"><i class="fas fa-brain"></i> AI Insights</a>
         </aside>
       `}
@@ -75,10 +75,10 @@ const loadMandiPricesPage = async () => {
                 <span class="status-pill completed" style="font-size:0.75rem;"><i class="fas fa-bolt"></i> Real-time Rates</span>
               </div>
               <h1 style="font-size:2rem; font-weight:800; color:var(--primary-navy); margin:0;">
-                🥕 Nearby Mandi Live Market Prices & Geospatial Map
+                ${getT('mandi_prices_title')}
               </h1>
               <p style="color:var(--text-muted); font-size:0.92rem; margin-top:4px; max-width:750px;">
-                Discover real-time prices for <strong>Vegetables, Fruits & Grains</strong> at nearby APMC mandis. Filter by distance, compare modal prices per quintal and per kilogram, and plan your harvest delivery.
+                ${getT('mandi_prices_subtitle')}
               </p>
             </div>
 
@@ -114,16 +114,16 @@ const loadMandiPricesPage = async () => {
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:16px;">
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <button class="btn btn-sm ${mandiPriceState.selectedCategory === 'all' ? 'btn-primary' : 'btn-outline'}" onclick="setMandiCategory('all')">
-                <i class="fas fa-basket-shopping"></i> All Items
+                <i class="fas fa-basket-shopping"></i> ${getT('filter_all')}
               </button>
               <button class="btn btn-sm ${mandiPriceState.selectedCategory === 'vegetable' ? 'btn-primary' : 'btn-outline'}" onclick="setMandiCategory('vegetable')">
-                <i class="fas fa-carrot"></i> 🥕 Vegetables (सब्जियां)
+                <i class="fas fa-carrot"></i> ${getT('filter_vegetables')}
               </button>
               <button class="btn btn-sm ${mandiPriceState.selectedCategory === 'fruit' ? 'btn-primary' : 'btn-outline'}" onclick="setMandiCategory('fruit')">
-                <i class="fas fa-apple-whole"></i> 🍎 Fruits (फल)
+                <i class="fas fa-apple-whole"></i> ${getT('filter_fruits')}
               </button>
               <button class="btn btn-sm ${mandiPriceState.selectedCategory === 'grain' ? 'btn-primary' : 'btn-outline'}" onclick="setMandiCategory('grain')">
-                <i class="fas fa-wheat-awn"></i> 🌾 Grains & Oilseeds
+                <i class="fas fa-wheat-awn"></i> ${getT('filter_grains')}
               </button>
             </div>
 

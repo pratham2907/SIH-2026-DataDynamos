@@ -1,18 +1,47 @@
+/**
+ * 🌐 KPMS Multilingual Translation Architecture (i18n)
+ * Supports English (en), Gujarati (gu), Hindi (hi), Bengali (bn), Marathi (mr), Punjabi (pa), Tamil (ta), Telugu (te), Kannada (kn)
+ */
+
 const translations = {
   en: {
+    // Government Flag & Branding
     system_title: "Kisan Procurement Management System",
-    gov_badge: "Government of India | Ministry of Agriculture",
-    hero_title: "Smart Digital Procurement & Queue Management for Farmers",
+    gov_badge: "Government of India | Ministry of Agriculture & Farmers Welfare",
+    brand_title: "KPMS AGRI-PORTAL",
+    brand_subtitle: "Kisan Procurement Management System",
+
+    // Navigation & Header
+    nav_smart_booking: "🌾 Smart Booking",
+    nav_mandi_prices: "🥕 Mandi Prices",
+    nav_display_board: "Mandi Display Board",
+    nav_kisan_sahayak: "Kisan Sahayak",
+    nav_login: "Login",
+    nav_register: "Register",
+    nav_logout: "Logout",
+    nav_portal: "Portal",
+    nav_dashboard: "Dashboard",
+    nav_home: "Home",
+
+    // Landing Page Hero
+    hero_pill: "Smart India Hackathon Production Edition",
+    hero_heading: "Digitizing India's Mandis with Smart Slots & Direct DBT",
     hero_desc: "Empowering Indian farmers with pre-booked mandi slots, real-time token queues, transparent weighbridge integration, and direct bank transfer (DBT) MSP payments.",
     btn_farmer_login: "Farmer Login",
     btn_officer_login: "Officer Portal",
     btn_admin_login: "Admin Control",
     btn_book_slot: "Book Procurement Slot",
     btn_register: "New Farmer Registration",
+    btn_guided_tour: "SIH Guided Tour",
+    btn_smart_mandi_finder: "🌾 Smart Mandi Finder",
+
+    // Stats Bar
     stat_farmers: "Registered Farmers",
     stat_centers: "Active Mandis",
     stat_procured: "Quintals Procured",
     stat_dbt: "Disbursed via DBT",
+
+    // How It Works Steps
     how_it_works: "How KPMS Works",
     step1_title: "1. Register & KYC",
     step1_desc: "Simple Aadhaar & Bank linked registration with automatic Farmer ID.",
@@ -24,24 +53,158 @@ const translations = {
     step4_desc: "Transparent moisture inspection & digital scale measurement.",
     step5_title: "5. Instant DBT",
     step5_desc: "Payment credited directly to your bank account within 48 hours.",
+
+    // Crop Perishability Badges
     perishability_high: "High Perishable",
     perishability_medium: "Medium Perishable",
-    perishability_low: "Low Perishable"
+    perishability_low: "Low Perishable",
+    high_perishability: "HIGH PERISHABILITY",
+    medium_perishability: "MEDIUM PERISHABILITY",
+    low_perishability: "LOW PERISHABILITY",
+
+    // Smart Booking UI
+    smart_booking_title: "Smart Mandi Recommendation & Slot Optimization",
+    smart_booking_subtitle: "AI Engine analyzing Real-time Weather, Road Transit Delays, Spoilage Rates & Market MSP to maximize Farmer Net Realized Return.",
+    step1_crop_heading: "What crop are you bringing? (Select Crop)",
+    step2_qty_heading: "How much produce do you want to sell? (Enter Quantity)",
+    tap_to_select: "Tap to select",
+    quantity_quintals: "Quantity (Quintals)",
+    btn_calculate_recommendation: "Find Best Mandi & Route",
+    btn_confirm_booking: "Confirm Slot Booking",
+    btn_change_selection: "Change Selection",
+    weather_arrival_window: "Weather & Expected Arrival Window",
+    net_realized_return: "Net Realized Return (NR)",
+    gross_msp_value: "Gross Realization (MSP)",
+    transport_cost: "Transport Cost",
+    deterioration_cost: "Produce Deterioration Cost",
+    delay_cost: "Delay / Waiting Cost",
+    storage_cost: "Storage Cost",
+    estimated_savings: "Estimated Savings",
+    scenario1_name: "Scenario 1: Highest Net Return",
+    scenario2_name: "Scenario 2: Fastest Delivery",
+    recommended_option: "Recommended Mandi Centre",
+    travel_risk_low: "Low Transit Risk",
+    travel_risk_medium: "Moderate Transit Risk",
+    travel_risk_high: "High Rain Risk",
+
+    // Mandi Live Prices
+    mandi_prices_heading: "🥕 Nearby Mandi Live Market Prices & Geospatial Map",
+    mandi_prices_sub: "Real-time daily mandi prices for Vegetables, Fruits, Grains & Oilseeds powered by Agmarknet feed.",
+    filter_all: "All Commodities",
+    filter_veg: "🥕 Vegetables",
+    filter_fruit: "🍎 Fruits",
+    filter_grain: "🌾 Grains & Oilseeds",
+    search_commodity: "Search item (e.g. Tomato, Onion)...",
+    radius_label: "Radius:",
+    spotlight_best_price: "⭐ Best Selling Price:",
+    spotlight_nearest: "📍 Nearest Mandi:",
+    nearby_comparison: "Nearby Mandi Comparison",
+    sorted_by_distance: "Sorted by distance",
+    highest_rate: "Highest Rate",
+    nearest_badge: "Nearest",
+    price_per_q: "per Quintal",
+    wholesale_benchmark: "Wholesale Benchmark",
+
+    // Slot Reservation Portal
+    reserve_slot_title: "Reserve Mandi Procurement Slot",
+    reserve_slot_sub: "Select your preferred Mandi centre, crop quantity, and pick a guaranteed time slot to avoid physical queues.",
+    select_mandi_centre: "Select Procurement Center (Mandi) *",
+    choose_mandi_default: "-- Choose Mandi Centre --",
+    procurement_date: "Preferred Procurement Date *",
+    crop_commodity: "Crop Commodity *",
+    vehicle_number: "Vehicle / Tractor No.",
+    vehicle_placeholder: "e.g. MP-04-HE-1234",
+    additional_remarks: "Special Requirements / Remarks",
+    btn_submit_reservation: "Proceed to Slot Selection",
+    available_slots: "Available Time Slots",
+    slot_fast_filling: "Fast Filling",
+    slot_available: "Available",
+    slot_full: "Full",
+
+    // Queue Tracker & Dashboard
+    queue_tracker_title: "Live Mandi Gate & Weighbridge Queue",
+    current_token_serving: "Current Token Serving",
+    your_queue_position: "Your Position in Queue",
+    estimated_wait_time: "Estimated Waiting Time",
+    assigned_counter: "Assigned Counter",
+    gate_pass_ready: "Digital Gate Pass Ready",
+    status_booked: "Booked",
+    status_confirmed: "Confirmed",
+    status_checked_in: "Checked In",
+    status_quality: "Quality Inspection",
+    status_weighing: "Weight Verification",
+    status_completed: "Procurement Complete",
+    status_dbt_paid: "Payment Disbursed (DBT)",
+
+    // Modals & Common Form Labels
+    login_title: "Sign In to KPMS Portal",
+    login_identifier: "Registered Mobile Number or Email *",
+    login_password: "Password *",
+    login_role: "Portal Role (Optional)",
+    login_btn: "Login to Portal",
+    login_new_farmer: "New farmer? Register Here (5-Step KYC)",
+    register_title: "New Farmer 5-Step KYC Registration",
+    reg_step1: "Personal",
+    reg_step2: "Location",
+    reg_step3: "Bank",
+    reg_step4: "Land & Crop",
+    reg_step5: "Docs",
+    btn_next_step: "Next Step",
+    btn_prev_step: "Previous Step",
+    btn_submit_registration: "Submit & Complete Registration",
+    btn_cancel: "Cancel",
+    btn_close: "Close",
+    btn_download_pass: "Download QR Pass",
+    btn_view_details: "View Details",
+
+    // Notifications & Feedback
+    msg_booking_success: "Slot booked successfully! Download your QR pass.",
+    msg_booking_cancelled: "Booking cancelled successfully.",
+    msg_login_success: "Welcome back! Login successful.",
+    msg_login_error: "Invalid credentials. Please verify your mobile number/password.",
+    msg_otp_sent: "OTP sent to your registered mobile and email.",
+    msg_loading: "Loading secure data...",
+    msg_error_generic: "An error occurred. Please try again."
   },
+
   hi: {
+    // Government Flag & Branding
     system_title: "किसान खरीद प्रबंधन प्रणाली",
     gov_badge: "भारत सरकार | कृषि एवं किसान कल्याण मंत्रालय",
-    hero_title: "किसानों के लिए स्मार्ट डिजिटल उपार्जन एवं लाइव कतार प्रबंधन",
+    brand_title: "केपीएमएस कृषि पोर्टल",
+    brand_subtitle: "किसान खरीद प्रबंधन प्रणाली",
+
+    // Navigation & Header
+    nav_smart_booking: "🌾 स्मार्ट बुकिंग",
+    nav_mandi_prices: "🥕 मंडी भाव",
+    nav_display_board: "मंडी डिस्प्ले बोर्ड",
+    nav_kisan_sahayak: "किसान सहायक",
+    nav_login: "लॉगिन",
+    nav_register: "पंजीकरण",
+    nav_logout: "लॉगआउट",
+    nav_portal: "पोर्टल",
+    nav_dashboard: "डैशबोर्ड",
+    nav_home: "होम",
+
+    // Landing Page Hero
+    hero_pill: "स्मार्ट इंडिया हैकथॉन उत्पादन संस्करण",
+    hero_heading: "स्मार्ट स्लॉट और सीधे बैंक भुगतान (DBT) से भारत की मंडियों का डिजिटलीकरण",
     hero_desc: "अग्रिम स्लॉट बुकिंग, डिजिटल टोकन, पारदर्शी तुलाई एवं सीधे बैंक खाते में एमएसपी (DBT) भुगतान की आधुनिक सुविधा।",
     btn_farmer_login: "किसान लॉगिन",
     btn_officer_login: "अधिकारी पोर्टल",
     btn_admin_login: "प्रशासन नियंत्रण",
     btn_book_slot: "उपार्जन स्लॉट बुक करें",
     btn_register: "नया किसान पंजीकरण",
+    btn_guided_tour: "एसआइएच टूर",
+    btn_smart_mandi_finder: "🌾 स्मार्ट मंडी खोजक",
+
+    // Stats Bar
     stat_farmers: "पंजीकृत किसान",
     stat_centers: "सक्रिय मंडियां",
     stat_procured: "कुल उपार्जित क्विंटल",
     stat_dbt: "डीबीटी कुल भुगतान",
+
+    // How It Works Steps
     how_it_works: "प्रणाली कैसे काम करती है",
     step1_title: "१. पंजीकरण एवं ई-केवाईसी",
     step1_desc: "आधार और बैंक खाते से सुरक्षित पंजीकरण और तत्काल किसान आईडी।",
@@ -53,24 +216,158 @@ const translations = {
     step4_desc: "पारदर्शी नमी परीक्षण एवं डिजिटल कांटा माप।",
     step5_title: "५. सीधा डीबीटी भुगतान",
     step5_desc: "उपार्जन पूर्ण होने पर सीधे बैंक खाते में भुगतान।",
+
+    // Crop Perishability Badges
     perishability_high: "अत्यधिक खराब होने वाली (High Perishable)",
     perishability_medium: "मध्यम खराब होने वाली (Medium Perishable)",
-    perishability_low: "कम खराब होने वाली (Low Perishable)"
+    perishability_low: "कम खराब होने वाली (Low Perishable)",
+    high_perishability: "उच्च नाशवान (HIGH PERISHABILITY)",
+    medium_perishability: "मध्यम नाशवान (MEDIUM PERISHABILITY)",
+    low_perishability: "कम नाशवान (LOW PERISHABILITY)",
+
+    // Smart Booking UI
+    smart_booking_title: "स्मार्ट मंडी चयन एवं स्लॉट अनुकूलन",
+    smart_booking_subtitle: "मौसम, सड़क जाम, फसल खराबी एवं बाजार भाव का विश्लेषण कर किसान की शुद्ध आय (Net Return) बढ़ाने वाला इंजन।",
+    step1_crop_heading: "आप कौन सी फसल ला रहे हैं? (फसल चुनें)",
+    step2_qty_heading: "आप कितनी उपज बेचना चाहते हैं? (मात्रा दर्ज करें)",
+    tap_to_select: "चुनने के लिए टैप करें",
+    quantity_quintals: "मात्रा (क्विंटल)",
+    btn_calculate_recommendation: "सर्वश्रेष्ठ मंडी एवं मार्ग खोजें",
+    btn_confirm_booking: "स्लॉट बुकिंग पक्की करें",
+    btn_change_selection: "चयन बदलें",
+    weather_arrival_window: "मौसम एवं अनुमानित पहुंचने का समय",
+    net_realized_return: "शुद्ध प्राप्त राशि (Net Return)",
+    gross_msp_value: "कुल एमएसपी मूल्य (Gross MSP)",
+    transport_cost: "परिवहन लागत",
+    deterioration_cost: "फसल खराबी नुकसान",
+    delay_cost: "प्रतीक्षा / कतार लागत",
+    storage_cost: "भंडारण लागत",
+    estimated_savings: "अनुमानित अतिरिक्त बचत",
+    scenario1_name: "परिदृश्य १: अधिकतम शुद्ध मुनाफा",
+    scenario2_name: "परिदृश्य २: सबसे तेज डिलीवरी",
+    recommended_option: "अनुशंसित मंडी केंद्र",
+    travel_risk_low: "कम यात्रा जोखिम",
+    travel_risk_medium: "मध्यम जोखिम",
+    travel_risk_high: "भारी बारिश का जोखिम",
+
+    // Mandi Live Prices
+    mandi_prices_heading: "🥕 नजदीकी मंडी लाइव बाजार भाव एवं मानचित्र",
+    mandi_prices_sub: "एगमार्कनेट लाइव डेटा द्वारा सब्जियों, फलों, खाद्यान्नों और तिलहनों के दैनिक भाव।",
+    filter_all: "सभी जिंस",
+    filter_veg: "🥕 सब्जियां",
+    filter_fruit: "🍎 फल",
+    filter_grain: "🌾 खाद्यान्न व तिलहन",
+    search_commodity: "वस्तु खोजें (उदा. टमाटर, प्याज)...",
+    radius_label: "दायरा:",
+    spotlight_best_price: "⭐ सर्वाधिक बिक्री मूल्य:",
+    spotlight_nearest: "📍 नजदीकी मंडी:",
+    nearby_comparison: "नजदीकी मंडियों की तुलना",
+    sorted_by_distance: "दूरी के अनुसार",
+    highest_rate: "सर्वोच्च दर",
+    nearest_badge: "निकटतम",
+    price_per_q: "प्रति क्विंटल",
+    wholesale_benchmark: "थोक बेंचमार्क",
+
+    // Slot Reservation Portal
+    reserve_slot_title: "उपार्जन स्लॉट बुक करें",
+    reserve_slot_sub: "लंबी कतारों से बचने के लिए अपनी पसंदीदा मंडी, फसल मात्रा और गारंटीकृत समय स्लॉट चुनें।",
+    select_mandi_centre: "उपार्जन केंद्र (मंडी) चुनें *",
+    choose_mandi_default: "-- मंडी केंद्र चुनें --",
+    procurement_date: "उपार्जन दिनांक *",
+    crop_commodity: "फसल / जिंस *",
+    vehicle_number: "वाहन / ट्रैक्टर नंबर",
+    vehicle_placeholder: "उदा. MP-04-HE-1234",
+    additional_remarks: "विशेष निर्देश / टिप्पणी",
+    btn_submit_reservation: "स्लॉट चयन के लिए आगे बढ़ें",
+    available_slots: "उपलब्ध समय स्लॉट",
+    slot_fast_filling: "शीघ्र भर रहा है",
+    slot_available: "उपलब्ध",
+    slot_full: "पूर्ण",
+
+    // Queue Tracker & Dashboard
+    queue_tracker_title: "लाइव मंडी गेट एवं कांटा कतार ट्रैकर",
+    current_token_serving: "वर्तमान सेवा टोकन",
+    your_queue_position: "कतार में आपका स्थान",
+    estimated_wait_time: "अनुमानित प्रतीक्षा समय",
+    assigned_counter: "आवंटित काउंटर",
+    gate_pass_ready: "डिजिटल गेट पास तैयार",
+    status_booked: "बुक किया गया",
+    status_confirmed: "पुष्टि की गई",
+    status_checked_in: "गेट चेक-इन",
+    status_quality: "गुणवत्ता परीक्षण",
+    status_weighing: "कांटा तुलाई",
+    status_completed: "खरीद पूर्ण",
+    status_dbt_paid: "डीबीटी भुगतान सम्पन्न",
+
+    // Modals & Common Form Labels
+    login_title: "केपीएमएस पोर्टल में साइन इन करें",
+    login_identifier: "पंजीकृत मोबाइल नंबर या ईमेल *",
+    login_password: "पासवर्ड *",
+    login_role: "पोर्टल भूमिका (वैकल्पिक)",
+    login_btn: "पोर्टल में लॉगिन करें",
+    login_new_farmer: "नए किसान? यहां पंजीकरण करें (5-चरण KYC)",
+    register_title: "नया किसान 5-चरण ई-केवाईसी पंजीकरण",
+    reg_step1: "व्यक्तिगत",
+    reg_step2: "स्थान",
+    reg_step3: "बैंक खाता",
+    reg_step4: "भूमि व फसल",
+    reg_step5: "दस्तावेज",
+    btn_next_step: "अगला चरण",
+    btn_prev_step: "पिछला चरण",
+    btn_submit_registration: "पंजीकरण पूर्ण करें",
+    btn_cancel: "रद्द करें",
+    btn_close: "बंद करें",
+    btn_download_pass: "क्यूआर पास डाउनलोड करें",
+    btn_view_details: "विवरण देखें",
+
+    // Notifications & Feedback
+    msg_booking_success: "स्लॉट सफलतापूर्वक बुक हुआ! अपना क्यूआर पास डाउनलोड करें।",
+    msg_booking_cancelled: "बुकिंग सफलतापूर्वक रद्द कर दी गई।",
+    msg_login_success: "स्वागत है! लॉगिन सफल रहा।",
+    msg_login_error: "अमान्य विवरण। कृपया अपना मोबाइल नंबर/पासवर्ड जांचें।",
+    msg_otp_sent: "आपके मोबाइल और ईमेल पर ओटीपी भेज दिया गया है।",
+    msg_loading: "डेटा लोड हो रहा है...",
+    msg_error_generic: "त्रुटि हुई। कृपया पुनः प्रयास करें।"
   },
+
   gu: {
+    // Government Flag & Branding
     system_title: "કિસાન ખરીદ વ્યવસ્થાપન પ્રણાલી",
-    gov_badge: "ભારત સરકાર | કૃષિ મંત્રાલય",
-    hero_title: "ખેડૂતો માટે સ્માર્ટ ડિજિટલ ખરીદી અને કતાર વ્યવસ્થાપન",
-    hero_desc: "પ્રી-બુક સ્લોટ, ડિજિટલ ટોકન, વજન કાંટો અને સીધા ખાતામાં એમએસપી ચુકવણી.",
+    gov_badge: "ભારત સરકાર | કૃષિ અને ખેડૂત કલ્યાણ મંત્રાલય",
+    brand_title: "KPMS કૃષિ પોર્ટલ",
+    brand_subtitle: "કિસાન ખરીદ વ્યવસ્થાપન પ્રણાલી",
+
+    // Navigation & Header
+    nav_smart_booking: "🌾 સ્માર્ટ બુકિંગ",
+    nav_mandi_prices: "🥕 મંડી ભાવો",
+    nav_display_board: "મંડી ડિસ્પ્લે બોર્ડ",
+    nav_kisan_sahayak: "કિસાન સહાયક",
+    nav_login: "લૉગિન",
+    nav_register: "રજીસ્ટ્રેશન",
+    nav_logout: "લૉગઆઉટ",
+    nav_portal: "પોર્ટલ",
+    nav_dashboard: "ડેશબોર્ડ",
+    nav_home: "હોમ",
+
+    // Landing Page Hero
+    hero_pill: "સ્માર્ટ ઇન્ડિયા હેકાથોન પ્રોડક્શન એડિશન",
+    hero_heading: "સ્માર્ટ સ્લોટ અને સીધા ડીબીટી ખાતા જમા સાથે મંડીઓનું ડિજિટાઈઝેશન",
+    hero_desc: "પ્રી-બુક સ્લોટ, ડિજિટલ ટોકન, વજન કાંટો અને સીધા ખાતામાં એમએસપી (DBT) ચુકવણી.",
     btn_farmer_login: "ખેડૂત લૉગિન",
     btn_officer_login: "અધિકારી પોર્ટલ",
     btn_admin_login: "એડમિન કંટ્રોલ",
     btn_book_slot: "સ્લોટ બુક કરો",
     btn_register: "નવું રજીસ્ટ્રેશન",
+    btn_guided_tour: "માર્ગદર્શિત ટૂર",
+    btn_smart_mandi_finder: "🌾 સ્માર્ટ મંડી શોધક",
+
+    // Stats Bar
     stat_farmers: "નોંધાયેલ ખેડૂતો",
     stat_centers: "સક્રિય મંડીઓ",
     stat_procured: "ખરીદેલ ક્વિન્ટલ",
     stat_dbt: "ડીબીટી ચુકવણી",
+
+    // How It Works Steps
     how_it_works: "કાર્ય પદ્ધતિ",
     step1_title: "૧. રજીસ્ટ્રેશન",
     step1_desc: "આધાર અને બેંક વિગતો સાથે સરળ નોંધણી.",
@@ -82,24 +379,158 @@ const translations = {
     step4_desc: "નમી અને વજનની પારદર્શક ચકાસણી.",
     step5_title: "૫. સીધી ચુકવણી",
     step5_desc: "સીધા બેંક ખાતામાં ૪૮ કલાકમાં પૈસા.",
+
+    // Crop Perishability Badges
     perishability_high: "વધુ બગડતી જણસ (High Perishable)",
     perishability_medium: "મધ્યમ બગડતી જણસ (Medium Perishable)",
-    perishability_low: "ઓછી બગડતી જણસ (Low Perishable)"
+    perishability_low: "ઓછી બગડતી જણસ (Low Perishable)",
+    high_perishability: "વધુ બગડતી (HIGH PERISHABILITY)",
+    medium_perishability: "મધ્યમ બગડતી (MEDIUM PERISHABILITY)",
+    low_perishability: "ઓછી બગડતી (LOW PERISHABILITY)",
+
+    // Smart Booking UI
+    smart_booking_title: "સ્માર્ટ મંડી ભલામણ અને સ્લોટ ઓપ્ટિમાઇઝેશન",
+    smart_booking_subtitle: "લાઈવ હવામાન, રસ્તાનો સમય, માલ બગાડ દર અને એમએસપી ભાવનું વિશ્લેષણ કરી નફો વધારતું એન્જિન.",
+    step1_crop_heading: "તમે કયો પાક લાવી રહ્યા છો? (પાક પસંદ કરો)",
+    step2_qty_heading: "તમારે કેટલી ઉપજ વેચવી છે? (જથ્થો લખો)",
+    tap_to_select: "પસંદ કરવા ટેપ કરો",
+    quantity_quintals: "જથ્થો (ક્વિન્ટલ)",
+    btn_calculate_recommendation: "શ્રેષ્ઠ મંડી અને રૂટ શોધો",
+    btn_confirm_booking: "સ્લોટ બુકિંગ પાકું કરો",
+    btn_change_selection: "પસંદગી બદલો",
+    weather_arrival_window: "હવામાન અને અંદાજિત પહોંચવાનો સમય",
+    net_realized_return: "ચોખ્ખો નફો (Net Return)",
+    gross_msp_value: "કુલ એમએસપી મૂલ્ય (Gross MSP)",
+    transport_cost: "પરિવહન ખર્ચ",
+    deterioration_cost: "માલ બગાડ નુકસાન",
+    delay_cost: "રાહ જોવાનો / કતાર ખર્ચ",
+    storage_cost: "સંગ્રહ ખર્ચ",
+    estimated_savings: "અંદાજિત વધારાનો નફો",
+    scenario1_name: "પરિદ્રશ્ય ૧: મહત્તમ ચોખ્ખો નફો",
+    scenario2_name: "પરિદ્રશ્ય ૨: ઝડપી ડિલિવરી",
+    recommended_option: "ભલામણ કરેલ મંડી કેન્દ્ર",
+    travel_risk_low: "ઓછું જોખમ",
+    travel_risk_medium: "મધ્યમ જોખમ",
+    travel_risk_high: "વરસાદનું જોખમ",
+
+    // Mandi Live Prices
+    mandi_prices_heading: "🥕 નજીકના મંડી લાઈવ બજાર ભાવો અને નકશો",
+    mandi_prices_sub: "એગમાર્કના લાઈવ ડેટા દ્વારા શાકભાજી, ફળો અને અનાજના દૈનિક ભાવો.",
+    filter_all: "તમામ જણસ",
+    filter_veg: "🥕 શાકભાજી",
+    filter_fruit: "🍎 ફળો",
+    filter_grain: "🌾 અનાજ અને તેલીબિયાં",
+    search_commodity: "જણસ શોધો (દા.ત. ટામેટા, ડુંગળી)...",
+    radius_label: "ત્રિજ્યા:",
+    spotlight_best_price: "⭐ શ્રેષ્ઠ વેચાણ ભાવ:",
+    spotlight_nearest: "📍 નજીકની મંડી:",
+    nearby_comparison: "નજીકની મંડીઓની સરખામણી",
+    sorted_by_distance: "અંતર પ્રમાણે ક્રમ",
+    highest_rate: "સૌથી ઊંચો ભાવ",
+    nearest_badge: "સૌથી નજીક",
+    price_per_q: "પ્રતિ ક્વિન્ટલ",
+    wholesale_benchmark: "જથ્થાબંધ બેંચમાર્ક",
+
+    // Slot Reservation Portal
+    reserve_slot_title: "ઉપાર્જન સ્લોટ બુક કરો",
+    reserve_slot_sub: "લાંબી કતારો ટાળવા માટે તમારી મનપસંદ મંડી, પાકનો જથ્થો અને સમય સ્લોટ પસંદ કરો.",
+    select_mandi_centre: "ખરીદ કેન્દ્ર (મંડી) પસંદ કરો *",
+    choose_mandi_default: "-- મંડી કેન્દ્ર પસંદ કરો --",
+    procurement_date: "ખરીદીની તારીખ *",
+    crop_commodity: "પાક / જણસ *",
+    vehicle_number: "વાહન / ટ્રેક્ટર નંબર",
+    vehicle_placeholder: "દા.ત. GJ-01-AB-1234",
+    additional_remarks: "ખાસ નોંધ / વિગત",
+    btn_submit_reservation: "સ્લોટ પસંદગી માટે આગળ વધો",
+    available_slots: "ઉપલબ્ધ સમય સ્લોટ્સ",
+    slot_fast_filling: "ઝડપથી ભરાઈ રહ્યું છે",
+    slot_available: "ઉપલબ્ધ",
+    slot_full: "સંપૂર્ણ",
+
+    // Queue Tracker & Dashboard
+    queue_tracker_title: "લાઈવ મંડી ગેટ અને વજન કાંટો ટ્રેકર",
+    current_token_serving: "હાલમાં ચાલતો ટોકન",
+    your_queue_position: "કતારમાં તમારો નંબર",
+    estimated_wait_time: "અંદાજિત રાહ જોવાનો સમય",
+    assigned_counter: "ફાળવેલ કાઉન્ટર",
+    gate_pass_ready: "ડિજિટલ ગેટ પાસ તૈયાર",
+    status_booked: "બુક થયેલ",
+    status_confirmed: "કન્ફર્મ થયેલ",
+    status_checked_in: "ગેટ ચેક-ઇન",
+    status_quality: "ગુણવત્તા ચકાસણી",
+    status_weighing: "વજન ચકાસણી",
+    status_completed: "ખરીદી પૂર્ણ",
+    status_dbt_paid: "ડીબીટી ચુકવણી સંપન્ન",
+
+    // Modals & Common Form Labels
+    login_title: "KPMS પોર્ટલમાં લૉગિન કરો",
+    login_identifier: "મોબાઇલ નંબર અથવા ઇમેઇલ *",
+    login_password: "પાસવર્ડ *",
+    login_role: "પોર્ટલ ભૂમિકા (વૈકલ્પિક)",
+    login_btn: "પોર્ટલમાં પ્રવેશ કરો",
+    login_new_farmer: "નવા ખેડૂત? અહીં નોંધણી કરો (5-પગલાં KYC)",
+    register_title: "નવા ખેડૂત માટે 5-પગલાં KYC નોંધણી",
+    reg_step1: "વ્યક્તિગત",
+    reg_step2: "સરનામું",
+    reg_step3: "બેંક ખાતું",
+    reg_step4: "જમીન અને પાક",
+    reg_step5: "દસ્તાવેજ",
+    btn_next_step: "આગળનું પગલું",
+    btn_prev_step: "પાછળનું પગલું",
+    btn_submit_registration: "નોંધણી પૂર્ણ કરો",
+    btn_cancel: "રદ કરો",
+    btn_close: "બંધ કરો",
+    btn_download_pass: "ક્યુઆર પાસ ડાઉનલોડ કરો",
+    btn_view_details: "વિગત જુઓ",
+
+    // Notifications & Feedback
+    msg_booking_success: "સ્લોટ સફળતાપૂર્વક બુક થયો! તમારો ક્યુઆર પાસ ડાઉનલોડ કરો.",
+    msg_booking_cancelled: "બુકિંગ સફળતાપૂર્વક રદ કરવામાં આવ્યું.",
+    msg_login_success: "સ્વાગત છે! લૉગિન સફળ રહ્યું.",
+    msg_login_error: "અમાન્ય વિગતો. કૃપા કરીને મોબાઇલ નંબર/પાસવર્ડ તપાસો.",
+    msg_otp_sent: "તમારા મોબાઇલ અને ઇમેઇલ પર ઓટીપી મોકલવામાં આવ્યો છે.",
+    msg_loading: "ડેટા લવાઈ રહ્યો છે...",
+    msg_error_generic: "ભૂલ આવી. કૃપા કરીને ફરી પ્રયાસ કરો."
   },
+
   mr: {
+    // Government Flag & Branding
     system_title: "किसान खरेदी व्यवस्थापन प्रणाली",
-    gov_badge: "भारत सरकार | कृषी मंत्रालय",
-    hero_title: "शेतकऱ्यांसाठी स्मार्ट डिजिटल खरेदी व रांग व्यवस्थापन",
+    gov_badge: "भारत सरकार | कृषी व शेतकरी कल्याण मंत्रालय",
+    brand_title: "KPMS कृषी पोर्टल",
+    brand_subtitle: "किसान खरेदी व्यवस्थापन प्रणाली",
+
+    // Navigation & Header
+    nav_smart_booking: "🌾 स्मार्ट बुकिंग",
+    nav_mandi_prices: "🥕 बाजार भाव",
+    nav_display_board: "मंडी प्रदर्शन फलक",
+    nav_kisan_sahayak: "शेतकरी सहाय्यक",
+    nav_login: "लॉगिन",
+    nav_register: "नोंदणी",
+    nav_logout: "लॉगआउट",
+    nav_portal: "पोर्टल",
+    nav_dashboard: "डॅशबोर्ड",
+    nav_home: "मुख्य पृष्ठ",
+
+    // Landing Page Hero
+    hero_pill: "स्मार्ट इंडिया हॅकाथॉन उत्पादन आवृत्ती",
+    hero_heading: "स्मार्ट स्लॉट्स व थेट डीबीटी (DBT) द्वारे भारतातील बाजार समित्यांचे डिजिटायझेशन",
     hero_desc: "आगाऊ स्लॉट बुकिंग, पारदर्शी वजन व थेट बँक खात्यात हमीभाव (DBT) जमा.",
     btn_farmer_login: "शेतकरी लॉगिन",
     btn_officer_login: "अधिकारी पोर्टल",
     btn_admin_login: "प्रशासन",
     btn_book_slot: "स्लॉट बुक करा",
     btn_register: "नवीन नोंदणी",
+    btn_guided_tour: "मार्गदर्शित फेरफटका",
+    btn_smart_mandi_finder: "🌾 स्मार्ट बाजार शोधक",
+
+    // Stats Bar
     stat_farmers: "नोंदणीकृत शेतकरी",
     stat_centers: "सक्रिय केंद्रे",
     stat_procured: "एकूण खरेदी (क्विंटल)",
     stat_dbt: "डीबीटी वाटप",
+
+    // How It Works Steps
     how_it_works: "कसे कार्य करते",
     step1_title: "१. नोंदणी",
     step1_desc: "आधार व बँक खात्याची जोडणी.",
@@ -111,24 +542,321 @@ const translations = {
     step4_desc: "डिजिटल काट्यावर पारदर्शक मोजमाप.",
     step5_title: "५. बँक खात्यात पैसे",
     step5_desc: "थेट बँक खात्यात हमीभाव रक्कम वर्ग.",
+
+    // Crop Perishability Badges
     perishability_high: "अति नाशवंत (High Perishable)",
     perishability_medium: "मध्यम नाशवंत (Medium Perishable)",
-    perishability_low: "कमी नाशवंत (Low Perishable)"
+    perishability_low: "कमी नाशवंत (Low Perishable)",
+    high_perishability: "अति नाशवंत (HIGH PERISHABILITY)",
+    medium_perishability: "मध्यम नाशवंत (MEDIUM PERISHABILITY)",
+    low_perishability: "कमी नाशवंत (LOW PERISHABILITY)",
+
+    // Smart Booking UI
+    smart_booking_title: "स्मार्ट बाजार निवड व स्लॉट ऑप्टिमायझेशन",
+    smart_booking_subtitle: "हवामान, वाहतूक, नुकसान दर व हमीभाव यांचे विश्लेषण करून शेतकऱ्याचा नफा वाढवणारे इंजिन.",
+    step1_crop_heading: "आपण कोणते पीक आणत आहात? (पीक निवडा)",
+    step2_qty_heading: "आपणास किती शेतमाल विकायचा आहे? (प्रमाण टाका)",
+    tap_to_select: "निवडण्यासाठी टॅप करा",
+    quantity_quintals: "प्रमाण (क्विंटल)",
+    btn_calculate_recommendation: "सर्वोत्तम बाजार व मार्ग शोधा",
+    btn_confirm_booking: "स्लॉट निश्चित करा",
+    btn_change_selection: "निवड बदला",
+    weather_arrival_window: "हवामान व अंदाजे पोहोचण्याची वेळ",
+    net_realized_return: "निव्वळ परतावा (Net Return)",
+    gross_msp_value: "एकूण हमीभाव मूल्य (Gross MSP)",
+    transport_cost: "वाहतूक खर्च",
+    deterioration_cost: "माल नुकसान खर्च",
+    delay_cost: "प्रतीक्षा / रांग खर्च",
+    storage_cost: "साठवणूक खर्च",
+    estimated_savings: "अंदाजे अतिरिक्त बचत",
+    scenario1_name: "पर्याय १: सर्वाधिक निव्वळ नफा",
+    scenario2_name: "पर्याय २: जलद डिलिव्हरी",
+    recommended_option: "शिफारस केलेले खरेदी केंद्र",
+    travel_risk_low: "कमी प्रवास धोका",
+    travel_risk_medium: "मध्यम धोका",
+    travel_risk_high: "मुसळधार पावसाचा धोका",
+
+    // Mandi Live Prices
+    mandi_prices_heading: "🥕 जवळील बाजार समित्यांमधील थेट भाव व नकाशा",
+    mandi_prices_sub: "अ‍ॅगमार्कनेट लाइव्ह डेटाद्वारे भाजीपाला, फळे आणि धान्याचे दैनंदिन बाजार भाव.",
+    filter_all: "सर्व शेतमाल",
+    filter_veg: "🥕 भाजीपाला",
+    filter_fruit: "🍎 फळे",
+    filter_grain: "🌾 धान्य व गळीत धान्य",
+    search_commodity: "शेतमाल शोधा (उदा. टोमॅटो, कांदा)...",
+    radius_label: "परिसर:",
+    spotlight_best_price: "⭐ सर्वोत्तम विक्री दर:",
+    spotlight_nearest: "📍 सर्वात जवळची बाजार समिती:",
+    nearby_comparison: "जवळील बाजार समित्यांची तुलना",
+    sorted_by_distance: "अंतराप्रमाणे क्रमवारी",
+    highest_rate: "सर्वाधिक दर",
+    nearest_badge: "जवळचे",
+    price_per_q: "प्रति क्विंटल",
+    wholesale_benchmark: "घाऊक बेंचमार्क",
+
+    // Slot Reservation Portal
+    reserve_slot_title: "खरेदी स्लॉट बुक करा",
+    reserve_slot_sub: "रांगा टाळण्यासाठी आपले पसंतीचे खरेदी केंद्र, शेतमाल प्रमाण व वेळ निवडा.",
+    select_mandi_centre: "खरेदी केंद्र (मंडी) निवडा *",
+    choose_mandi_default: "-- खरेदी केंद्र निवडा --",
+    procurement_date: "खरेदी दिनांक *",
+    crop_commodity: "पीक / शेतमाल *",
+    vehicle_number: "वाहन / ट्रॅक्टर क्रमांक",
+    vehicle_placeholder: "उदा. MH-12-AB-1234",
+    additional_remarks: "विशेष सूचना",
+    btn_submit_reservation: "स्लॉट निवडीकडे जा",
+    available_slots: "उपलब्ध वेळ स्लॉट्स",
+    slot_fast_filling: "जलद भरत आहे",
+    slot_available: "उपलब्ध",
+    slot_full: "पूर्ण",
+
+    // Queue Tracker & Dashboard
+    queue_tracker_title: "थेट गेट व वजन काटा रांग ट्रॅकर",
+    current_token_serving: "सध्या सुरू असलेले टोकन",
+    your_queue_position: "रांगेतील आपला क्रमांक",
+    estimated_wait_time: "अंदाजे प्रतीक्षा वेळ",
+    assigned_counter: "नेमून दिलेले काउंटर",
+    gate_pass_ready: "डिजिटल गेट पास तयार",
+    status_booked: "नोंदवले",
+    status_confirmed: "निश्चित",
+    status_checked_in: "गेट चेक-इन",
+    status_quality: "गुणवत्ता तपासणी",
+    status_weighing: "वजन पडताळणी",
+    status_completed: "खरेदी पूर्ण",
+    status_dbt_paid: "डीबीटी जमा",
+
+    // Modals & Common Form Labels
+    login_title: "KPMS पोर्टलवर साइन इन करा",
+    login_identifier: "नोंदणीकृत मोबाइल किंवा ईमेल *",
+    login_password: "पासवर्ड *",
+    login_role: "भूमिका (पर्यायी)",
+    login_btn: "लॉगिन करा",
+    login_new_farmer: "नवीन शेतकरी? येथे नोंदणी करा (5-टप्पे KYC)",
+    register_title: "नवीन शेतकरी 5-टप्पे ई-केवायसी नोंदणी",
+    reg_step1: "वैयक्तिक",
+    reg_step2: "पत्ता",
+    reg_step3: "बँक खाते",
+    reg_step4: "जमीन व पीक",
+    reg_step5: "कागदपत्रे",
+    btn_next_step: "पुढील टप्पा",
+    btn_prev_step: "मागील टप्पा",
+    btn_submit_registration: "नोंदणी पूर्ण करा",
+    btn_cancel: "रद्द करा",
+    btn_close: "बंद करा",
+    btn_download_pass: "क्यूआर पास डाउनलोड करा",
+    btn_view_details: "तपशील पहा",
+
+    // Notifications & Feedback
+    msg_booking_success: "स्लॉट यशस्वीरित्या बुक झाला! आपला क्यूआर पास डाउनलोड करा.",
+    msg_booking_cancelled: "बुकिंग यशस्वीरित्या रद्द करण्यात आली.",
+    msg_login_success: "स्वागत आहे! लॉगिन यशस्वी.",
+    msg_login_error: "अवैध माहिती. कृपया आपला मोबाइल नंबर/पासवर्ड तपासा.",
+    msg_otp_sent: "आपल्या मोबाइलवर व ईमेलवर ओटीपी पाठवला आहे.",
+    msg_loading: "डेटा लोड होत आहे...",
+    msg_error_generic: "त्रुटी आली. कृपया पुन्हा प्रयत्न करा."
   },
+
+  bn: {
+    // Government Flag & Branding
+    system_title: "কিষাণ সংগ্রহ ব্যবস্থাপনা পদ্ধতি",
+    gov_badge: "ভারত সরকার | কৃষি ও কৃষক কল্যাণ মন্ত্রক",
+    brand_title: "KPMS কৃষি পোর্টাল",
+    brand_subtitle: "কিষাণ সংগ্রহ ব্যবস্থাপনা পদ্ধতি",
+
+    // Navigation & Header
+    nav_smart_booking: "🌾 স্মার্ট বুকিং",
+    nav_mandi_prices: "🥕 মান্ডি মূল্য",
+    nav_display_board: "মান্ডি ডিসপ্লে বোর্ড",
+    nav_kisan_sahayak: "কিষাণ সহায়ক",
+    nav_login: "লগইন",
+    nav_register: "নিবন্ধন",
+    nav_logout: "লগআউট",
+    nav_portal: "পোর্টাল",
+    nav_dashboard: "ড্যাশবোর্ড",
+    nav_home: "হোম",
+
+    // Landing Page Hero
+    hero_pill: "স্মার্ট ইন্ডিয়া হ্যাকাথন প্রডাকশন এডিশন",
+    hero_heading: "স্মার্ট স্লট এবং সরাসরি ডিবিটি মাধ্যমে ভারতের মান্ডিগুলির ডিজিটাইজেশন",
+    hero_desc: "স্লট বুকিং, ডিজিটাল টোকেন, স্বচ্ছ ওজন এবং সরাসরি ব্যাঙ্ক অ্যাকাউন্টে এমএসপি প্রদান।",
+    btn_farmer_login: "কৃষক লগইন",
+    btn_officer_login: "আধিকারিক পোর্টাল",
+    btn_admin_login: "অ্যাডমিন কন্ট্রোল",
+    btn_book_slot: "স্লট বুক করুন",
+    btn_register: "নতুন কৃষক নিবন্ধন",
+    btn_guided_tour: "গাইডেড ট্যুর",
+    btn_smart_mandi_finder: "🌾 স্মার্ট মান্ডি সন্ধানকারী",
+
+    // Stats Bar
+    stat_farmers: "নিবন্ধিত কৃষক",
+    stat_centers: "সক্রিয় কেন্দ্র",
+    stat_procured: "মোট সংগৃহীত কুইন্টাল",
+    stat_dbt: "ডিবিটি পেমেন্ট",
+
+    // How It Works Steps
+    how_it_works: "কার্যপদ্ধতি",
+    step1_title: "১. নিবন্ধন",
+    step1_desc: "আধার এবং ব্যাঙ্ক অ্যাকাউন্টের মাধ্যমে সহজ নিবন্ধন।",
+    step2_title: "২. স্লট বুকিং",
+    step2_desc: "পছন্দের তারিখ ও সময় নির্বাচন করে কিউআর পাস সংগ্রহ।",
+    step3_title: "৩. চেক-ইন",
+    step3_desc: "গেটে কিউআর স্ক্যান করে ডিজিটাল টোকেন নিন।",
+    step4_title: "৪. মান ও ওজন",
+    step4_desc: "স্বচ্ছ আর্দ্রতা পরীক্ষা এবং ডিজিটাল ওজন।",
+    step5_title: "৫. সরাসরি ব্যাঙ্ক ট্রান্সফার",
+    step5_desc: "সরাসরি ব্যাঙ্ক অ্যাকাউন্টে এমএসপি টাকা জমা।",
+
+    // Crop Perishability Badges
+    perishability_high: "দ্রুত পচনশীল (High Perishable)",
+    perishability_medium: "মাঝারি পচনশীল (Medium Perishable)",
+    perishability_low: "কম পচনশীল (Low Perishable)",
+    high_perishability: "উচ্চ পচনশীল (HIGH PERISHABILITY)",
+    medium_perishability: "মাঝারি পচনশীল (MEDIUM PERISHABILITY)",
+    low_perishability: "কম পচনশীল (LOW PERISHABILITY)",
+
+    // Smart Booking UI
+    smart_booking_title: "স্মার্ট মান্ডি সুপারিশ এবং স্লট অপ্টিমাইজেশন",
+    smart_booking_subtitle: "আবহাওয়া, সড়ক বিলম্ব, ফসলের ক্ষয়ক্ষতি ও বাজার মূল্য বিশ্লেষণ করে কৃষকের আয় বৃদ্ধির ইঞ্জিন।",
+    step1_crop_heading: "আপনি কোন ফসল আনছেন? (ফসল নির্বাচন করুন)",
+    step2_qty_heading: "আপনি কত ফসল বিক্রি করতে চান? (পরিমাণ লিখুন)",
+    tap_to_select: "নির্বাচন করতে ট্যাপ করুন",
+    quantity_quintals: "পরিমাণ (কুইন্টাল)",
+    btn_calculate_recommendation: "সেরা মান্ডি ও রুট খুঁজুন",
+    btn_confirm_booking: "স্লট বুকিং নিশ্চিত করুন",
+    btn_change_selection: "নির্বাচন পরিবর্তন করুন",
+    weather_arrival_window: "আবহাওয়া এবং আনুমানিক পৌঁছানোর সময়",
+    net_realized_return: "নিট লাভ (Net Return)",
+    gross_msp_value: "মোট এমএসপি মূল্য (Gross MSP)",
+    transport_cost: "পরিবহন খরচ",
+    deterioration_cost: "ফসল নষ্টের ক্ষতি",
+    delay_cost: "অপেক্ষার ক্ষতি",
+    storage_cost: "সংরক্ষণ খরচ",
+    estimated_savings: "আনুমানিক অতিরিক্ত সাশ্রয়",
+    scenario1_name: "দৃশ্যপট ১: সর্বোচ্চ নিট লাভ",
+    scenario2_name: "দৃশ্যপট ২: দ্রুততম ডেলিভারি",
+    recommended_option: "সুপারিশকৃত মান্ডি কেন্দ্র",
+    travel_risk_low: "কম ঝুঁকি",
+    travel_risk_medium: "মাঝারি ঝুঁকি",
+    travel_risk_high: "বৃষ্টির ঝুঁকি",
+
+    // Mandi Live Prices
+    mandi_prices_heading: "🥕 নিকটবর্তী মান্ডির লাইভ বাজার দর ও মানচিত্র",
+    mandi_prices_sub: "অ্যাগমার্কনেট লাইভ ডেটা দ্বারা শাকসবজি, ফলমূল ও শস্যের দৈনিক মূল্য।",
+    filter_all: "সকল পণ্য",
+    filter_veg: "🥕 শাকসবজি",
+    filter_fruit: "🍎 ফলমূল",
+    filter_grain: "🌾 শস্য ও তৈলবীজ",
+    search_commodity: "পণ্য খুঁজুন (যেমন টমেটো, পেঁয়াজ)...",
+    radius_label: "ব্যাসার্ধ:",
+    spotlight_best_price: "⭐ সেরা বিক্রয় মূল্য:",
+    spotlight_nearest: "📍 নিকটতম মান্ডি:",
+    nearby_comparison: "নিকটবর্তী মান্ডির তুলনা",
+    sorted_by_distance: "দূরত্ব অনুসারে সাজানো",
+    highest_rate: "সর্বোচ্চ দর",
+    nearest_badge: "নিকটতম",
+    price_per_q: "প্রতি কুইন্টাল",
+    wholesale_benchmark: "পাইকারি বেঞ্চমার্ক",
+
+    // Slot Reservation Portal
+    reserve_slot_title: "সংগ্রহ স্লট বুক করুন",
+    reserve_slot_sub: "ভিড় এড়াতে আপনার পছন্দের মান্ডি, ফসলের পরিমাণ ও সময় নির্বাচন করুন।",
+    select_mandi_centre: "সংগ্রহ কেন্দ্র (মান্ডি) নির্বাচন করুন *",
+    choose_mandi_default: "-- মান্ডি কেন্দ্র নির্বাচন করুন --",
+    procurement_date: "সংগ্রহের তারিখ *",
+    crop_commodity: "ফসল / পণ্য *",
+    vehicle_number: "যানবাহন / ট্র্যাক্টর নম্বর",
+    vehicle_placeholder: "যেমন WB-01-AB-1234",
+    additional_remarks: "বিশেষ মন্তব্য",
+    btn_submit_reservation: "স্লট নির্বাচনে এগিয়ে যান",
+    available_slots: "উপলব্ধ সময় স্লট",
+    slot_fast_filling: "দ্রুত পূর্ণ হচ্ছে",
+    slot_available: "উপলব্ধ",
+    slot_full: "সম্পূর্ণ",
+
+    // Queue Tracker & Dashboard
+    queue_tracker_title: "লাইভ মান্ডি গেট ও ডিজিটাল ওজন কিউ ট্র্যাকার",
+    current_token_serving: "বর্তমানে চালিত টোকেন",
+    your_queue_position: "লাইনে আপনার অবস্থান",
+    estimated_wait_time: "আনুমানিক অপেক্ষার সময়",
+    assigned_counter: "বরাদ্দ কাউন্টার",
+    gate_pass_ready: "ডিজিটাল গেট পাস প্রস্তুত",
+    status_booked: "বুক করা হয়েছে",
+    status_confirmed: "নিশ্চিত",
+    status_checked_in: "গেট চেক-ইন",
+    status_quality: "মান পরীক্ষা",
+    status_weighing: "ওজন যাচাই",
+    status_completed: "সংগ্রহ সম্পন্ন",
+    status_dbt_paid: "ডিবিটি জমা হয়েছে",
+
+    // Modals & Common Form Labels
+    login_title: "KPMS পোর্টালে সাইন ইন করুন",
+    login_identifier: "নিবন্ধিত মোবাইল নম্বর বা ইমেল *",
+    login_password: "পাসওয়ার্ড *",
+    login_role: "ভূমিকা (ঐচ্ছিক)",
+    login_btn: "লগইন করুন",
+    login_new_farmer: "নতুন কৃষক? এখানে নিবন্ধন করুন (5-ধাপ KYC)",
+    register_title: "নতুন কৃষক 5-ধাপ ই-কেওয়াইসি নিবন্ধন",
+    reg_step1: "ব্যক্তিগত",
+    reg_step2: "ঠিকানা",
+    reg_step3: "ব্যাঙ্ক অ্যাকাউন্ট",
+    reg_step4: "জমি ও ফসল",
+    reg_step5: "নথিপত্র",
+    btn_next_step: "পরবর্তী ধাপ",
+    btn_prev_step: "পূর্ববর্তী ধাপ",
+    btn_submit_registration: "নিবন্ধন সম্পন্ন করুন",
+    btn_cancel: "বাতিল করুন",
+    btn_close: "বন্ধ করুন",
+    btn_download_pass: "কিউআর পাস ডাউনলোড",
+    btn_view_details: "বিবরণ দেখুন",
+
+    // Notifications & Feedback
+    msg_booking_success: "স্লট সফলভাবে বুক হয়েছে! আপনার কিউআর পাস ডাউনলোড করুন।",
+    msg_booking_cancelled: "বুকিং সফলভাবে বাতিল করা হয়েছে।",
+    msg_login_success: "স্বাগতম! লগইন সফল হয়েছে।",
+    msg_login_error: "অবৈধ তথ্য। অনুগ্রহ করে মোবাইল নম্বর/পাসওয়ার্ড পরীক্ষা করুন।",
+    msg_otp_sent: "আপনার মোবাইলে ও ইমেলে ওটিপি পাঠানো হয়েছে।",
+    msg_loading: "তথ্য লোড হচ্ছে...",
+    msg_error_generic: "ত্রুটি ঘটেছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+  },
+
   pa: {
+    // Government Flag & Branding
     system_title: "ਕਿਸਾਨ ਖਰੀਦ ਪ੍ਰਬੰਧਨ ਪ੍ਰਣਾਲੀ",
-    gov_badge: "ਭਾਰਤ ਸਰਕਾਰ | ਖੇਤੀਬਾੜੀ ਮੰਤਰਾਲਾ",
-    hero_title: "ਕਿਸਾਨਾਂ ਲਈ ਸਮਾਰਟ ਡਿਜੀਟਲ ਖਰੀਦ ਅਤੇ ਲਾਈਵ ਲਾਈਨ ਪ੍ਰਬੰਧਨ",
+    gov_badge: "ਭਾਰਤ ਸਰਕਾਰ | ਖੇਤੀਬਾੜੀ ਅਤੇ ਕਿਸਾਨ ਭਲਾਈ ਮੰਤਰਾਲਾ",
+    brand_title: "KPMS ਖੇਤੀ ਪੋਰਟਲ",
+    brand_subtitle: "ਕਿਸਾਨ ਖਰੀਦ ਪ੍ਰਬੰਧਨ ਪ੍ਰਣਾਲੀ",
+
+    // Navigation & Header
+    nav_smart_booking: "🌾 ਸਮਾਰਟ ਬੁਕਿੰਗ",
+    nav_mandi_prices: "🥕 ਮੰਡੀ ਭਾਅ",
+    nav_display_board: "ਮੰਡੀ ਡਿਸਪਲੇਅ ਬੋਰਡ",
+    nav_kisan_sahayak: "ਕਿਸਾਨ ਸਹਾਇਕ",
+    nav_login: "ਲੌਗਇਨ",
+    nav_register: "ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+    nav_logout: "ਲੌਗਆਉਟ",
+    nav_portal: "ਪੋਰਟਲ",
+    nav_dashboard: "ਡੈਸ਼ਬੋਰਡ",
+    nav_home: "ਮੁੱਖ ਪੰਨਾ",
+
+    // Landing Page Hero
+    hero_pill: "ਸਮਾਰਟ ਇੰਡੀਆ ਹੈਕਾਥੌਨ ਪ੍ਰੋਡਕਸ਼ਨ ਐਡੀਸ਼ਨ",
+    hero_heading: "ਸਮਾਰਟ ਸਲਾਟ ਅਤੇ ਸਿੱਧੇ ਬੈਂਕ ਖਾਤੇ (DBT) ਭੁਗਤਾਨ ਨਾਲ ਭਾਰਤ ਦੀਆਂ ਮੰਡੀਆਂ ਦਾ ਡਿਜੀਟਾਈਜ਼ੇਸ਼ਨ",
     hero_desc: "ਪਹਿਲਾਂ ਤੋਂ ਸਲਾਟ ਬੁਕਿੰਗ, ਡਿਜੀਟਲ ਟੋਕਨ, ਪਾਰਦਰਸ਼ੀ ਕੰਡਾ ਅਤੇ ਸਿੱਧਾ ਬੈਂਕ ਖਾਤੇ ਵਿੱਚ ਭੁਗਤਾਨ।",
     btn_farmer_login: "ਕਿਸਾਨ ਲੌਗਇਨ",
     btn_officer_login: "ਅਧਿਕਾਰੀ ਪੋਰਟਲ",
     btn_admin_login: "ਐਡਮਿਨ ਕੰਟਰੋਲ",
     btn_book_slot: "ਸਲਾਟ ਬੁੱਕ ਕਰੋ",
     btn_register: "ਨਵੀਂ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+    btn_guided_tour: "ਗਾਈਡਡ ਟੂਰ",
+    btn_smart_mandi_finder: "🌾 ਸਮਾਰਟ ਮੰਡੀ ਖੋਜੀ",
+
+    // Stats Bar
     stat_farmers: "ਰਜਿਸਟਰਡ ਕਿਸਾਨ",
     stat_centers: "ਮੰਡੀਆਂ",
-    stat_procured: "ਕੁੱਲ ਖਰੀਦ",
+    stat_procured: "ਕੁੱਲ ਖਰੀਦ (ਕੁਇੰਟਲ)",
     stat_dbt: "ਡੀਬੀਟੀ ਅਦਾਇਗੀ",
+
+    // How It Works Steps
     how_it_works: "ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ",
     step1_title: "੧. ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
     step1_desc: "ਅਧਾਰ ਅਤੇ ਬੈਂਕ ਨਾਲ ਆਸਾਨ ਰਜਿਸਟ੍ਰੇਸ਼ਨ।",
@@ -140,14 +868,137 @@ const translations = {
     step4_desc: "ਪਾਰਦਰਸ਼ੀ ਨਮੀ ਜਾਂਚ ਅਤੇ ਡਿਜੀਟਲ ਕੰਡਾ।",
     step5_title: "੫. ਸਿੱਧਾ ਭੁਗਤਾਨ",
     step5_desc: "ਸਿੱਧਾ ਬੈਂਕ ਖਾਤੇ ਵਿੱਚ ਐਮਐਸਪੀ ਜਮ੍ਹਾਂ।",
+
+    // Crop Perishability Badges
     perishability_high: "ਜਲਦੀ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (High Perishable)",
     perishability_medium: "ਦਰਮਿਆਨੀ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (Medium Perishable)",
-    perishability_low: "ਘੱਟ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (Low Perishable)"
+    perishability_low: "ਘੱਟ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (Low Perishable)",
+    high_perishability: "ਜਲਦੀ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (HIGH PERISHABILITY)",
+    medium_perishability: "ਦਰਮਿਆਨੀ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (MEDIUM PERISHABILITY)",
+    low_perishability: "ਘੱਟ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (LOW PERISHABILITY)",
+
+    // Smart Booking UI
+    smart_booking_title: "ਸਮਾਰਟ ਮੰਡੀ ਸਿਫ਼ਾਰਸ਼ ਅਤੇ ਸਲਾਟ ਅਨੁਕੂਲਨ",
+    smart_booking_subtitle: "ਮੌਸਮ, ਰਸਤੇ ਦੀ ਦੇਰੀ, ਫਸਲ ਖਰਾਬੀ ਤੇ ਸਰਕਾਰੀ ਭਾਅ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰਕੇ ਮੁਨਾਫਾ ਵਧਾਉਣ ਵਾਲਾ ਇੰਜਣ।",
+    step1_crop_heading: "ਤੁਸੀਂ ਕਿਹੜੀ ਫ਼ਸਲ ਲਿਆ ਰਹੇ ਹੋ? (ਫ਼ਸਲ ਚੁਣੋ)",
+    step2_qty_heading: "ਤੁਸੀਂ ਕਿੰਨੀ ਫ਼ਸਲ ਵੇਚਣਾ ਚਾਹੁੰਦੇ ਹੋ? (ਮਾਤਰਾ ਦਰਜ ਕਰੋ)",
+    tap_to_select: "ਚੁਣਨ ਲਈ ਟੈਪ ਕਰੋ",
+    quantity_quintals: "ਮਾਤਰਾ (ਕੁਇੰਟਲ)",
+    btn_calculate_recommendation: "ਸਭ ਤੋਂ ਵਧੀਆ ਮੰਡੀ ਤੇ ਰਸਤਾ ਲੱਭੋ",
+    btn_confirm_booking: "ਸਲਾਟ ਬੁਕਿੰਗ ਪੱਕੀ ਕਰੋ",
+    btn_change_selection: "ਚੋਣ ਬਦਲੋ",
+    weather_arrival_window: "ਮੌਸਮ ਅਤੇ ਪਹੁੰਚਣ ਦਾ ਅੰਦਾਜ਼ਨ ਸਮਾਂ",
+    net_realized_return: "ਸ਼ੁੱਧ ਮੁਨਾਫ਼ਾ (Net Return)",
+    gross_msp_value: "ਕੁੱਲ ਐਮਐਸਪੀ ਮੁੱਲ (Gross MSP)",
+    transport_cost: "ਆਵਾਜਾਈ ਖਰਚਾ",
+    deterioration_cost: "ਫ਼ਸਲ ਖਰਾਬੀ ਦਾ ਨੁਕਸਾਨ",
+    delay_cost: "ਉਡੀਕ / ਕਤਾਰ ਖਰਚਾ",
+    storage_cost: "ਸਟੋਰੇਜ ਖਰਚਾ",
+    estimated_savings: "ਅੰਦਾਜ਼ਨ ਵਾਧੂ ਬੱਚਤ",
+    scenario1_name: "ਵਿਕਲਪ ੧: ਵੱਧ ਤੋਂ ਵੱਧ ਸ਼ੁੱਧ ਮੁਨਾਫ਼ਾ",
+    scenario2_name: "ਵਿਕਲਪ ੨: ਸਭ ਤੋਂ ਤੇਜ਼ ਡਿਲੀਵਰੀ",
+    recommended_option: "ਸਿਫ਼ਾਰਸ਼ ਕੀਤਾ ਮੰਡੀ ਕੇਂਦਰ",
+    travel_risk_low: "ਘੱਟ ਜੋਖਮ",
+    travel_risk_medium: "ਦਰਮਿਆਨਾ ਜੋਖਮ",
+    travel_risk_high: "ਭਾਰੀ ਮੀਂਹ ਦਾ ਜੋਖਮ",
+
+    // Mandi Live Prices
+    mandi_prices_heading: "🥕 ਨੇੜਲੀਆਂ ਮੰਡੀਆਂ ਦੇ ਲਾਈਵ ਭਾਅ ਅਤੇ ਨਕਸ਼ਾ",
+    mandi_prices_sub: "ਐਗਮਾਰਕਨੈੱਟ ਲਾਈਵ ਡੇਟਾ ਰਾਹੀਂ ਸਬਜ਼ੀਆਂ, ਫਲਾਂ ਅਤੇ ਅਨਾਜ ਦੇ ਰੋਜ਼ਾਨਾ ਭਾਅ।",
+    filter_all: "ਸਾਰੀਆਂ ਜਿਣਸਾਂ",
+    filter_veg: "🥕 ਸਬਜ਼ੀਆਂ",
+    filter_fruit: "🍎 ਫਲ",
+    filter_grain: "🌾 ਅਨਾਜ ਅਤੇ ਤੇਲ ਬੀਜ",
+    search_commodity: "ਜਿਣਸ ਲੱਭੋ (ਜਿਵੇਂ ਟਮਾਟਰ, ਪਿਆਜ਼)...",
+    radius_label: "ਘੇਰਾ:",
+    spotlight_best_price: "⭐ ਸਭ ਤੋਂ ਵਧੀਆ ਵਿਕਰੀ ਭਾਅ:",
+    spotlight_nearest: "📍 ਸਭ ਤੋਂ ਨੇੜਲੀ ਮੰਡੀ:",
+    nearby_comparison: "ਨੇੜਲੀਆਂ ਮੰਡੀਆਂ ਦੀ ਤੁਲਨਾ",
+    sorted_by_distance: "ਦੂਰੀ ਅਨੁਸਾਰ",
+    highest_rate: "ਸਭ ਤੋਂ ਉੱਚਾ ਭਾਅ",
+    nearest_badge: "ਸਭ ਤੋਂ ਨੇੜੇ",
+    price_per_q: "ਪ੍ਰਤੀ ਕੁਇੰਟਲ",
+    wholesale_benchmark: "ਥੋਕ ਬੈਂਚਮਾਰਕ",
+
+    // Slot Reservation Portal
+    reserve_slot_title: "ਖਰੀਦ ਸਲਾਟ ਬੁੱਕ ਕਰੋ",
+    reserve_slot_sub: "ਲੰਬੀਆਂ ਲਾਈਨਾਂ ਤੋਂ ਬਚਣ ਲਈ ਆਪਣੀ ਪਸੰਦੀਦਾ ਮੰਡੀ, ਫਸਲ ਦੀ ਮਾਤਰਾ ਅਤੇ ਸਮਾਂ ਸਲਾਟ ਚੁਣੋ।",
+    select_mandi_centre: "ਖਰੀਦ ਕੇਂਦਰ (ਮੰਡੀ) ਚੁਣੋ *",
+    choose_mandi_default: "-- ਮੰਡੀ ਕੇਂਦਰ ਚੁਣੋ --",
+    procurement_date: "ਖਰੀਦ ਦੀ ਮਿਤੀ *",
+    crop_commodity: "ਫ਼ਸਲ / ਜਿਣਸ *",
+    vehicle_number: "ਵਾਹਨ / ਟਰੈਕਟਰ ਨੰਬਰ",
+    vehicle_placeholder: "ਜਿਵੇਂ PB-02-AB-1234",
+    additional_remarks: "ਖਾਸ ਨੋਟ / ਟਿੱਪਣੀ",
+    btn_submit_reservation: "ਸਲਾਟ ਚੋਣ ਵੱਲ ਵਧੋ",
+    available_slots: "ਉਪਲਬਧ ਸਮਾਂ ਸਲਾਟ",
+    slot_fast_filling: "ਤੇਜ਼ੀ ਨਾਲ ਭਰ ਰਿਹਾ ਹੈ",
+    slot_available: "ਉਪਲਬਧ",
+    slot_full: "ਭਰਿਆ ਹੋਇਆ",
+
+    // Queue Tracker & Dashboard
+    queue_tracker_title: "ਲਾਈਵ ਮੰਡੀ ਗੇਟ ਅਤੇ ਕੰਡਾ ਲਾਈਨ ਟਰੈਕਰ",
+    current_token_serving: "ਮੌਜੂਦਾ ਚੱਲ ਰਿਹਾ ਟੋਕਨ",
+    your_queue_position: "ਲਾਈਨ ਵਿੱਚ ਤੁਹਾਡਾ ਨੰਬਰ",
+    estimated_wait_time: "ਅੰਦਾਜ਼ਨ ਉਡੀਕ ਸਮਾਂ",
+    assigned_counter: "ਅਲਾਟ ਕੀਤਾ ਕਾਊਂਟਰ",
+    gate_pass_ready: "ਡਿਜੀਟਲ ਗੇਟ ਪਾਸ ਤਿਆਰ",
+    status_booked: "ਬੁੱਕ ਕੀਤਾ",
+    status_confirmed: "ਪੱਕਾ ਹੋਇਆ",
+    status_checked_in: "ਗੇਟ ਐਂਟਰੀ",
+    status_quality: "ਗੁਣਵੱਤਾ ਜਾਂਚ",
+    status_weighing: "ਵਜ਼ਨ ਜਾਂਚ",
+    status_completed: "ਖਰੀਦ ਮੁਕੰਮਲ",
+    status_dbt_paid: "ਡੀਬੀਟੀ ਭੁਗਤਾਨ ਸਫਲ",
+
+    // Modals & Common Form Labels
+    login_title: "KPMS ਪੋਰਟਲ ਵਿੱਚ ਲੌਗਇਨ ਕਰੋ",
+    login_identifier: "ਰਜਿਸਟਰਡ ਮੋਬਾਈਲ ਨੰਬਰ ਜਾਂ ਈਮੇਲ *",
+    login_password: "ਪਾਸਵਰਡ *",
+    login_role: "ਭੂਮਿਕਾ (ਵਿਕਲਪਿਕ)",
+    login_btn: "ਪੋਰਟਲ ਲੌਗਇਨ ਕਰੋ",
+    login_new_farmer: "ਨਵੇਂ ਕਿਸਾਨ? ਇੱਥੇ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਕਰੋ (5-ਪੜਾਅ KYC)",
+    register_title: "ਨਵਾਂ ਕਿਸਾਨ 5-ਪੜਾਅ ਈ-ਕੇਵਾਈਸੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+    reg_step1: "ਨਿੱਜੀ",
+    reg_step2: "ਪਤਾ",
+    reg_step3: "ਬੈਂਕ ਖਾਤਾ",
+    reg_step4: "ਜ਼ਮੀਨ ਤੇ ਫ਼ਸਲ",
+    reg_step5: "ਦਸਤਾਵੇਜ਼",
+    btn_next_step: "ਅਗਲਾ ਪੜਾਅ",
+    btn_prev_step: "ਪਿਛਲਾ ਪੜਾਅ",
+    btn_submit_registration: "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਮੁਕੰਮਲ ਕਰੋ",
+    btn_cancel: "ਰੱਦ ਕਰੋ",
+    btn_close: "ਬੰਦ ਕਰੋ",
+    btn_download_pass: "ਕਿਊਆਰ ਪਾਸ ਡਾਊਨਲੋਡ ਕਰੋ",
+    btn_view_details: "ਵੇਰਵਾ ਦੇਖੋ",
+
+    // Notifications & Feedback
+    msg_booking_success: "ਸਲਾਟ ਸਫਲਤਾਪੂਰਵਕ ਬੁੱਕ ਹੋ ਗਿਆ! ਆਪਣਾ ਕਿਊਆਰ ਪਾਸ ਡਾਊਨਲੋਡ ਕਰੋ।",
+    msg_booking_cancelled: "ਬੁਕਿੰਗ ਸਫਲਤਾਪੂਰਵਕ ਰੱਦ ਕਰ ਦਿੱਤੀ ਗਈ।",
+    msg_login_success: "ਜੀ ਆਇਆਂ ਨੂੰ! ਲੌਗਇਨ ਸਫਲ ਰਿਹਾ।",
+    msg_login_error: "ਗਲਤ ਵੇਰਵੇ। ਕਿਰਪਾ ਕਰਕੇ ਮੋਬਾਈਲ ਨੰਬਰ/ਪਾਸਵਰਡ ਦੀ ਜਾਂਚ ਕਰੋ।",
+    msg_otp_sent: "ਤੁਹਾਡੇ ਮੋਬਾਈਲ ਅਤੇ ਈਮੇਲ 'ਤੇ ਓਟੀਪੀ ਭੇਜਿਆ ਗਿਆ ਹੈ।",
+    msg_loading: "ਡੇਟਾ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
+    msg_error_generic: "ਕੋਈ ਖਰਾਬੀ ਆਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
   },
+
   ta: {
     system_title: "விவசாயிகள் கொள்முதல் மேலாண்மை அமைப்பு",
-    gov_badge: "இந்திய அரசு | வேளாண் அமைச்சகம்",
-    hero_title: "விவசாயிகளுக்கான ஸ்மார்ட் டிஜிட்டல் கொள்முதல்",
+    gov_badge: "இந்திய அரசு | வேளாண்மை மற்றும் விவசாயிகள் நல அமைச்சகம்",
+    brand_title: "KPMS வேளாண் போர்டல்",
+    brand_subtitle: "விவசாயிகள் கொள்முதல் மேலாண்மை அமைப்பு",
+    nav_smart_booking: "🌾 ஸ்மார்ட் முன்பதிவு",
+    nav_mandi_prices: "🥕 சந்தை விலை",
+    nav_display_board: "சந்தை காட்சி பலகை",
+    nav_kisan_sahayak: "கிசான் உதவியாளர்",
+    nav_login: "உள்நுழைவு",
+    nav_register: "பதிவு",
+    nav_logout: "வெளியேறு",
+    nav_portal: "போர்டல்",
+    nav_dashboard: "டாஷ்போர்டு",
+    nav_home: "முகப்பு",
+    hero_pill: "ஸ்மார்ட் இந்தியா ஹேக்கத்தான் பதிப்பு",
+    hero_heading: "ஸ்மார்ட் ஸ்லாட்டுகள் மற்றும் நேரடி வங்கி பரிமாற்றம் மூலம் கொள்முதல் நிலையங்கள் டிஜிட்டல் மயம்",
     hero_desc: "முன்பதிவு ஸ்லாட், டிஜிட்டல் வரிசை டோக்கன் மற்றும் நேரடி வங்கி பணப்பரிமாற்றம்.",
     btn_farmer_login: "விவசாயி உள்நுழைவு",
     btn_officer_login: "அதிகாரி தளம்",
@@ -156,7 +1007,7 @@ const translations = {
     btn_register: "புதிய பதிவு",
     stat_farmers: "பதிவுசெய்த விவசாயிகள்",
     stat_centers: "கொள்முதல் நிலையங்கள்",
-    stat_procured: "மொத்த கொள்முதல்",
+    stat_procured: "மொத்த கொள்முதல் (குவிண்டால்)",
     stat_dbt: "டி.பி.டி பணம்",
     how_it_works: "செயல்முறை",
     step1_title: "1. பதிவு",
@@ -171,12 +1022,49 @@ const translations = {
     step5_desc: "நேரடியாக வங்கி கணக்கில் பணம்.",
     perishability_high: "எளிதில் அழுகக்கூடியது (High Perishable)",
     perishability_medium: "மிதமான அழுகக்கூடியது (Medium Perishable)",
-    perishability_low: "குறைந்த அழுகக்கூடியது (Low Perishable)"
+    perishability_low: "குறைந்த அழுகக்கூடியது (Low Perishable)",
+    high_perishability: "அதிக அழுகும் தன்மை (HIGH PERISHABILITY)",
+    medium_perishability: "மிதமான அழுகும் தன்மை (MEDIUM PERISHABILITY)",
+    low_perishability: "குறைந்த அழுகும் தன்மை (LOW PERISHABILITY)",
+    smart_booking_title: "ஸ்மார்ட் சந்தை தேர்வு மற்றும் ஸ்லாட் உகப்பாக்கம்",
+    smart_booking_subtitle: "வானிலை, போக்குவரத்து தாமதம் மற்றும் சந்தை விலையை பகுப்பாய்வு செய்து விவசாயிகளுக்கு அதிகபட்ச லாபம் தரும் அமைப்பு.",
+    step1_crop_heading: "நீங்கள் கொண்டு வரும் பயிர் எது? (பயிரை தேர்வு செய்க)",
+    step2_qty_heading: "விற்பனை செய்ய விரும்பும் அளவு என்ன? (அளவை உள்ளிடவும்)",
+    tap_to_select: "தேர்வு செய்ய தட்டவும்",
+    quantity_quintals: "அளவு (குவிண்டால்)",
+    btn_calculate_recommendation: "சிறந்த சந்தை மற்றும் வழியை கண்டறியவும்",
+    btn_confirm_booking: "ஸ்லாட் முன்பதிவை உறுதிப்படுத்தவும்",
+    btn_change_selection: "தேர்வை மாற்றவும்",
+    weather_arrival_window: "வானிலை மற்றும் வருகை நேரம்",
+    net_realized_return: "நிகர வருமானம் (Net Return)",
+    gross_msp_value: "மொத்த ஆதரவு விலை (Gross MSP)",
+    transport_cost: "போக்குவரத்து செலவு",
+    deterioration_cost: "பயிர் சேத இழப்பு",
+    delay_cost: "காத்திருப்பு செலவு",
+    storage_cost: "சேமிப்பு செலவு",
+    estimated_savings: "மதிப்பிடப்பட்ட கூடுதல் சேமிப்பு",
+    scenario1_name: "விருப்பம் 1: அதிகபட்ச நிகர லாபம்",
+    scenario2_name: "விருப்பம் 2: விரைவான டெலிவரி",
+    recommended_option: "பரிந்துரைக்கப்பட்ட சந்தை மையம்"
   },
+
   te: {
     system_title: "కిసాన్ సేకరణ నిర్వహణ వ్యవస్థ",
-    gov_badge: "భారత ప్రభుత్వం | వ్యవసాయ మంత్రిత్వ శాఖ",
-    hero_title: "రైతుల కోసం స్మార్ట్ డిజిటల్ సేకరణ మరియు క్యూ నిర్వహణ",
+    gov_badge: "భారత ప్రభుత్వం | వ్యవసాయ మరియు రైతు సంక్షేమ మంత్రిత్వ శాఖ",
+    brand_title: "KPMS వ్యవసాయ పోర్టల్",
+    brand_subtitle: "కిసాన్ సేకరణ నిర్వహణ వ్యవస్థ",
+    nav_smart_booking: "🌾 స్మార్ట్ బుకింగ్",
+    nav_mandi_prices: "🥕 మార్కెట్ ధరలు",
+    nav_display_board: "డిస్ప్లే బోర్డు",
+    nav_kisan_sahayak: "కిసాన్ సహాయక్",
+    nav_login: "లాగిన్",
+    nav_register: "నమోదు",
+    nav_logout: "లాగౌట్",
+    nav_portal: "పోర్టల్",
+    nav_dashboard: "డ్యాష్‌బోర్డ్",
+    nav_home: "హోమ్",
+    hero_pill: "స్మార్ట్ ఇండియా హ్యాకథాన్ ఎడిషన్",
+    hero_heading: "స్మార్ట్ స్లాట్లు మరియు ప్రత్యక్ష బ్యాంకు బదిలీ (DBT) తో మార్కెట్ల డిజిటలైజేషన్",
     hero_desc: "ముందస్తు స్లాట్ బుకింగ్, డిజిటల్ టోకెన్ మరియు నేరుగా బ్యాంకు ఖాతాలో MSP జమ.",
     btn_farmer_login: "రైతు లాగిన్",
     btn_officer_login: "అధికారి పోర్టల్",
@@ -194,18 +1082,55 @@ const translations = {
     step2_desc: "తేదీ మరియు సమయం ఎంచుకుని QR పాస్ పొందండి.",
     step3_title: "3. చెక్-ఇన్",
     step3_desc: "గేట్ వద్ద QR స్కాన్ చేసి టోకెన్ తీసుకోండి.",
-    step4_title: "4. నాణ್ಯత & బరువు",
+    step4_title: "4. నాణ్యత & బరువు",
     step4_desc: "పారదర్శక బరువు మరియు నాణ్యత తనిఖీ.",
     step5_title: "5. ప్రత్యక్ష చెల్లింపు",
     step5_desc: "బ్యాంకు ఖాతాలో నేరుగా నగదు జమ.",
     perishability_high: "త్వరగా పాడయ్యే పంట (High Perishable)",
     perishability_medium: "మధ్యస్థంగా పాడయ్యే పంట (Medium Perishable)",
-    perishability_low: "తక్కువ పాడయ్యే పంట (Low Perishable)"
+    perishability_low: "తక్కువ పాడయ్యే పంట (Low Perishable)",
+    high_perishability: "ఎక్కువ పాడయ్యే స్వభావం (HIGH PERISHABILITY)",
+    medium_perishability: "మధ్యస్థ పాడయ్యే స్వభావం (MEDIUM PERISHABILITY)",
+    low_perishability: "తక్కువ పాడయ్యే స్వభావం (LOW PERISHABILITY)",
+    smart_booking_title: "స్మార్ట్ మార్కెట్ సిఫార్సు మరియు స్లాట్ ఆప్టిమైజేషన్",
+    smart_booking_subtitle: "వాతావరణం, రవాణా ఆలస్యం మరియు మార్కెట్ ధరలను విశ్లేషించి రైతులకు నికర లాభాన్ని పెంచే వ్యవస్థ.",
+    step1_crop_heading: "మీరు ఏ పంటను తీసుకువస్తున్నారు? (పంటను ఎంచుకోండి)",
+    step2_qty_heading: "ఎంత పరిమాణం విక్రయించాలనుకుంటున్నారు? (పరిమాణం నమోదు చేయండి)",
+    tap_to_select: "ఎంచుకోవడానికి నొక్కండి",
+    quantity_quintals: "పరిమాణం (క్వింటాళ్లు)",
+    btn_calculate_recommendation: "ఉత్తమ మార్కెట్ మరియు మార్గాన్ని కనుగొనండి",
+    btn_confirm_booking: "స్లాట్ బుకింగ్ నిర్ధారించండి",
+    btn_change_selection: "ఎంపిక మార్చండి",
+    weather_arrival_window: "వాతావరణం మరియు అంచనా వేసిన చేరుకునే సమయం",
+    net_realized_return: "నికర రాబడి (Net Return)",
+    gross_msp_value: "మొత్తం మద్దతు ధర (Gross MSP)",
+    transport_cost: "రవాణా ఖర్చు",
+    deterioration_cost: "పంట నష్టం ఖర్చు",
+    delay_cost: "నిరీక్షణ ఖర్చు",
+    storage_cost: "నిల్వ ఖర్చు",
+    estimated_savings: "అంచనా వేసిన అదనపు ఆదా",
+    scenario1_name: "ఎంపిక 1: గరిష్ట నికర లాభం",
+    scenario2_name: "ఎంపిక 2: వేగవంతమైన డెలివరీ",
+    recommended_option: "సిఫార్సు చేయబడిన మార్కెట్ కేంద్రం"
   },
+
   kn: {
     system_title: "ಕಿಸಾನ್ ಖರೀದಿ ನಿರ್ವಹಣಾ ವ್ಯವಸ್ಥೆ",
-    gov_badge: "ಭಾರತ ಸರ್ಕಾರ | ಕೃಷಿ ಸಚಿವಾಲಯ",
-    hero_title: "ರೈತರಿಗಾಗಿ ಸ್ಮಾರ್ಟ್ ಡಿಜಿಟಲ್ ಖರೀದಿ ಮತ್ತು ಕ್ಯೂ ನಿರ್ವಹಣೆ",
+    gov_badge: "ಭಾರತ ಸರ್ಕಾರ | ಕೃಷಿ ಮತ್ತು ರೈತರ ಕಲ್ಯಾಣ ಸಚಿವಾಲಯ",
+    brand_title: "KPMS ಕೃಷಿ ಪೋರ್ಟಲ್",
+    brand_subtitle: "ಕಿಸಾನ್ ಖರೀದಿ ನಿರ್ವಹಣಾ ವ್ಯವಸ್ಥೆ",
+    nav_smart_booking: "🌾 ಸ್ಮಾರ್ಟ್ ಬುಕಿಂಗ್",
+    nav_mandi_prices: "🥕 ಮಾರುಕಟ್ಟೆ ದರಗಳು",
+    nav_display_board: "ಪ್ರದರ್ಶನ ಫಲಕ",
+    nav_kisan_sahayak: "ಕಿಸಾನ್ ಸಹಾಯಕ",
+    nav_login: "ಲಾಗಿನ್",
+    nav_register: "ನೋಂದಣಿ",
+    nav_logout: "ಲಾಗೌಟ್",
+    nav_portal: "ಪೋರ್ಟಲ್",
+    nav_dashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    nav_home: "ಮುಖಪುಟ",
+    hero_pill: "ಸ್ಮಾರ್ಟ್ ಇಂಡಿಯಾ ಹ್ಯಾಕಥಾನ್ ಆವೃತ್ತಿ",
+    hero_heading: "ಸ್ಮಾರ್ಟ್ ಸ್ಲಾಟ್‌ಗಳು ಮತ್ತು ನೇರ ಬ್ಯಾಂಕ್ ವರ್ಗಾವಣೆ (DBT) ಮೂಲಕ ಮಂಡಿಗಳ ಡಿಜಿಟಲೀಕರಣ",
     hero_desc: "ಸ್ಲಾಟ್ ಬುಕಿಂಗ್, ಡಿಜಿಟಲ್ ಟೋಕನ್ ಮತ್ತು ನೇರ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಬೆಂಬಲ ಬೆಲೆ ಜಮೆ.",
     btn_farmer_login: "ರೈತರ ಲಾಗಿನ್",
     btn_officer_login: "ಅಧಿಕಾರಿ ಪೋರ್ಟಲ್",
@@ -214,7 +1139,7 @@ const translations = {
     btn_register: "ಹೊಸ ನೋಂದಣಿ",
     stat_farmers: "ನೋಂದಾಯಿತ ರೈತರು",
     stat_centers: "ಖರೀದಿ ಕೇಂದ್ರಗಳು",
-    stat_procured: "ಒಟ್ಟು ಖರೀದಿ",
+    stat_procured: "ಒಟ್ಟು ಖರೀದಿ (ಕ್ವಿಂಟಾಲ್)",
     stat_dbt: "ಡಿಬಿಟಿ ಜಮೆ",
     how_it_works: "ಕಾರ್ಯವಿಧಾನ",
     step1_title: "೧. ನೋಂದಣಿ",
@@ -229,60 +1154,109 @@ const translations = {
     step5_desc: "ನೇರವಾಗಿ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಹಣ ಜಮೆ.",
     perishability_high: "ಬೇಗನೆ ಹಾಳಾಗುವ ಬೆಳೆ (High Perishable)",
     perishability_medium: "ಮಧ್ಯಮ ಹಾಳಾಗುವ ಬೆಳೆ (Medium Perishable)",
-    perishability_low: "ಕಡಿಮೆ ಹಾಳಾಗುವ ಬೆಳೆ (Low Perishable)"
-  },
-  bn: {
-    system_title: "কিষাণ সংগ্রহ ব্যবস্থাপনা পদ্ধতি",
-    gov_badge: "ভারত সরকার | কৃষি মন্ত্রক",
-    hero_title: "কৃষকদের জন্য স্মার্ট ডিজিটাল সংগ্রহ ও কিউ ব্যবস্থাপনা",
-    hero_desc: "স্লট বুকিং, ডিজিটাল টোকেন, স্বচ্ছ ওজন এবং সরাসরি ব্যাঙ্ক অ্যাকাউন্টে এমএসপি প্রদান।",
-    btn_farmer_login: "কৃষক লগইন",
-    btn_officer_login: "আধিকারিক পোর্টাল",
-    btn_admin_login: "অ্যাডমিন কন্ট্রোল",
-    btn_book_slot: "স্লট বুক করুন",
-    btn_register: "নতুন কৃষক নিবন্ধন",
-    stat_farmers: "নিবন্ধিত কৃষক",
-    stat_centers: "সক্রিয় কেন্দ্র",
-    stat_procured: "মোট সংগৃহীত কুইন্টাল",
-    stat_dbt: "ডিবিটি পেমেন্ট",
-    how_it_works: "কার্যপদ্ধতি",
-    step1_title: "১. নিবন্ধন",
-    step1_desc: "আধার এবং ব্যাঙ্ক অ্যাকাউন্টের মাধ্যমে সহজ নিবন্ধন।",
-    step2_title: "২. স্লট বুকিং",
-    step2_desc: "পছন্দের তারিখ ও সময় নির্বাচন করে কিউআর পাস সংগ্রহ।",
-    step3_title: "৩. চেক-ইন",
-    step3_desc: "গেটে কিউআর স্ক্যান করে ডিজিটাল টোকেন নিন।",
-    step4_title: "৪. মান ও ওজন",
-    step4_desc: "স্বচ্ছ আর্দ্রতা পরীক্ষা এবং ডিজিটাল ওজন।",
-    step5_title: "৫. সরাসরি ব্যাঙ্ক ট্রান্সফার",
-    step5_desc: "সরাসরি ব্যাঙ্ক অ্যাকাউন্টে এমএসপি টাকা জমা।",
-    perishability_high: "দ্রুত পচনশীল (High Perishable)",
-    perishability_medium: "মাঝারি পচনশীল (Medium Perishable)",
-    perishability_low: "কম পচনশীল (Low Perishable)"
+    perishability_low: "ಕಡಿಮೆ ಹಾಳಾಗುವ ಬೆಳೆ (Low Perishable)",
+    high_perishability: "ಹೆಚ್ಚು ಹಾಳಾಗುವ ಬೆಳೆ (HIGH PERISHABILITY)",
+    medium_perishability: "ಮಧ್ಯಮ ಹಾಳಾಗುವ ಬೆಳೆ (MEDIUM PERISHABILITY)",
+    low_perishability: "ಕಡಿಮೆ ಹಾಳಾಗುವ ಬೆಳೆ (LOW PERISHABILITY)",
+    smart_booking_title: "ಸ್ಮಾರ್ಟ್ ಮಾರುಕಟ್ಟೆ ಶಿಫಾರಸು ಮತ್ತು ಸ್ಲಾಟ್ ಆಪ್ಟಿಮೈಸೇಶನ್",
+    smart_booking_subtitle: "ಹವಾಮಾನ, ಸಾರಿಗೆ ವಿಳಂಬ ಮತ್ತು ಬೆಂಬಲ ಬೆಲೆಯನ್ನು ವಿಶ್ಲೇಷಿಸಿ ರೈತರಿಗೆ ಗರಿಷ್ಠ ನಿವ್ವಳ ಲಾಭ ಒದಗಿಸುವ ಎಂಜಿನ್.",
+    step1_crop_heading: "ನೀವು ಯಾವ ಬೆಳೆಯನ್ನು ತರುತ್ತಿದ್ದೀರಿ? (ಬೆಳೆ ಆಯ್ಕೆಮಾಡಿ)",
+    step2_qty_heading: "ನೀವು ಎಷ್ಟು ಪ್ರಮಾಣವನ್ನು ಮಾರಾಟ ಮಾಡಲು ಬಯಸುತ್ತೀರಿ? (ಪ್ರಮಾಣ ನಮೂದಿಸಿ)",
+    tap_to_select: "ಆಯ್ಕೆ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
+    quantity_quintals: "ಪ್ರಮಾಣ (ಕ್ವಿಂಟಾಲ್)",
+    btn_calculate_recommendation: "ಉತ್ತಮ ಮಾರುಕಟ್ಟೆ ಮತ್ತು ಮಾರ್ಗವನ್ನು ಹುಡುಕಿ",
+    btn_confirm_booking: "ಸ್ಲಾಟ್ ಬುಕಿಂಗ್ ದೃಢೀಕರಿಸಿ",
+    btn_change_selection: "ಆಯ್ಕೆಯನ್ನು ಬದಲಾಯಿಸಿ",
+    weather_arrival_window: "ಹವಾಮಾನ ಮತ್ತು ನಿರೀಕ್ಷಿತ ಆಗಮನದ ಸಮಯ",
+    net_realized_return: "ನಿವ್ವಳ ಲಾಭ (Net Return)",
+    gross_msp_value: "ಒಟ್ಟು ಬೆಂಬಲ ಬೆಲೆ (Gross MSP)",
+    transport_cost: "ಸಾರಿಗೆ ವೆಚ್ಚ",
+    deterioration_cost: "ಬೆಳೆ ಹಾನಿ ವೆಚ್ಚ",
+    delay_cost: "ವಿಳಂಬ ವೆಚ್ಚ",
+    storage_cost: "ಸಂಗ್ರಹಣೆ ವೆಚ್ಚ",
+    estimated_savings: "ಅಂದಾಜು ಹೆಚ್ಚುವರಿ ಉಳಿತಾಯ",
+    scenario1_name: "ಆಯ್ಕೆ ೧: ಗರಿಷ್ಠ ನಿವ್ವಳ ಲಾಭ",
+    scenario2_name: "ಆಯ್ಕೆ ೨: ತ್ವರಿತ ವಿತರಣೆ",
+    recommended_option: "ಶಿಫಾರಸು ಮಾಡಲಾದ ಮಾರುಕಟ್ಟೆ ಕೇಂದ್ರ"
   }
 };
 
 let currentLanguage = 'en';
 
+/**
+ * Get translation for key with graceful fallback
+ */
+const getT = (key, fallback = '') => {
+  if (!key) return '';
+  const langMap = translations[currentLanguage] || translations['en'];
+  if (langMap && langMap[key]) return langMap[key];
+  if (translations['en'] && translations['en'][key]) return translations['en'][key];
+  return fallback || key;
+};
+
+// Aliases
+const t = getT;
+window.getT = getT;
+window.t = getT;
+
+/**
+ * Set active application language and update entire UI reactively
+ */
 const setLanguage = (lang) => {
-  if (!translations[lang]) return;
+  if (!translations[lang]) lang = 'en';
   currentLanguage = lang;
   localStorage.setItem('kpms_lang', lang);
 
+  // 1. Update all static [data-i18n] text contents
   document.querySelectorAll('[data-i18n]').forEach((el) => {
     const key = el.getAttribute('data-i18n');
-    if (translations[lang][key]) {
-      el.textContent = translations[lang][key];
-    }
+    const val = getT(key);
+    if (val) el.textContent = val;
   });
 
+  // 2. Update all [data-i18n-placeholder] attributes
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const val = getT(key);
+    if (val) el.setAttribute('placeholder', val);
+  });
+
+  // 3. Update all [data-i18n-title] attributes
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+    const key = el.getAttribute('data-i18n-title');
+    const val = getT(key);
+    if (val) el.setAttribute('title', val);
+  });
+
+  // 4. Update language selector dropdown if exists
   const sel = document.getElementById('lang-selector');
   if (sel) sel.value = lang;
+
+  // 5. Update header navigation items
+  const btnSmartBooking = document.getElementById('nav-btn-smart-booking');
+  if (btnSmartBooking) btnSmartBooking.innerHTML = `<i class="fas fa-wand-magic-sparkles"></i> ${getT('nav_smart_booking')}`;
+
+  const btnMandiPrices = document.getElementById('nav-btn-mandi-prices');
+  if (btnMandiPrices) btnMandiPrices.innerHTML = `<i class="fas fa-carrot"></i> ${getT('nav_mandi_prices')}`;
+
+  const btnDisplayBoard = document.getElementById('nav-btn-display-board');
+  if (btnDisplayBoard) btnDisplayBoard.innerHTML = `<i class="fas fa-tv"></i> ${getT('nav_display_board')}`;
+
+  const btnKisanSahayak = document.getElementById('nav-btn-kisan-sahayak');
+  if (btnKisanSahayak) btnKisanSahayak.innerHTML = `<i class="fas fa-circle-question"></i> ${getT('nav_kisan_sahayak')}`;
+
+  // 6. Update auth navigation buttons
+  if (typeof updateNavAuth === 'function') {
+    updateNavAuth();
+  }
+
+  // 7. Live re-render current SPA view seamlessly
+  if (typeof renderRoute === 'function') {
+    renderRoute(window.location.hash || '#landing');
+  }
 };
 
-const getT = (key) => {
-  return (translations[currentLanguage] && translations[currentLanguage][key]) || (translations['en'][key] || key);
-};
+window.setLanguage = setLanguage;
 
 window.addEventListener('DOMContentLoaded', () => {
   const saved = localStorage.getItem('kpms_lang') || 'en';

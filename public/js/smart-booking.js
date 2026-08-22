@@ -65,15 +65,15 @@ const loadSmartBookingPage = async () => {
                 <span class="status-pill completed" style="font-size:0.75rem;"><i class="fas fa-check-circle"></i> Real-Time Centre Feeds</span>
               </div>
               <h1 style="font-size:2.2rem; font-weight:800; color:var(--primary-navy); margin:0;">
-                🌾 Smart Mandi Procurement Finder
+                ${getT('smart_booking_title')}
               </h1>
               <p style="color:var(--text-muted); font-size:0.95rem; margin-top:6px; max-width:750px;">
-                Identifies optimal procurement centres for your harvest by factoring <strong>live destination weather</strong>, travel delay windows, crop perishability sensitivity, live queue wait times, and net economic value.
+                ${getT('smart_booking_subtitle')}
               </p>
             </div>
             <div style="display:flex; gap:10px;">
               <button class="btn btn-outline btn-sm" onclick="routeTo('#book-slot')">
-                <i class="fas fa-list-check"></i> Standard Booking
+                <i class="fas fa-list-check"></i> ${getT('btn_book_slot')}
               </button>
             </div>
           </div>
@@ -123,11 +123,11 @@ const renderSmartBookingForm = () => {
           <div>
             <span style="font-size:0.8rem; font-weight:800; color:var(--saffron); text-transform:uppercase; letter-spacing:0.5px;">Step 1 of 2</span>
             <h2 style="font-size:1.4rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
-              What crop are you bringing? (फसल चुनें)
+              ${getT('step1_crop_heading')}
             </h2>
           </div>
           <span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">
-            <i class="fas fa-hand-pointer"></i> Tap to select
+            <i class="fas fa-hand-pointer"></i> ${getT('tap_to_select')}
           </span>
         </div>
 
@@ -180,7 +180,7 @@ const renderSmartBookingForm = () => {
           <div>
             <span style="font-size:0.8rem; font-weight:800; color:var(--green-gov); text-transform:uppercase; letter-spacing:0.5px;">Step 2 of 2</span>
             <h2 style="font-size:1.4rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
-              How much produce do you want to sell? (मात्रा दर्ज करें)
+              ${getT('step2_qty_heading')}
             </h2>
           </div>
         </div>
@@ -196,12 +196,12 @@ const renderSmartBookingForm = () => {
                 min="1" 
                 max="5000" 
                 value="${smartBookingState.quantity}" 
-                placeholder="Enter quantity"
+                placeholder="100"
                 oninput="onSmartQuantityChange(this.value)"
               />
             </div>
             <div style="background:var(--primary-navy); color:#FFF; padding:14px 22px; border-radius:12px; font-weight:800; font-size:1.1rem; letter-spacing:0.5px;">
-              Quintals (क्विंटल)
+              ${getT('quantity_quintals')}
             </div>
           </div>
 
@@ -228,7 +228,7 @@ const renderSmartBookingForm = () => {
           style="padding:16px 48px; font-size:1.25rem; font-weight:800; border-radius:14px; box-shadow:0 8px 24px rgba(224,109,20,0.35); justify-content:center; width:100%; max-width:480px; margin:0 auto;"
           onclick="handleFindBestOptionClick()"
         >
-          <i class="fas fa-wand-magic-sparkles"></i> Find Best Procurement Option
+          <i class="fas fa-wand-magic-sparkles"></i> ${getT('btn_calculate_recommendation')}
         </button>
         <p style="font-size:0.82rem; color:var(--text-muted); margin-top:10px;">
           <i class="fas fa-shield-halved" style="color:var(--green-gov);"></i> Integrates centre weather feeds, perishability risks, transit delays & live mandi rates automatically.
@@ -465,7 +465,7 @@ const renderScenarioCard = (data, type) => {
       
       <!-- Top Tag Badge -->
       <div style="position:absolute; top:-14px; left:24px; background:${isRec ? 'linear-gradient(135deg, #E06D14, #EA580C)' : 'var(--navy-light)'}; color:#FFF; padding:4px 16px; border-radius:20px; font-weight:800; font-size:0.8rem; letter-spacing:0.5px; box-shadow:${isRec ? '0 4px 12px rgba(224,109,20,0.4)' : 'none'};">
-        ${data.tag || (isRec ? '⭐ RECOMMENDED CENTRE' : '🚜 CLOSER OPTION')}
+        ${isRec ? `⭐ ${getT('recommended_option')}` : `🚜 ${getT('scenario2_name')}`}
       </div>
 
       <!-- Centre Header -->
@@ -490,7 +490,7 @@ const renderScenarioCard = (data, type) => {
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div style="font-size:0.82rem; font-weight:700; color:var(--primary-navy); display:flex; align-items:center; gap:6px;">
             <i class="fas ${weatherClass.icon || 'fa-cloud-sun'}" style="color:${weatherClass.color || 'var(--saffron)'};"></i>
-            Weather near procurement centre: <strong>${weatherClass.label || 'Clear'}</strong>
+            Weather: <strong>${weatherClass.label || 'Clear'}</strong>
           </div>
           <span style="font-size:0.75rem; color:var(--text-muted);">
             ${data.weather ? `${Math.round(data.weather.temp || 28)}°C, ${data.weather.humidity || 55}% Hum` : ''}
@@ -498,7 +498,7 @@ const renderScenarioCard = (data, type) => {
         </div>
         
         <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.85rem; margin-top:4px;">
-          <span style="color:var(--text-muted);"><i class="fas fa-clock"></i> Expected Arrival Window:</span>
+          <span style="color:var(--text-muted);"><i class="fas fa-clock"></i> ${getT('weather_arrival_window')}:</span>
           <strong style="color:var(--primary-navy);">${weatherDelay.arrivalDisplay || '10:00 AM'}</strong>
         </div>
 
@@ -513,28 +513,28 @@ const renderScenarioCard = (data, type) => {
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;">
         
         <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-hourglass-half"></i> Est. Mandi Wait</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-hourglass-half"></i> ${getT('estimated_wait_time')}</div>
           <div style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
             ~${data.waitingDays} day wait
           </div>
         </div>
 
         <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-truck"></i> Transport Cost</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-truck"></i> ${getT('transport_cost')}</div>
           <div style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
             ${data.formattedTransport}
           </div>
         </div>
 
         <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-clock-rotate-left"></i> Delay Economic Cost</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-clock-rotate-left"></i> ${getT('delay_cost')}</div>
           <div style="font-size:1.15rem; font-weight:800; color:#D97706; margin-top:2px;">
             ${data.formattedDelay}
           </div>
         </div>
 
         <div style="background:#ECFDF5; padding:12px 14px; border-radius:10px; border:1px solid #A7F3D0;">
-          <div style="font-size:0.75rem; color:#065F46; font-weight:700;"><i class="fas fa-coins"></i> Estimated Net Return</div>
+          <div style="font-size:0.75rem; color:#065F46; font-weight:700;"><i class="fas fa-coins"></i> ${getT('net_realized_return')}</div>
           <div style="font-size:1.25rem; font-weight:900; color:#047857; margin-top:2px;">
             ${data.formattedNev}
           </div>
@@ -558,7 +558,7 @@ const renderScenarioCard = (data, type) => {
         style="width:100%; justify-content:center; padding:14px; font-size:1.05rem; font-weight:800; border-radius:12px;"
         onclick="selectAndProceedToBooking('${data.centerId}', '${data.crop}', ${data.acceptedQuantity})"
       >
-        <i class="fas fa-check-circle"></i> Choose This Centre
+        <i class="fas fa-check-circle"></i> ${getT('btn_confirm_booking')}
       </button>
 
     </div>
@@ -574,7 +574,7 @@ const renderBreakdownTable = (rec, alt) => {
       <table style="width:100%; border-collapse:collapse; font-size:0.88rem; text-align:left;">
         <thead>
           <tr style="border-bottom:2px solid var(--border-color); color:var(--primary-navy);">
-            <th style="padding:10px 14px;">Calculation Factor</th>
+            <th style="padding:10px 14px;">Factor</th>
             <th style="padding:10px 14px;">⭐ ${rec.shortName}</th>
             ${alt ? `<th style="padding:10px 14px;">🚜 ${alt.shortName}</th>` : ''}
           </tr>
@@ -586,27 +586,27 @@ const renderBreakdownTable = (rec, alt) => {
             ${alt ? `<td style="padding:10px 14px;"><i class="fas ${alt.weatherClassification.icon}"></i> ${alt.weatherClassification.label}</td>` : ''}
           </tr>
           <tr style="border-bottom:1px solid var(--border-color);">
-            <td style="padding:10px 14px; font-weight:600;">Expected Transit Window</td>
+            <td style="padding:10px 14px; font-weight:600;">${getT('weather_arrival_window')}</td>
             <td style="padding:10px 14px;">${rec.weatherDelay.arrivalDisplay}</td>
             ${alt ? `<td style="padding:10px 14px;">${alt.weatherDelay.arrivalDisplay}</td>` : ''}
           </tr>
           <tr style="border-bottom:1px solid var(--border-color);">
-            <td style="padding:10px 14px; font-weight:600;">Gross Produce Value (Q × Price)</td>
+            <td style="padding:10px 14px; font-weight:600;">${getT('gross_msp_value')}</td>
             <td style="padding:10px 14px; font-weight:700;">${rec.formattedRevenue}</td>
             ${alt ? `<td style="padding:10px 14px; font-weight:700;">${alt.formattedRevenue}</td>` : ''}
           </tr>
           <tr style="border-bottom:1px solid var(--border-color);">
-            <td style="padding:10px 14px; font-weight:600;">Transport Logistics Cost (−)</td>
+            <td style="padding:10px 14px; font-weight:600;">${getT('transport_cost')} (−)</td>
             <td style="padding:10px 14px; color:#EF4444;">− ${rec.formattedTransport}</td>
             ${alt ? `<td style="padding:10px 14px; color:#EF4444;">− ${alt.formattedTransport}</td>` : ''}
           </tr>
           <tr style="border-bottom:1px solid var(--border-color);">
-            <td style="padding:10px 14px; font-weight:600;">Yard Delay & Queue Cost (−)</td>
+            <td style="padding:10px 14px; font-weight:600;">${getT('delay_cost')} (−)</td>
             <td style="padding:10px 14px; color:#D97706;">− ${rec.formattedDelay}</td>
             ${alt ? `<td style="padding:10px 14px; color:#D97706;">− ${alt.formattedDelay}</td>` : ''}
           </tr>
           <tr style="border-bottom:2px solid var(--border-color); background:rgba(16,185,129,0.06);">
-            <td style="padding:12px 14px; font-weight:800; color:var(--primary-navy);">Expected Net Economic Value (NEV)</td>
+            <td style="padding:12px 14px; font-weight:800; color:var(--primary-navy);">${getT('net_realized_return')}</td>
             <td style="padding:12px 14px; font-weight:900; color:#047857; font-size:1.1rem;">${rec.formattedNev}</td>
             ${alt ? `<td style="padding:12px 14px; font-weight:900; color:#047857; font-size:1.1rem;">${alt.formattedNev}</td>` : ''}
           </tr>

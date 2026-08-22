@@ -45,11 +45,11 @@ const loadFarmerQueuePage = async () => {
     container.innerHTML = `
       <div class="app-container">
         <aside class="sidebar">
-          <div class="sidebar-heading">Queue Tracking</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> Dashboard</a>
-          <a class="nav-link active" onclick="loadFarmerQueuePage()"><i class="fas fa-users-line"></i> Live Queue Status</a>
-          <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> My Bookings</a>
-          <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> Public TV Display Board</a>
+          <div class="sidebar-heading">${getT('nav_portal')}</div>
+          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard')}</a>
+          <a class="nav-link active" onclick="loadFarmerQueuePage()"><i class="fas fa-users-line"></i> ${getT('queue_tracker_title')}</a>
+          <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> ${getT('status_booked')}</a>
+          <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> ${getT('nav_display_board')}</a>
         </aside>
 
         <main class="main-content">
@@ -57,10 +57,10 @@ const loadFarmerQueuePage = async () => {
             <!-- Header -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
               <div>
-                <h2 style="color:var(--primary-navy); font-weight:800;">Real-Time Mandi Queue Monitor</h2>
+                <h2 style="color:var(--primary-navy); font-weight:800;">${getT('queue_tracker_title')}</h2>
                 <p style="color:var(--text-muted); font-size:0.9rem;">Auto-updates continuously via Socket.IO stream.</p>
               </div>
-              <button class="btn btn-outline" onclick="loadFarmerQueuePage()"><i class="fas fa-rotate"></i> Refresh Now</button>
+              <button class="btn btn-outline" onclick="loadFarmerQueuePage()"><i class="fas fa-rotate"></i> Refresh</button>
             </div>
 
             <!-- Big Live Token Showcase Card -->
@@ -69,7 +69,7 @@ const loadFarmerQueuePage = async () => {
                 <i class="fas fa-circle-notch fa-spin"></i> Status: ${queue.status.toUpperCase()}
               </span>
 
-              <div style="color:var(--text-muted); font-size:0.95rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:8px;">Your Queue Token</div>
+              <div style="color:var(--text-muted); font-size:0.95rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:8px;">${getT('token_number')}</div>
               <div class="queue-token-badge animate-saffron-pulse">${queue.tokenNumber}</div>
 
               <div style="font-size:1.3rem; font-weight:700; color:var(--primary-navy); margin-top:8px;">
@@ -87,11 +87,11 @@ const loadFarmerQueuePage = async () => {
             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:24px;">
               <div class="glass-card" style="padding:20px; text-align:center;">
                 <div style="font-size:2rem; font-weight:800; color:var(--primary-navy);">${farmersAhead}</div>
-                <div style="color:var(--text-muted); font-size:0.85rem; font-weight:600;">Farmers Ahead of You</div>
+                <div style="color:var(--text-muted); font-size:0.85rem; font-weight:600;">${getT('farmers_ahead')}</div>
               </div>
               <div class="glass-card" style="padding:20px; text-align:center;">
                 <div style="font-size:2rem; font-weight:800; color:var(--saffron);">${estimatedWaitMinutes} Mins</div>
-                <div style="color:var(--text-muted); font-size:0.85rem; font-weight:600;">Estimated Wait Time</div>
+                <div style="color:var(--text-muted); font-size:0.85rem; font-weight:600;">${getT('estimated_wait_time')}</div>
               </div>
               <div class="glass-card" style="padding:20px; text-align:center;">
                 <div style="font-size:2rem; font-weight:800; color:var(--green-gov);">${currentlyServingToken}</div>

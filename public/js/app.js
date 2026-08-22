@@ -45,31 +45,31 @@ const toggleTheme = () => {
 const openLoginModal = () => {
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
-  document.getElementById('modal-title').textContent = 'Sign In to KPMS Portal';
+  document.getElementById('modal-title').textContent = getT('login_title');
 
   body.innerHTML = `
     <div>
       <form onsubmit="handleLoginForm(event)">
         <div class="form-group">
-          <label class="form-label"><i class="fas fa-user"></i> Registered Mobile Number or Email *</label>
+          <label class="form-label"><i class="fas fa-user"></i> ${getT('login_identifier')}</label>
           <input type="text" name="identifier" class="form-control" placeholder="e.g. 9876543210 or ramesh@farmer.in" required autocomplete="username" />
         </div>
         <div class="form-group">
-          <label class="form-label"><i class="fas fa-lock"></i> Password *</label>
+          <label class="form-label"><i class="fas fa-lock"></i> ${getT('login_password')}</label>
           <input type="password" name="password" class="form-control" placeholder="Enter your portal password" required autocomplete="current-password" />
         </div>
         <div class="form-group">
-          <label class="form-label"><i class="fas fa-shield"></i> Portal Role (Optional)</label>
+          <label class="form-label"><i class="fas fa-shield"></i> ${getT('login_role')}</label>
           <select name="role" class="form-control">
-            <option value="farmer">Farmer Portal</option>
-            <option value="officer">Procurement Officer Portal</option>
-            <option value="admin">Super Admin / Government Control</option>
+            <option value="farmer">${getT('btn_farmer_login')}</option>
+            <option value="officer">${getT('btn_officer_login')}</option>
+            <option value="admin">${getT('btn_admin_login')}</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;"><i class="fas fa-right-to-bracket"></i> Login to Portal</button>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;"><i class="fas fa-right-to-bracket"></i> ${getT('login_btn')}</button>
       </form>
       <div style="text-align:center; margin-top:16px; font-size:0.88rem;">
-        New farmer? <a onclick="closeModal(); openRegisterModal();" style="color:var(--saffron); cursor:pointer; font-weight:700;">Register Here (5-Step KYC)</a>
+        <a onclick="closeModal(); openRegisterModal();" style="color:var(--saffron); cursor:pointer; font-weight:700;">${getT('login_new_farmer')}</a>
       </div>
     </div>
   `;
@@ -79,18 +79,18 @@ const openLoginModal = () => {
 const openRegisterModal = () => {
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
-  document.getElementById('modal-title').textContent = 'New Farmer 5-Step KYC Registration';
+  document.getElementById('modal-title').textContent = getT('register_title');
   regCurrentStep = 1;
 
   body.innerHTML = `
     <div>
       <!-- Step Indicators -->
       <div class="wizard-steps">
-        <div class="step-item active"><div class="step-circle">1</div><div class="step-title">Personal</div></div>
-        <div class="step-item"><div class="step-circle">2</div><div class="step-title">Location</div></div>
-        <div class="step-item"><div class="step-circle">3</div><div class="step-title">Bank</div></div>
-        <div class="step-item"><div class="step-circle">4</div><div class="step-title">Land & Crop</div></div>
-        <div class="step-item"><div class="step-circle">5</div><div class="step-title">Docs</div></div>
+        <div class="step-item active"><div class="step-circle">1</div><div class="step-title">${getT('reg_step1')}</div></div>
+        <div class="step-item"><div class="step-circle">2</div><div class="step-title">${getT('reg_step2')}</div></div>
+        <div class="step-item"><div class="step-circle">3</div><div class="step-title">${getT('reg_step3')}</div></div>
+        <div class="step-item"><div class="step-circle">4</div><div class="step-title">${getT('reg_step4')}</div></div>
+        <div class="step-item"><div class="step-circle">5</div><div class="step-title">${getT('reg_step5')}</div></div>
       </div>
 
       <!-- Step 1: Personal -->
@@ -104,7 +104,7 @@ const openRegisterModal = () => {
           <div class="form-group"><label class="form-label">Password *</label><input type="password" name="password" class="form-control" value="Farmer@123" required /></div>
           <div class="form-group"><label class="form-label">Gender</label><select name="gender" class="form-control"><option value="Male">Male</option><option value="Female">Female</option></select></div>
         </div>
-        <div style="text-align:right; margin-top:12px;"><button type="button" class="btn btn-primary" onclick="nextRegStep(2)">Next: Location & Aadhaar <i class="fas fa-arrow-right"></i></button></div>
+        <div style="text-align:right; margin-top:12px;"><button type="button" class="btn btn-primary" onclick="nextRegStep(2)">${getT('btn_next_step')} <i class="fas fa-arrow-right"></i></button></div>
       </div>
 
       <!-- Step 2: Location -->
@@ -187,13 +187,13 @@ const updateNavAuth = () => {
   if (user) {
     navContainer.innerHTML = `
       <span style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);"><i class="fas fa-user-circle"></i> ${user.name} (${user.role.toUpperCase()})</span>
-      <button class="btn btn-outline btn-sm" onclick="routeTo('${user.role === 'farmer' ? '#farmer-dashboard' : (user.role === 'officer' ? '#officer-dashboard' : '#admin-dashboard')}')"><i class="fas fa-gauge"></i> Portal</button>
-      <button class="btn btn-outline btn-sm" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+      <button class="btn btn-outline btn-sm" onclick="routeTo('${user.role === 'farmer' ? '#farmer-dashboard' : (user.role === 'officer' ? '#officer-dashboard' : '#admin-dashboard')}')"><i class="fas fa-gauge"></i> ${getT('nav_portal')}</button>
+      <button class="btn btn-outline btn-sm" style="color:#EF4444;" onclick="logout()" title="${getT('nav_logout')}"><i class="fas fa-sign-out-alt"></i></button>
     `;
   } else {
     navContainer.innerHTML = `
-      <button class="btn btn-outline btn-sm" onclick="openLoginModal()"><i class="fas fa-right-to-bracket"></i> Login</button>
-      <button class="btn btn-primary btn-sm" onclick="openRegisterModal()"><i class="fas fa-user-plus"></i> Register</button>
+      <button class="btn btn-outline btn-sm" onclick="openLoginModal()"><i class="fas fa-right-to-bracket"></i> ${getT('nav_login')}</button>
+      <button class="btn btn-primary btn-sm" onclick="openRegisterModal()"><i class="fas fa-user-plus"></i> ${getT('nav_register')}</button>
     `;
   }
 };
@@ -243,18 +243,18 @@ const renderLandingPage = () => {
     <!-- Hero Section -->
     <section class="hero-section">
       <div>
-        <div class="hero-pill"><i class="fas fa-shield-halved"></i> Smart India Hackathon Production Edition</div>
+        <div class="hero-pill"><i class="fas fa-shield-halved"></i> ${getT('hero_pill')}</div>
         <h1 class="hero-heading">
-          Digitizing India's Mandis with <span class="gradient-text">Smart Slots & Direct DBT</span>
+          ${getT('hero_heading')}
         </h1>
         <p class="hero-desc">
-          Kisan Procurement Management System (KPMS) eliminates long mandi queues by empowering farmers to pre-book verified procurement slots, track real-time queue tokens, ensure transparent weighbridge measurements, and receive instant direct bank transfer (DBT) MSP disbursements.
+          ${getT('hero_desc')}
         </p>
         <div style="display:flex; gap:14px; flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> 🌾 Smart Mandi Finder</button>
-          <button class="btn btn-navy" onclick="openLoginModal()"><i class="fas fa-calendar-plus"></i> Standard Slot Booking</button>
-          <button class="btn btn-outline" onclick="startJudgeGuidedTour()"><i class="fas fa-play"></i> SIH Guided Tour</button>
-          <button class="btn btn-outline" onclick="openKisanAIChat()"><i class="fas fa-robot"></i> Kisan Sahayak AI</button>
+          <button class="btn btn-primary" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> ${getT('btn_smart_mandi_finder')}</button>
+          <button class="btn btn-navy" onclick="openLoginModal()"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot')}</button>
+          <button class="btn btn-outline" onclick="startJudgeGuidedTour()"><i class="fas fa-play"></i> ${getT('btn_guided_tour')}</button>
+          <button class="btn btn-outline" onclick="openKisanAIChat()"><i class="fas fa-robot"></i> ${getT('nav_kisan_sahayak')}</button>
         </div>
       </div>
       <div>
@@ -274,11 +274,11 @@ const renderLandingPage = () => {
             </div>
             <div style="background:var(--bg-main); padding:12px; border-radius:8px; display:flex; justify-content:space-between;">
               <span>Current MSP Wheat Rate:</span>
-              <strong>₹2,275 / Quintal</strong>
+              <strong>₹2,425 / Quintal</strong>
             </div>
           </div>
           <button class="btn btn-navy" style="width:100%; margin-top:20px; justify-content:center;" onclick="routeTo('#tv-display')">
-            <i class="fas fa-tv"></i> Launch Fullscreen Mandi TV Display
+            <i class="fas fa-tv"></i> ${getT('nav_display_board')}
           </button>
         </div>
       </div>
@@ -288,55 +288,55 @@ const renderLandingPage = () => {
     <div class="hero-stats-banner">
       <div class="glass-card stat-kpi-card">
         <div class="stat-kpi-number" id="landing-stat-farmers">12,480+</div>
-        <div class="stat-kpi-label">Registered Farmers</div>
+        <div class="stat-kpi-label">${getT('stat_farmers')}</div>
       </div>
       <div class="glass-card stat-kpi-card" style="border-left-color:var(--green-gov);">
         <div class="stat-kpi-number" id="landing-stat-centers">48</div>
-        <div class="stat-kpi-label">Active Mandi Centers</div>
+        <div class="stat-kpi-label">${getT('stat_centers')}</div>
       </div>
       <div class="glass-card stat-kpi-card" style="border-left-color:var(--navy-light);">
         <div class="stat-kpi-number" id="landing-stat-procured">4,82,000 Q</div>
-        <div class="stat-kpi-label">Quintals Procured</div>
+        <div class="stat-kpi-label">${getT('stat_procured')}</div>
       </div>
       <div class="glass-card stat-kpi-card" style="border-left-color:var(--gold);">
         <div class="stat-kpi-number" id="landing-stat-dbt">₹109.5 Cr</div>
-        <div class="stat-kpi-label">Disbursed via DBT</div>
+        <div class="stat-kpi-label">${getT('stat_dbt')}</div>
       </div>
     </div>
 
     <!-- How It Works Section -->
     <section style="max-width:1300px; margin:40px auto 60px; padding:0 24px;">
       <div style="text-align:center; margin-bottom:40px;">
-        <span class="hero-pill"><i class="fas fa-arrow-down-short-wide"></i> Step-by-Step Workflow</span>
-        <h2 style="font-size:2.4rem; font-weight:800; color:var(--primary-navy);">How Kisan Procurement Works</h2>
+        <span class="hero-pill"><i class="fas fa-arrow-down-short-wide"></i> ${getT('how_it_works')}</span>
+        <h2 style="font-size:2.4rem; font-weight:800; color:var(--primary-navy);">${getT('how_it_works')}</h2>
         <p style="color:var(--text-muted); max-width:600px; margin:0 auto;">From advance slot reservation to direct bank account payment in 5 simple steps.</p>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px;">
         <div class="glass-card" style="padding:24px; text-align:center;">
           <div style="width:50px; height:50px; border-radius:50%; background:#EFF6FF; color:#2563EB; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:1.3rem;">1</div>
-          <h4 style="color:var(--primary-navy); margin-bottom:8px;">1. Online Registration</h4>
-          <p style="color:var(--text-muted); font-size:0.85rem;">Simple Aadhaar & Bank linked registration with automatic Farmer ID generation.</p>
+          <h4 style="color:var(--primary-navy); margin-bottom:8px;">${getT('step1_title')}</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem;">${getT('step1_desc')}</p>
         </div>
         <div class="glass-card" style="padding:24px; text-align:center;">
           <div style="width:50px; height:50px; border-radius:50%; background:#FFFBEB; color:#D97706; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:1.3rem;">2</div>
-          <h4 style="color:var(--primary-navy); margin-bottom:8px;">2. Smart Slot Booking</h4>
-          <p style="color:var(--text-muted); font-size:0.85rem;">Select Mandi, crop commodity, and pick a guaranteed time slot. Download QR pass.</p>
+          <h4 style="color:var(--primary-navy); margin-bottom:8px;">${getT('step2_title')}</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem;">${getT('step2_desc')}</p>
         </div>
         <div class="glass-card" style="padding:24px; text-align:center;">
           <div style="width:50px; height:50px; border-radius:50%; background:#FAF5FF; color:#9333EA; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:1.3rem;">3</div>
-          <h4 style="color:var(--primary-navy); margin-bottom:8px;">3. Gate QR Check-in</h4>
-          <p style="color:var(--text-muted); font-size:0.85rem;">Scan pass at gate to get digital queue token and assigned counter number.</p>
+          <h4 style="color:var(--primary-navy); margin-bottom:8px;">${getT('step3_title')}</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem;">${getT('step3_desc')}</p>
         </div>
         <div class="glass-card" style="padding:24px; text-align:center;">
           <div style="width:50px; height:50px; border-radius:50%; background:#ECFDF5; color:#059669; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:1.3rem;">4</div>
-          <h4 style="color:var(--primary-navy); margin-bottom:8px;">4. Transparent Weighing</h4>
-          <p style="color:var(--text-muted); font-size:0.85rem;">Moisture testing & digital weighbridge scale measurement with instant voucher.</p>
+          <h4 style="color:var(--primary-navy); margin-bottom:8px;">${getT('step4_title')}</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem;">${getT('step4_desc')}</p>
         </div>
         <div class="glass-card" style="padding:24px; text-align:center;">
           <div style="width:50px; height:50px; border-radius:50%; background:#F0FDF4; color:#15803D; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:1.3rem;">5</div>
-          <h4 style="color:var(--primary-navy); margin-bottom:8px;">5. Direct DBT Transfer</h4>
-          <p style="color:var(--text-muted); font-size:0.85rem;">MSP payment credited straight into bank account with live UTR tracker.</p>
+          <h4 style="color:var(--primary-navy); margin-bottom:8px;">${getT('step5_title')}</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem;">${getT('step5_desc')}</p>
         </div>
       </div>
     </section>
@@ -356,10 +356,10 @@ const renderLandingPage = () => {
         <div>
           <h5 style="color:#FFF; font-size:0.95rem; margin-bottom:12px;">Quick Portals</h5>
           <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
-            <a onclick="demoLogin('farmer')" style="color:#CBD5E1; cursor:pointer;">Farmer Portal</a>
-            <a onclick="demoLogin('officer')" style="color:#CBD5E1; cursor:pointer;">Mandi Officer Console</a>
-            <a onclick="demoLogin('admin')" style="color:#CBD5E1; cursor:pointer;">Government Control Center</a>
-            <a onclick="routeTo('#tv-display')" style="color:#CBD5E1; cursor:pointer;">Public TV Display Board</a>
+            <a onclick="routeTo('#farmer-dashboard')" style="color:#CBD5E1; cursor:pointer;">${getT('btn_farmer_login')}</a>
+            <a onclick="routeTo('#officer-dashboard')" style="color:#CBD5E1; cursor:pointer;">${getT('btn_officer_login')}</a>
+            <a onclick="routeTo('#admin-dashboard')" style="color:#CBD5E1; cursor:pointer;">${getT('btn_admin_login')}</a>
+            <a onclick="routeTo('#tv-display')" style="color:#CBD5E1; cursor:pointer;">${getT('nav_display_board')}</a>
           </div>
         </div>
         <div>

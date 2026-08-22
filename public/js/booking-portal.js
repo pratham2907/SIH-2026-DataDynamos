@@ -47,12 +47,12 @@ const loadBookingPortal = async () => {
     container.innerHTML = `
       <div class="app-container">
         <aside class="sidebar">
-          <div class="sidebar-heading">Slot Booking</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> Smart Mandi Finder</a>
-          <a class="nav-link active" onclick="loadBookingPortal()"><i class="fas fa-calendar-plus"></i> New Reservation</a>
-          <a class="nav-link" onclick="loadMyBookings()"><i class="fas fa-ticket-alt"></i> My Active Bookings</a>
-          <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> Live Queue</a>
+          <div class="sidebar-heading">${getT('nav_portal')}</div>
+          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard')}</a>
+          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> ${getT('btn_smart_mandi_finder')}</a>
+          <a class="nav-link active" onclick="loadBookingPortal()"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot')}</a>
+          <a class="nav-link" onclick="loadMyBookings()"><i class="fas fa-ticket-alt"></i> ${getT('status_booked')}</a>
+          <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('queue_tracker_title')}</a>
         </aside>
 
         <main class="main-content">
@@ -72,9 +72,9 @@ const loadBookingPortal = async () => {
 
             <div style="text-align:center; margin-bottom:24px;">
               <span class="hero-pill"><i class="fas fa-bolt"></i> Smart AI Slot Allocation Engine</span>
-              <h2 style="font-size:2rem; font-weight:800; color:var(--primary-navy);">Reserve Mandi Procurement Slot</h2>
+              <h2 style="font-size:2rem; font-weight:800; color:var(--primary-navy);">${getT('reserve_slot_title')}</h2>
               <p style="color:var(--text-muted); font-size:0.92rem;">
-                Select your preferred Mandi centre, crop quantity, and pick a guaranteed time slot to avoid physical queues.
+                ${getT('reserve_slot_sub')}
               </p>
             </div>
 
@@ -82,16 +82,16 @@ const loadBookingPortal = async () => {
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                 <!-- Center Selection -->
                 <div class="form-group">
-                  <label class="form-label"><i class="fas fa-building"></i> Select Procurement Center (Mandi) *</label>
+                  <label class="form-label"><i class="fas fa-building"></i> ${getT('select_mandi_centre')}</label>
                   <select id="booking-center-select" class="form-control" onchange="onBookingCenterOrDateChange()" required>
-                    <option value="">-- Choose Mandi Centre --</option>
+                    <option value="">${getT('choose_mandi_default')}</option>
                     ${centerOptionsHtml}
                   </select>
                 </div>
 
                 <!-- Date Picker -->
                 <div class="form-group">
-                  <label class="form-label"><i class="fas fa-calendar-day"></i> Preferred Procurement Date *</label>
+                  <label class="form-label"><i class="fas fa-calendar-day"></i> ${getT('procurement_date')}</label>
                   <input type="date" id="booking-date-input" class="form-control" min="${today}" value="${today}" onchange="onBookingCenterOrDateChange()" required />
                 </div>
               </div>
@@ -99,7 +99,7 @@ const loadBookingPortal = async () => {
               <div style="display:grid; grid-template-columns:1.2fr 0.8fr 1fr; gap:16px;">
                 <!-- Crop Selection -->
                 <div class="form-group">
-                  <label class="form-label"><i class="fas fa-wheat-awn"></i> Crop Commodity *</label>
+                  <label class="form-label"><i class="fas fa-wheat-awn"></i> ${getT('crop_commodity')}</label>
                   <select id="booking-crop-select" class="form-control" onchange="updateBookingPerishabilityBadge(this.value)" required>
                     <option value="Wheat (Sharbati)" ${prefill && prefill.crop && prefill.crop.includes('Wheat') ? 'selected' : ''}>Wheat (Sharbati) — MSP ₹2,425/Q [🟢 LOW PERISHABILITY]</option>
                     <option value="Paddy (Common)" ${prefill && prefill.crop && prefill.crop.includes('Paddy') ? 'selected' : ''}>Paddy (Common) — MSP ₹2,369/Q [🟠 MEDIUM PERISHABILITY]</option>
@@ -118,13 +118,13 @@ const loadBookingPortal = async () => {
 
                 <!-- Quantity -->
                 <div class="form-group">
-                  <label class="form-label"><i class="fas fa-weight-scale"></i> Quantity (Quintals) *</label>
+                  <label class="form-label"><i class="fas fa-weight-scale"></i> ${getT('quantity_quintals')} *</label>
                   <input type="number" id="booking-quantity-input" class="form-control" min="1" max="5000" value="${prefill ? prefill.quantity : 45}" required />
                 </div>
 
                 <!-- Vehicle Number -->
                 <div class="form-group">
-                  <label class="form-label"><i class="fas fa-truck"></i> Vehicle / Tractor No.</label>
+                  <label class="form-label"><i class="fas fa-truck"></i> ${getT('vehicle_number')}</label>
                   <input type="text" id="booking-vehicle-input" class="form-control" placeholder="e.g. MP-04-HE-1234" />
                 </div>
               </div>
@@ -132,7 +132,7 @@ const loadBookingPortal = async () => {
               <!-- Live Slots Availability Grid -->
               <div style="margin:20px 0;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                  <label class="form-label" style="margin:0;"><i class="fas fa-clock"></i> Select Available Time Slot *</label>
+                  <label class="form-label" style="margin:0;"><i class="fas fa-clock"></i> ${getT('available_slots')} *</label>
                   <span id="capacity-meter-tag" style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Loading slots...</span>
                 </div>
                 <div id="slots-grid-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px;">
@@ -142,13 +142,13 @@ const loadBookingPortal = async () => {
 
               <!-- Remarks -->
               <div class="form-group">
-                <label class="form-label"><i class="fas fa-comment-dots"></i> Special Remarks / Notes (Optional)</label>
+                <label class="form-label"><i class="fas fa-comment-dots"></i> ${getT('additional_remarks')}</label>
                 <input type="text" id="booking-remarks-input" class="form-control" placeholder="e.g. Pre-cleaned grain, moisture tested below 11%" />
               </div>
 
               <div style="margin-top:24px; text-align:center;">
                 <button type="submit" class="btn btn-primary" style="padding:12px 32px; font-size:1.05rem; justify-content:center;">
-                  <i class="fas fa-check-circle"></i> Confirm & Generate QR Booking Pass
+                  <i class="fas fa-check-circle"></i> ${getT('btn_confirm_booking')}
                 </button>
               </div>
             </form>
