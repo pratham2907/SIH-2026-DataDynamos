@@ -2,17 +2,34 @@ const {
   Farmers, Farms, Crops, Bookings, Queues, Payments, Notifications, generateId
 } = require('../models/dbStore');
 
+const getFarmerRecord = async (user) => {
+  if (!user) return null;
+  let farmer = await Farmers.findById(user.id);
+  if (!farmer) {
+    farmer = await Farmers.findOne({
+      $or: [
+        { _id: user.id },
+        { userId: user.id },
+        { farmerId: user.farmerId || user.id },
+        { email: user.email },
+        { mobile: user.mobile }
+      ]
+    });
+  }
+  return farmer;
+};
+
 /**
  * Get Farmer Dashboard Overview
  */
 const getDashboardSummary = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const farmer = await Farmers.findById(userId);
+    const farmer = await getFarmerRecord(req.user);
     if (!farmer) {
       return res.status(404).json({ success: false, message: 'Farmer profile not found' });
     }
 
+    const userId = req.user.id;
     const farmerId = farmer.farmerId;
     const today = new Date().toISOString().split('T')[0];
 
@@ -70,7 +87,8 @@ const getDashboardSummary = async (req, res) => {
  */
 const getProfile = async (req, res) => {
   try {
-    const farmer = await Farmers.findById(req.user.id);
+    const farmer = await getFarmerRecord(req.user);
+    if (!farmer) return res.status(404).json({ success: false, message: 'Farmer not found' });
     return res.json({ success: true, data: farmer });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -79,7 +97,9 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const updated = await Farmers.findByIdAndUpdate(req.user.id, { $set: req.body });
+    const farmer = await getFarmerRecord(req.user);
+    if (!farmer) return res.status(404).json({ success: false, message: 'Farmer not found' });
+    const updated = await Farmers.findByIdAndUpdate(farmer._id || farmer.id, { $set: req.body });
     return res.json({ success: true, message: 'Profile updated successfully', data: updated });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -96,7 +116,9 @@ const uploadDocument = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    const farmer = await Farmers.findById(req.user.id);
+    const farmer = await getFarmerRecord(req.user);
+    if (!farmer) return res.status(404).json({ success: false, message: 'Farmer not found' });
+
     const newDoc = {
       id: generateId('doc_'),
       docType: docType || 'Supporting Document',
@@ -108,7 +130,7 @@ const uploadDocument = async (req, res) => {
 
     const docs = farmer.documents || [];
     docs.push(newDoc);
-    await Farmers.findByIdAndUpdate(req.user.id, { documents: docs });
+    await Farmers.findByIdAndUpdate(farmer._id || farmer.id, { documents: docs });
 
     return res.json({ success: true, message: 'Document uploaded successfully', document: newDoc });
   } catch (err) {
@@ -119,9 +141,10 @@ const uploadDocument = async (req, res) => {
 const deleteDocument = async (req, res) => {
   try {
     const { docId } = req.params;
-    const farmer = await Farmers.findById(req.user.id);
+    const farmer = await getFarmerRecord(req.user);
+    if (!farmer) return res.status(404).json({ success: false, message: 'Farmer not found' });
     const docs = (farmer.documents || []).filter(d => d.id !== docId && d._id !== docId);
-    await Farmers.findByIdAndUpdate(req.user.id, { documents: docs });
+    await Farmers.findByIdAndUpdate(farmer._id || farmer.id, { documents: docs });
     return res.json({ success: true, message: 'Document deleted' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -133,8 +156,25 @@ const deleteDocument = async (req, res) => {
  */
 const getFarms = async (req, res) => {
   try {
-    const farmer = await Farmers.findById(req.user.id);
-    const farms = await Farms.find({ farmerId: farmer.farmerId });
+    const farmer = await getFarmerRecord(req.user);
+    const farmerId = farmer ? farmer.farmerId : 'FARM000001';
+    let farms = await Farms.find({ farmerId });
+
+    // Seed default farm if empty for demo farmer
+    if (farms.length === 0 && farmer) {
+      const defaultFarm = await Farms.create({
+        farmerId: farmer.farmerId,
+        farmName: `${farmer.fullName || 'Ramesh'}'s Main Acre`,
+        surveyNumber: 'SRV-894/2',
+        area: farmer.totalLandArea || 5.0,
+        village: farmer.village || 'Ratibad',
+        crop: farmer.primaryCrop || 'Wheat (Sharbati)',
+        estimatedQuantity: farmer.estimatedQuantity || 50,
+        procurementCenter: farmer.preferredCenterId || 'CTR-01'
+      });
+      farms = [defaultFarm];
+    }
+
     return res.json({ success: true, data: farms });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -143,9 +183,9 @@ const getFarms = async (req, res) => {
 
 const addFarm = async (req, res) => {
   try {
-    const farmer = await Farmers.findById(req.user.id);
+    const farmer = await getFarmerRecord(req.user);
     const farm = await Farms.create({
-      farmerId: farmer.farmerId,
+      farmerId: farmer ? farmer.farmerId : 'FARM000001',
       ...req.body
     });
     return res.status(201).json({ success: true, message: 'Farm added successfully', data: farm });
@@ -177,8 +217,24 @@ const deleteFarm = async (req, res) => {
  */
 const getCrops = async (req, res) => {
   try {
-    const farmer = await Farmers.findById(req.user.id);
-    const crops = await Crops.find({ farmerId: farmer.farmerId });
+    const farmer = await getFarmerRecord(req.user);
+    const farmerId = farmer ? farmer.farmerId : 'FARM000001';
+    let crops = await Crops.find({ farmerId });
+
+    // Seed default crops if empty
+    if (crops.length === 0 && farmer) {
+      const defaultCrop = await Crops.create({
+        farmerId: farmer.farmerId,
+        cropName: farmer.primaryCrop || 'Wheat (Sharbati)',
+        season: 'Rabi 2025-26',
+        quantity: farmer.estimatedQuantity || 50,
+        expectedHarvestDate: '2026-08-25',
+        supportPrice: 2275,
+        status: 'Active'
+      });
+      crops = [defaultCrop];
+    }
+
     return res.json({ success: true, data: crops });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -187,9 +243,10 @@ const getCrops = async (req, res) => {
 
 const addCrop = async (req, res) => {
   try {
-    const farmer = await Farmers.findById(req.user.id);
+    const farmer = await getFarmerRecord(req.user);
     const crop = await Crops.create({
-      farmerId: farmer.farmerId,
+      farmerId: farmer ? farmer.farmerId : 'FARM000001',
+      status: 'Active',
       ...req.body
     });
     return res.status(201).json({ success: true, message: 'Crop registered successfully', data: crop });
