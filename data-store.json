@@ -131,6 +131,28 @@
       "password": "$2a$10$xzkiuIQPMQnxIjUXEELPS.eKjGNgCjFiicfbwnloDv43azKWo.p7e",
       "role": "farmer",
       "isVerified": true
+    },
+    {
+      "_id": "usr_f_mt4b395g5jvqd",
+      "createdAt": "2026-08-22T11:39:50.236Z",
+      "updatedAt": "2026-08-22T11:39:50.236Z",
+      "name": "Ram soni",
+      "email": "upadhyayhem0@gmail.com",
+      "mobile": "9823456787",
+      "password": "$2a$10$5FCM4HOkj5.xqpgQr4qb8Or70nPkZnnkq6zqZlwgSUSZeg3Fp8QgS",
+      "role": "farmer",
+      "isVerified": false
+    },
+    {
+      "_id": "usr_f_mt4btd0l2hs1x",
+      "createdAt": "2026-08-22T12:00:08.314Z",
+      "updatedAt": "2026-08-22T12:00:36.986Z",
+      "name": "drashti vaghela",
+      "email": "drashtiv26@gmail.com",
+      "mobile": "9327367559",
+      "password": "$2a$10$scLnZRRfVDyb/w3tyjxa5eGPBojzcIqpugJX.MMs/BLkpt.8N2AiS",
+      "role": "farmer",
+      "isVerified": true
     }
   ],
   "farmers": [
@@ -449,6 +471,76 @@
       "mobile": "1565465234",
       "email": "ayushlamba02062008@gmail.com",
       "aadhaarNumber": "482910482978",
+      "state": "Madhya Pradesh",
+      "district": "Bhopal",
+      "taluka": "",
+      "village": "Ratibad",
+      "address": "House 8, Kisan Mohalla, Ratibad",
+      "pinCode": "462044",
+      "bankName": "State Bank of India",
+      "branch": "Bhopal Main",
+      "ifscCode": "SBIN0001234",
+      "accountNumber": "39482910482",
+      "accountHolderName": "Ramdas Solanki",
+      "totalLandArea": 7.5,
+      "landOwnershipType": "Owned",
+      "primaryCrop": "Wheat (Sharbati)",
+      "estimatedQuantity": 55,
+      "preferredCenterId": "CTR-01",
+      "documents": [],
+      "isVerified": true,
+      "verificationStatus": "Approved",
+      "isPriorityCategory": false,
+      "priorityReason": ""
+    },
+    {
+      "_id": "usr_f_mt4b395g5jvqd",
+      "createdAt": "2026-08-22T11:39:50.243Z",
+      "updatedAt": "2026-08-22T11:39:50.243Z",
+      "userId": "usr_f_mt4b395g5jvqd",
+      "farmerId": "FARM000009",
+      "fullName": "Ram soni",
+      "fatherName": "Gokul Soni",
+      "dob": "",
+      "gender": "Male",
+      "mobile": "9823456787",
+      "email": "upadhyayhem0@gmail.com",
+      "aadhaarNumber": "482910482974",
+      "state": "Madhya Pradesh",
+      "district": "Bhopal",
+      "taluka": "",
+      "village": "Ratibad",
+      "address": "House 8, Kisan Mohalla, Ratibad",
+      "pinCode": "462044",
+      "bankName": "State Bank of India",
+      "branch": "Bhopal Main",
+      "ifscCode": "SBIN0001234",
+      "accountNumber": "39482910482",
+      "accountHolderName": "Ramdas Solanki",
+      "totalLandArea": 7.5,
+      "landOwnershipType": "Owned",
+      "primaryCrop": "Wheat (Sharbati)",
+      "estimatedQuantity": 55,
+      "preferredCenterId": "CTR-01",
+      "documents": [],
+      "isVerified": false,
+      "verificationStatus": "Pending",
+      "isPriorityCategory": false,
+      "priorityReason": ""
+    },
+    {
+      "_id": "usr_f_mt4btd0l2hs1x",
+      "createdAt": "2026-08-22T12:00:08.320Z",
+      "updatedAt": "2026-08-22T12:00:36.989Z",
+      "userId": "usr_f_mt4btd0l2hs1x",
+      "farmerId": "FARM000010",
+      "fullName": "drashti vaghela",
+      "fatherName": "Gaurang Vaghela",
+      "dob": "",
+      "gender": "Female",
+      "mobile": "9327367559",
+      "email": "drashtiv26@gmail.com",
+      "aadhaarNumber": "482910482456",
       "state": "Madhya Pradesh",
       "district": "Bhopal",
       "taluka": "",
@@ -927,6 +1019,118 @@
         {
           "stage": "Confirmed",
           "timestamp": "2026-08-22T11:03:13.278Z",
+          "done": true
+        },
+        {
+          "stage": "Checked In",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Quality Inspection",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Weight Verification",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Procurement Complete",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Payment Completed",
+          "timestamp": null,
+          "done": false
+        }
+      ]
+    },
+    {
+      "_id": "bkg_mt4bvcq5w33dw",
+      "createdAt": "2026-08-22T12:01:41.208Z",
+      "updatedAt": "2026-08-22T12:01:41.208Z",
+      "bookingNumber": "BKG-2026-0106",
+      "farmerId": "FARM000010",
+      "userId": "usr_f_mt4btd0l2hs1x",
+      "farmerName": "drashti vaghela",
+      "centerId": "CTR-01",
+      "centerName": "APMC Central Mandi Bhopal",
+      "cropName": "Wheat (Sharbati)",
+      "quantity": 45,
+      "date": "2026-08-28",
+      "timeSlot": "08:00 AM - 08:30 AM",
+      "vehicleNumber": "MP-04-HE-1423",
+      "remarks": "",
+      "status": "Confirmed",
+      "qrCodeDataUrl": "data:image/png;base64,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",
+      "timeline": [
+        {
+          "stage": "Booked",
+          "timestamp": "2026-08-22T12:01:41.208Z",
+          "done": true
+        },
+        {
+          "stage": "Confirmed",
+          "timestamp": "2026-08-22T12:01:41.208Z",
+          "done": true
+        },
+        {
+          "stage": "Checked In",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Quality Inspection",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Weight Verification",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Procurement Complete",
+          "timestamp": null,
+          "done": false
+        },
+        {
+          "stage": "Payment Completed",
+          "timestamp": null,
+          "done": false
+        }
+      ]
+    },
+    {
+      "_id": "bkg_mt4bwezd6sssx",
+      "createdAt": "2026-08-22T12:02:30.759Z",
+      "updatedAt": "2026-08-22T12:02:30.759Z",
+      "bookingNumber": "BKG-2026-0107",
+      "farmerId": "FARM000010",
+      "userId": "usr_f_mt4btd0l2hs1x",
+      "farmerName": "drashti vaghela",
+      "centerId": "CTR-01",
+      "centerName": "APMC Central Mandi Bhopal",
+      "cropName": "Wheat (Sharbati)",
+      "quantity": 45,
+      "date": "2026-08-22",
+      "timeSlot": "08:00 AM - 08:30 AM",
+      "vehicleNumber": "Farmer Transport",
+      "remarks": "hiiiii",
+      "status": "Confirmed",
+      "qrCodeDataUrl": "data:image/png;base64,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",
+      "timeline": [
+        {
+          "stage": "Booked",
+          "timestamp": "2026-08-22T12:02:30.759Z",
+          "done": true
+        },
+        {
+          "stage": "Confirmed",
+          "timestamp": "2026-08-22T12:02:30.759Z",
           "done": true
         },
         {
@@ -2148,6 +2352,88 @@
         "mobile": "9876543210",
         "email": "ramesh@farmer.in"
       }
+    },
+    {
+      "_id": "notif_mt4b397yay2p3",
+      "createdAt": "2026-08-22T11:39:50.254Z",
+      "updatedAt": "2026-08-22T11:39:50.254Z",
+      "userId": "usr_f_mt4b395g5jvqd",
+      "role": "farmer",
+      "title": "Registration Initiated",
+      "message": "Your KPMS Farmer Registration was received. Your verification OTP is: 315567",
+      "type": "system",
+      "isRead": false,
+      "metadata": {
+        "mobile": "9823456787",
+        "email": "upadhyayhem0@gmail.com",
+        "fullName": "Ram soni"
+      }
+    },
+    {
+      "_id": "notif_mt4btd39m0f4h",
+      "createdAt": "2026-08-22T12:00:08.325Z",
+      "updatedAt": "2026-08-22T12:00:08.325Z",
+      "userId": "usr_f_mt4btd0l2hs1x",
+      "role": "farmer",
+      "title": "Registration Initiated",
+      "message": "Your KPMS Farmer Registration was received. Your verification OTP is: 395321",
+      "type": "system",
+      "isRead": false,
+      "metadata": {
+        "mobile": "9327367559",
+        "email": "drashtiv26@gmail.com",
+        "fullName": "drashti vaghela"
+      }
+    },
+    {
+      "_id": "notif_mt4btz7w1mj1a",
+      "createdAt": "2026-08-22T12:00:37.004Z",
+      "updatedAt": "2026-08-22T12:00:37.004Z",
+      "userId": "usr_f_mt4btd0l2hs1x",
+      "role": "farmer",
+      "title": "Account Activated",
+      "message": "Welcome to KPMS, drashti vaghela! Your Farmer ID FARM000010 is now active.",
+      "type": "system",
+      "isRead": false,
+      "metadata": {}
+    },
+    {
+      "_id": "notif_mt4bvcrh04zdv",
+      "createdAt": "2026-08-22T12:01:41.213Z",
+      "updatedAt": "2026-08-22T12:01:41.213Z",
+      "userId": "usr_f_mt4btd0l2hs1x",
+      "role": "farmer",
+      "title": "Slot Booking Confirmed",
+      "message": "Your slot for Wheat (Sharbati) (45 Q) at APMC Central Mandi Bhopal on 2026-08-28 (08:00 AM - 08:30 AM) is confirmed. Booking No: BKG-2026-0106",
+      "type": "booking",
+      "isRead": false,
+      "metadata": {
+        "bookingNumber": "BKG-2026-0106",
+        "date": "2026-08-28",
+        "timeSlot": "08:00 AM - 08:30 AM",
+        "mobile": "9327367559",
+        "email": "drashtiv26@gmail.com",
+        "fullName": "drashti vaghela"
+      }
+    },
+    {
+      "_id": "notif_mt4bwezwf4jmz",
+      "createdAt": "2026-08-22T12:02:30.764Z",
+      "updatedAt": "2026-08-22T12:02:30.764Z",
+      "userId": "usr_f_mt4btd0l2hs1x",
+      "role": "farmer",
+      "title": "Slot Booking Confirmed",
+      "message": "Your slot for Wheat (Sharbati) (45 Q) at APMC Central Mandi Bhopal on 2026-08-22 (08:00 AM - 08:30 AM) is confirmed. Booking No: BKG-2026-0107",
+      "type": "booking",
+      "isRead": false,
+      "metadata": {
+        "bookingNumber": "BKG-2026-0107",
+        "date": "2026-08-22",
+        "timeSlot": "08:00 AM - 08:30 AM",
+        "mobile": "9327367559",
+        "email": "drashtiv26@gmail.com",
+        "fullName": "drashti vaghela"
+      }
     }
   ],
   "smsLogs": [
@@ -2346,6 +2632,42 @@
       "updatedAt": "2026-08-22T11:18:02.344Z",
       "to": "9876543210",
       "message": "[KPMS GOVT] DBT Payment Transferred to Bank Account: ₹1,16,250 successfully credited to your State Bank of India account (UTR: SBIN261312711073).",
+      "status": "DELIVERED",
+      "provider": "Twilio Gateway"
+    },
+    {
+      "_id": "s_mt4b3981lymro",
+      "createdAt": "2026-08-22T11:39:50.257Z",
+      "updatedAt": "2026-08-22T11:39:50.257Z",
+      "to": "9823456787",
+      "message": "[KPMS GOVT] Registration Initiated: Your KPMS Farmer Registration was received. Your verification OTP is: 315567",
+      "status": "DELIVERED",
+      "provider": "Twilio Gateway"
+    },
+    {
+      "_id": "s_mt4btd3b11iue",
+      "createdAt": "2026-08-22T12:00:08.328Z",
+      "updatedAt": "2026-08-22T12:00:08.328Z",
+      "to": "9327367559",
+      "message": "[KPMS GOVT] Registration Initiated: Your KPMS Farmer Registration was received. Your verification OTP is: 395321",
+      "status": "DELIVERED",
+      "provider": "Twilio Gateway"
+    },
+    {
+      "_id": "s_mt4bvcrl0phm1",
+      "createdAt": "2026-08-22T12:01:41.217Z",
+      "updatedAt": "2026-08-22T12:01:41.217Z",
+      "to": "9327367559",
+      "message": "[KPMS GOVT] Slot Booking Confirmed: Your slot for Wheat (Sharbati) (45 Q) at APMC Central Mandi Bhopal on 2026-08-28 (08:00 AM - 08:30 AM) is confirmed. Booking No: BKG-2026-0106",
+      "status": "DELIVERED",
+      "provider": "Twilio Gateway"
+    },
+    {
+      "_id": "s_mt4bwezyjpfrd",
+      "createdAt": "2026-08-22T12:02:30.766Z",
+      "updatedAt": "2026-08-22T12:02:30.766Z",
+      "to": "9327367559",
+      "message": "[KPMS GOVT] Slot Booking Confirmed: Your slot for Wheat (Sharbati) (45 Q) at APMC Central Mandi Bhopal on 2026-08-22 (08:00 AM - 08:30 AM) is confirmed. Booking No: BKG-2026-0107",
       "status": "DELIVERED",
       "provider": "Twilio Gateway"
     }
@@ -2558,6 +2880,46 @@
       "to": "ramesh@farmer.in",
       "subject": "KPMS Alert: DBT Payment Transferred to Bank Account",
       "body": "₹1,16,250 successfully credited to your State Bank of India account (UTR: SBIN261312711073).",
+      "status": "DELIVERED",
+      "provider": "Brevo HTTP API v3"
+    },
+    {
+      "_id": "e_mt4b4egqu5yt4",
+      "createdAt": "2026-08-22T11:40:43.706Z",
+      "updatedAt": "2026-08-22T11:40:43.706Z",
+      "to": "upadhyayhem0@gmail.com",
+      "subject": "KPMS Alert: Registration Initiated",
+      "body": "Your KPMS Farmer Registration was received. Your verification OTP is: 315567",
+      "status": "FAILED",
+      "provider": "Brevo SMTP"
+    },
+    {
+      "_id": "e_mt4bte2yq7gmp",
+      "createdAt": "2026-08-22T12:00:09.610Z",
+      "updatedAt": "2026-08-22T12:00:09.610Z",
+      "to": "drashtiv26@gmail.com",
+      "subject": "KPMS Alert: Registration Initiated",
+      "body": "Your KPMS Farmer Registration was received. Your verification OTP is: 395321",
+      "status": "DELIVERED",
+      "provider": "Brevo HTTP API v3"
+    },
+    {
+      "_id": "e_mt4bvd9wn7wxt",
+      "createdAt": "2026-08-22T12:01:41.876Z",
+      "updatedAt": "2026-08-22T12:01:41.876Z",
+      "to": "drashtiv26@gmail.com",
+      "subject": "KPMS Alert: Slot Booking Confirmed",
+      "body": "Your slot for Wheat (Sharbati) (45 Q) at APMC Central Mandi Bhopal on 2026-08-28 (08:00 AM - 08:30 AM) is confirmed. Booking No: BKG-2026-0106",
+      "status": "DELIVERED",
+      "provider": "Brevo HTTP API v3"
+    },
+    {
+      "_id": "e_mt4bwfr6lvqsr",
+      "createdAt": "2026-08-22T12:02:31.746Z",
+      "updatedAt": "2026-08-22T12:02:31.746Z",
+      "to": "drashtiv26@gmail.com",
+      "subject": "KPMS Alert: Slot Booking Confirmed",
+      "body": "Your slot for Wheat (Sharbati) (45 Q) at APMC Central Mandi Bhopal on 2026-08-22 (08:00 AM - 08:30 AM) is confirmed. Booking No: BKG-2026-0107",
       "status": "DELIVERED",
       "provider": "Brevo HTTP API v3"
     }

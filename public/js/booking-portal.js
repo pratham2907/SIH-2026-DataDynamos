@@ -100,14 +100,20 @@ const loadBookingPortal = async () => {
                 <!-- Crop Selection -->
                 <div class="form-group">
                   <label class="form-label"><i class="fas fa-wheat-awn"></i> Crop Commodity *</label>
-                  <select id="booking-crop-select" class="form-control" required>
-                    <option value="Wheat (Sharbati)" ${prefill && prefill.crop && prefill.crop.includes('Wheat') ? 'selected' : ''}>Wheat (Sharbati) - MSP ₹2,275/Q</option>
-                    <option value="Paddy (Common)" ${prefill && prefill.crop && prefill.crop.includes('Paddy') ? 'selected' : ''}>Paddy (Common) - MSP ₹2,300/Q</option>
-                    <option value="Maize (Makka)" ${prefill && prefill.crop && prefill.crop.includes('Maize') ? 'selected' : ''}>Maize (Makka) - MSP ₹2,225/Q</option>
-                    <option value="Gram (Chana)" ${prefill && prefill.crop && prefill.crop.includes('Gram') ? 'selected' : ''}>Gram (Chana) - MSP ₹5,440/Q</option>
-                    <option value="Mustard (Sarson)" ${prefill && prefill.crop && prefill.crop.includes('Mustard') ? 'selected' : ''}>Mustard (Sarson) - MSP ₹5,650/Q</option>
-                    <option value="Soyabean (Yellow)" ${prefill && prefill.crop && prefill.crop.includes('Soyabean') ? 'selected' : ''}>Soyabean (Yellow) - MSP ₹4,892/Q</option>
+                  <select id="booking-crop-select" class="form-control" onchange="updateBookingPerishabilityBadge(this.value)" required>
+                    <option value="Wheat (Sharbati)" ${prefill && prefill.crop && prefill.crop.includes('Wheat') ? 'selected' : ''}>Wheat (Sharbati) — MSP ₹2,425/Q [🟢 LOW PERISHABILITY]</option>
+                    <option value="Paddy (Common)" ${prefill && prefill.crop && prefill.crop.includes('Paddy') ? 'selected' : ''}>Paddy (Common) — MSP ₹2,369/Q [🟠 MEDIUM PERISHABILITY]</option>
+                    <option value="Potato" ${prefill && prefill.crop && prefill.crop.includes('Potato') ? 'selected' : ''}>Potato (आलू) — MSP ₹1,800/Q [🟠 MEDIUM PERISHABILITY]</option>
+                    <option value="Tomato" ${prefill && prefill.crop && prefill.crop.includes('Tomato') ? 'selected' : ''}>Tomato (टमाटर) — MSP ₹2,100/Q [🔴 HIGH PERISHABILITY]</option>
+                    <option value="Leafy vegetables" ${prefill && prefill.crop && (prefill.crop.includes('Leafy') || prefill.crop.includes('vegetable')) ? 'selected' : ''}>Leafy vegetables (सब्जियां) — MSP ₹2,400/Q [🔴 HIGH PERISHABILITY]</option>
+                    <option value="Maize (Makka)" ${prefill && prefill.crop && prefill.crop.includes('Maize') ? 'selected' : ''}>Maize (Makka) — MSP ₹2,225/Q [🟢 LOW PERISHABILITY]</option>
+                    <option value="Gram (Chana)" ${prefill && prefill.crop && prefill.crop.includes('Gram') ? 'selected' : ''}>Gram (Chana) — MSP ₹5,440/Q [🟢 LOW PERISHABILITY]</option>
+                    <option value="Mustard (Sarson)" ${prefill && prefill.crop && prefill.crop.includes('Mustard') ? 'selected' : ''}>Mustard (Sarson) — MSP ₹5,650/Q [🟢 LOW PERISHABILITY]</option>
+                    <option value="Soyabean (Yellow)" ${prefill && prefill.crop && prefill.crop.includes('Soyabean') ? 'selected' : ''}>Soyabean (Yellow) — MSP ₹4,892/Q [🟠 MEDIUM PERISHABILITY]</option>
                   </select>
+                  <div id="booking-perishability-badge" style="margin-top:6px; font-size:0.78rem; font-weight:700; color:#047857;">
+                    🟢 Low Perishable &bull; Stable storage tolerance
+                  </div>
                 </div>
 
                 <!-- Quantity -->
@@ -417,5 +423,19 @@ const cancelBookingAction = async (id) => {
     }
   } catch (err) {
     showToast('Failed to cancel booking', 'error');
+  }
+};
+
+const updateBookingPerishabilityBadge = (cropVal) => {
+  const badgeEl = document.getElementById('booking-perishability-badge');
+  if (!badgeEl) return;
+  const lower = (cropVal || '').toLowerCase();
+  
+  if (lower.includes('tomato') || lower.includes('leafy') || lower.includes('vegetable')) {
+    badgeEl.innerHTML = `<span style="color:#DC2626;"><i class="fas fa-circle-exclamation"></i> 🔴 High Perishable &bull; Time-sensitive processing recommended</span>`;
+  } else if (lower.includes('potato') || lower.includes('paddy') || lower.includes('rice') || lower.includes('soya')) {
+    badgeEl.innerHTML = `<span style="color:#D97706;"><i class="fas fa-clock"></i> 🟠 Medium Perishable &bull; Moderate storage duration</span>`;
+  } else {
+    badgeEl.innerHTML = `<span style="color:#047857;"><i class="fas fa-check-circle"></i> 🟢 Low Perishable &bull; Stable storage tolerance</span>`;
   }
 };

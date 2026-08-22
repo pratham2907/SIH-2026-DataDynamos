@@ -1,15 +1,17 @@
 /**
  * 🌾 Smart Booking UI Controller — AgriQueue / KPMS
- * Interactive Farmer Experience, Decision Cards, Real-time Validation & Slot Transition
+ * Interactive Farmer Experience with Real-Time OpenWeather Integration,
+ * Crop Perishability Badges, Weather Transit Delays, and Economic Trade-offs.
  */
 
 const smartBookingState = {
   selectedCrop: 'Wheat',
   quantity: 100,
-  step: 1, // 1: Inputs, 2: Loading, 3: Scenarios & Recommendations
+  step: 1,
   results: null,
   activeExplanationTab: null,
-  showAllCentresModal: false
+  showAllCentresModal: false,
+  centreWeatherMap: {}
 };
 
 /**
@@ -24,7 +26,6 @@ const loadSmartBookingPage = async () => {
 
   container.innerHTML = `
     <div class="app-container">
-      <!-- Sidebar Navigation if logged in as farmer -->
       ${isFarmer ? `
         <aside class="sidebar">
           <div style="padding:10px 14px; border-bottom:1px solid var(--border-color); margin-bottom:12px;">
@@ -51,7 +52,6 @@ const loadSmartBookingPage = async () => {
         </aside>
       `}
 
-      <!-- Main Content Canvas -->
       <main class="main-content" style="max-width:1100px; margin:0 auto; padding-bottom:60px;">
         
         <!-- Header Banner -->
@@ -60,15 +60,15 @@ const loadSmartBookingPage = async () => {
             <div>
               <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
                 <span class="hero-pill" style="margin:0; background:rgba(224,109,20,0.15); color:var(--saffron);">
-                  <i class="fas fa-brain"></i> AI Procurement Logistics Engine
+                  <i class="fas fa-cloud-sun-rain"></i> OpenWeather & Agro Logistics Engine
                 </span>
-                <span class="status-pill completed" style="font-size:0.75rem;"><i class="fas fa-check-circle"></i> Live Mandi Rates</span>
+                <span class="status-pill completed" style="font-size:0.75rem;"><i class="fas fa-check-circle"></i> Real-Time Centre Feeds</span>
               </div>
               <h1 style="font-size:2.2rem; font-weight:800; color:var(--primary-navy); margin:0;">
                 🌾 Smart Mandi Procurement Finder
               </h1>
-              <p style="color:var(--text-muted); font-size:0.95rem; margin-top:6px; max-width:700px;">
-                Finding the mandi that delivers the <strong>maximum net profit</strong> for your produce by factoring travel distance, live wait times, procurement rates, and storage delay costs.
+              <p style="color:var(--text-muted); font-size:0.95rem; margin-top:6px; max-width:750px;">
+                Identifies optimal procurement centres for your harvest by factoring <strong>live destination weather</strong>, travel delay windows, crop perishability sensitivity, live queue wait times, and net economic value.
               </p>
             </div>
             <div style="display:flex; gap:10px;">
@@ -79,7 +79,7 @@ const loadSmartBookingPage = async () => {
           </div>
         </div>
 
-        <!-- Dynamic Step Container -->
+        <!-- Stage Container -->
         <div id="smart-booking-stage-container">
           <!-- Rendered dynamically -->
         </div>
@@ -92,13 +92,27 @@ const loadSmartBookingPage = async () => {
 };
 
 /**
- * Step 1 & 2: Crop Selection & Quantity Entry Form
+ * Step 1 & 2: Crop Selection & Quantity Form with Automatic Perishability Badge
  */
 const renderSmartBookingForm = () => {
   const container = document.getElementById('smart-booking-stage-container');
   if (!container) return;
 
-  const catalog = window.SmartBookingEngine ? window.SmartBookingEngine.SMART_CROP_CATALOG : [];
+  const engine = window.SmartBookingEngine;
+  const cropProfiles = engine ? engine.cropProfiles : {};
+  const currentProfile = engine ? engine.getCropProfile(smartBookingState.selectedCrop) : null;
+
+  const displayCrops = [
+    cropProfiles.wheat,
+    cropProfiles.rice,
+    cropProfiles.potato,
+    cropProfiles.tomato,
+    cropProfiles.leafyvegetables,
+    cropProfiles.maize,
+    cropProfiles.gram,
+    cropProfiles.mustard,
+    cropProfiles.soyabean
+  ].filter(Boolean);
 
   container.innerHTML = `
     <div class="glass-panel" style="padding:32px; border-radius:18px;">
@@ -118,26 +132,46 @@ const renderSmartBookingForm = () => {
         </div>
 
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:14px;" id="crop-card-grid">
-          ${catalog.map(crop => {
-            const isSelected = smartBookingState.selectedCrop === crop.name;
+          ${displayCrops.map(crop => {
+            const isSelected = currentProfile && currentProfile.name === crop.name;
             return `
               <div 
                 class="glass-card crop-select-card"
                 style="padding:18px 14px; text-align:center; cursor:pointer; border-radius:14px; transition:all 0.2s ease; ${isSelected ? `border:2px solid var(--saffron); background:${crop.bg}; box-shadow:0 6px 18px rgba(224,109,20,0.2); transform:translateY(-2px);` : 'border:1px solid var(--border-color);'}"
                 onclick="selectSmartCrop('${crop.name}')"
               >
-                <div style="width:52px; height:52px; border-radius:50%; background:${isSelected ? '#FFF' : crop.bg}; color:${crop.color}; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                <div style="width:50px; height:50px; border-radius:50%; background:${isSelected ? '#FFF' : crop.bg}; color:${crop.color}; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.4rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
                   <i class="fas ${crop.icon}"></i>
                 </div>
                 <div style="font-weight:800; font-size:1.05rem; color:var(--primary-navy);">${crop.name}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${crop.displayName.split('(')[1] ? '(' + crop.displayName.split('(')[1] : ''}</div>
-                <div style="margin-top:8px; display:inline-block; font-size:0.75rem; font-weight:700; color:${crop.color}; background:rgba(255,255,255,0.85); padding:2px 8px; border-radius:12px;">
-                  MSP: ₹${crop.baseMsp}/Q
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${crop.displayName && crop.displayName.split('(')[1] ? '(' + crop.displayName.split('(')[1] : ''}</div>
+                <div style="margin-top:6px; font-size:0.72rem; font-weight:800;">
+                  ${crop.badge || ''}
+                </div>
+                <div style="margin-top:6px; display:inline-block; font-size:0.72rem; font-weight:700; color:${crop.color}; background:rgba(255,255,255,0.9); padding:2px 8px; border-radius:12px;">
+                  MSP: ₹${crop.defaultPrice}/Q
                 </div>
               </div>
             `;
           }).join('')}
         </div>
+
+        <!-- Automatic Perishability Badge Banner (Section 8 & 29) -->
+        ${currentProfile ? `
+          <div style="margin-top:18px; padding:14px 18px; border-radius:12px; background:rgba(14,42,71,0.03); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:1.1rem; font-weight:800; color:var(--primary-navy);">
+                ${currentProfile.badge}
+              </span>
+              <span style="color:var(--text-muted); font-size:0.88rem;">
+                &bull; ${currentProfile.badgeDescription}
+              </span>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-muted); font-weight:600;">
+              Base Deterioration Rate: ${(currentProfile.baseDeteriorationRate * 100).toFixed(2)}%/day
+            </div>
+          </div>
+        ` : ''}
       </div>
 
       <!-- STEP 2: ENTER QUANTITY -->
@@ -171,7 +205,6 @@ const renderSmartBookingForm = () => {
             </div>
           </div>
 
-          <!-- Quick Increment Buttons -->
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
             <span style="font-size:0.8rem; color:var(--text-muted); align-self:center; font-weight:600;">Quick Pick:</span>
             <button type="button" class="btn btn-outline btn-sm" onclick="setQuickQuantity(25)">25 Q</button>
@@ -198,7 +231,7 @@ const renderSmartBookingForm = () => {
           <i class="fas fa-wand-magic-sparkles"></i> Find Best Procurement Option
         </button>
         <p style="font-size:0.82rem; color:var(--text-muted); margin-top:10px;">
-          <i class="fas fa-shield-halved" style="color:var(--green-gov);"></i> Calculates distance, live queues, price MSP & storage delay cost automatically.
+          <i class="fas fa-shield-halved" style="color:var(--green-gov);"></i> Integrates centre weather feeds, perishability risks, transit delays & live mandi rates automatically.
         </p>
       </div>
 
@@ -206,17 +239,11 @@ const renderSmartBookingForm = () => {
   `;
 };
 
-/**
- * Handle Crop Selection
- */
 const selectSmartCrop = (cropName) => {
   smartBookingState.selectedCrop = cropName;
   renderSmartBookingForm();
 };
 
-/**
- * Handle Quantity Input Changes
- */
 const onSmartQuantityChange = (val) => {
   const num = Number(val);
   smartBookingState.quantity = num;
@@ -238,7 +265,7 @@ const setQuickQuantity = (qty) => {
 };
 
 /**
- * Find Best Option Click Handler & 3-Step Animated Loading
+ * Animated Loading Simulation with 3-Stage Progress
  */
 const handleFindBestOptionClick = () => {
   const qty = Number(smartBookingState.quantity);
@@ -252,80 +279,116 @@ const handleFindBestOptionClick = () => {
   const container = document.getElementById('smart-booking-stage-container');
   if (!container) return;
 
-  // Step 1: Loading phase 1
   container.innerHTML = `
     <div class="glass-panel" style="padding:60px 30px; text-align:center; border-radius:18px;">
-      <div style="width:70px; height:70px; border-radius:50%; background:rgba(224,109,20,0.1); color:var(--saffron); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:2rem;">
-        <i class="fas fa-circle-notch fa-spin"></i>
+      <div style="width:72px; height:72px; border-radius:50%; background:rgba(224,109,20,0.12); color:var(--saffron); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:2rem; animation:pulse 1.5s infinite;">
+        <i class="fas fa-satellite-dish"></i>
       </div>
-      <h3 id="loading-stage-text" style="font-size:1.35rem; font-weight:800; color:var(--primary-navy); margin-bottom:10px;">
-        Checking nearby procurement centres...
+      
+      <h3 style="font-size:1.6rem; font-weight:800; color:var(--primary-navy); margin-bottom:8px;">
+        Analyzing Mandi Feeds & Destination Weather...
       </h3>
-      <p id="loading-sub-text" style="color:var(--text-muted); font-size:0.92rem;">
-        Locating active government and APMC mandis for ${smartBookingState.selectedCrop}...
+      <p style="color:var(--text-muted); font-size:0.95rem; max-width:550px; margin:0 auto 28px;" id="loading-stage-text">
+        Querying OpenWeather observations for nearby procurement centres...
       </p>
-      <div style="max-width:320px; height:6px; background:#E2E8F0; border-radius:10px; margin:24px auto 0; overflow:hidden;">
-        <div id="loading-progress-bar" style="width:30%; height:100%; background:var(--saffron); border-radius:10px; transition:width 0.4s ease;"></div>
+
+      <div style="max-width:400px; height:8px; background:var(--bg-main); border-radius:4px; margin:0 auto 20px; overflow:hidden; border:1px solid var(--border-color);">
+        <div id="loading-progress-bar" style="width:30%; height:100%; background:linear-gradient(90deg, var(--saffron), #10B981); transition:width 0.4s ease;"></div>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:20px; font-size:0.82rem; color:var(--text-muted); font-weight:600;">
+        <span id="load-step-1" style="color:var(--saffron);"><i class="fas fa-circle-notch fa-spin"></i> Destination Weather</span>
+        <span id="load-step-2" style="opacity:0.5;"><i class="fas fa-hourglass-start"></i> Delay & Deterioration</span>
+        <span id="load-step-3" style="opacity:0.5;"><i class="fas fa-calculator"></i> Net Return</span>
       </div>
     </div>
   `;
 
-  // Step 2: Transition after 500ms
+  // Fetch live centre weather from server
+  fetchLiveCentresWeather().then(weatherMap => {
+    smartBookingState.centreWeatherMap = weatherMap;
+  }).catch(() => {});
+
   setTimeout(() => {
-    const txt = document.getElementById('loading-stage-text');
-    const sub = document.getElementById('loading-sub-text');
+    const text = document.getElementById('loading-stage-text');
     const bar = document.getElementById('loading-progress-bar');
-    if (txt) txt.textContent = "Comparing availability, queue, travel cost and waiting time...";
-    if (sub) sub.textContent = "Running net outcome optimization algorithm across all eligible mandis...";
+    const step2 = document.getElementById('load-step-2');
+    if (text) text.textContent = "Calculating crop perishability risk & transit time ranges...";
     if (bar) bar.style.width = "70%";
-  }, 500);
+    if (step2) { step2.style.opacity = "1"; step2.style.color = "var(--saffron)"; }
+  }, 600);
 
-  // Step 3: Transition after 1000ms
   setTimeout(() => {
-    const txt = document.getElementById('loading-stage-text');
-    const sub = document.getElementById('loading-sub-text');
+    const text = document.getElementById('loading-stage-text');
     const bar = document.getElementById('loading-progress-bar');
-    if (txt) txt.textContent = "Finding the best option for you...";
-    if (sub) sub.textContent = "Finalizing top recommendations and trade-off comparison...";
+    const step3 = document.getElementById('load-step-3');
+    if (text) text.textContent = "Computing final Net Economic Value across eligible mandis...";
     if (bar) bar.style.width = "100%";
-  }, 1000);
+    if (step3) { step3.style.opacity = "1"; step3.style.color = "var(--green-gov)"; }
+  }, 1100);
 
-  // Execute Algorithm & Render Results after 1400ms
   setTimeout(() => {
     executeSmartBookingAlgorithm();
   }, 1400);
 };
 
 /**
+ * Fetch live weather from backend for default centres
+ */
+const fetchLiveCentresWeather = async () => {
+  try {
+    const centres = window.SmartBookingEngine.DEFAULT_PROCUREMENT_CENTRES;
+    const map = {};
+    await Promise.all(centres.map(async (c) => {
+      try {
+        const res = await fetch(`/api/weather/centre?lat=${c.latitude}&lon=${c.longitude}&city=${encodeURIComponent(c.district || c.name)}`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          map[c.id || c.code] = json.data;
+        }
+      } catch (e) {}
+    }));
+    return map;
+  } catch (e) {
+    return {};
+  }
+};
+
+/**
  * Execute Optimization Algorithm and Render Recommendations
  */
 const executeSmartBookingAlgorithm = () => {
-  const { selectedCrop, quantity } = smartBookingState;
-  const result = window.SmartBookingEngine.runSmartProcurementAlgorithm(selectedCrop, quantity);
+  const { selectedCrop, quantity, centreWeatherMap } = smartBookingState;
+  const result = window.SmartBookingEngine.runSmartProcurementAlgorithm(
+    selectedCrop,
+    quantity,
+    null,
+    null,
+    centreWeatherMap
+  );
   smartBookingState.results = result;
 
   const container = document.getElementById('smart-booking-stage-container');
   if (!container) return;
 
-  // Handle Edge Case 1: No Centres Available
   if (!result.success || !result.scenarios.hasResults) {
     renderNoCentresAvailableView(result.message || 'No suitable procurement centres found.');
     return;
   }
 
-  const { scenarios, capacityWarning, maxAvailableCapacity } = result;
+  const { scenarios, capacityWarning, maxAvailableCapacity, cropProfile } = result;
   const { recommended, alternative, singleOptionOnly } = scenarios;
 
   container.innerHTML = `
     <div>
-      <!-- Top Summary Pill Bar -->
+      <!-- Top Summary Bar -->
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="renderSmartBookingForm()">
             <i class="fas fa-arrow-left"></i> Change Crop or Quantity
           </button>
           <span style="font-size:0.92rem; font-weight:700; color:var(--primary-navy);">
-            Producing: <strong style="color:var(--saffron);">${selectedCrop}</strong> (${quantity} Quintals)
+            Producing: <strong style="color:var(--saffron);">${selectedCrop}</strong> (${quantity} Quintals) &bull; ${cropProfile.badge}
           </span>
         </div>
         ${scenarios.otherCentres && scenarios.otherCentres.length > 0 ? `
@@ -335,418 +398,284 @@ const executeSmartBookingAlgorithm = () => {
         ` : ''}
       </div>
 
-      <!-- Capacity Exceeded Warning Banner if applicable -->
+      <!-- Capacity Exceeded Advisory -->
       ${capacityWarning ? `
         <div class="glass-panel" style="padding:16px 20px; margin-bottom:22px; background:#FFFBEB; border:1px solid #F59E0B; border-radius:12px; display:flex; align-items:center; gap:14px;">
           <div style="width:38px; height:38px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">
             <i class="fas fa-triangle-exclamation"></i>
           </div>
           <div style="font-size:0.9rem; color:#92400E;">
-            <strong>High Volume Advisory:</strong> Your quantity (${quantity} Q) exceeds the single-day available quota (${maxAvailableCapacity} Q) at available centres. Calculations below reflect maximum accepted quantity for immediate procurement.
+            <strong>High Volume Advisory:</strong> Your quantity (${quantity} Q) exceeds single-day available quota (${maxAvailableCapacity} Q). Calculations reflect maximum accepted volume for immediate procurement.
           </div>
         </div>
       ` : ''}
 
-      <!-- MAIN TWO SCENARIOS GRID -->
-      <div style="display:grid; grid-template-columns:${singleOptionOnly ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))'}; gap:24px; margin-bottom:30px;">
+      <!-- MAIN TWO SCENARIOS GRID (Section 26 & 27) -->
+      <div style="display:grid; grid-template-columns:${singleOptionOnly ? '1fr' : 'repeat(auto-fit, minmax(340px, 1fr))'}; gap:24px; margin-bottom:30px;">
         
         <!-- SCENARIO 1: RECOMMENDED BEST OPTION -->
-        <div class="glass-card" style="border:2px solid var(--saffron); border-radius:18px; padding:28px; position:relative; box-shadow:0 12px 32px rgba(224,109,20,0.15); background:linear-gradient(180deg, var(--bg-card) 0%, rgba(255,247,237,0.4) 100%);">
-          <!-- Recommendation Badge -->
-          <div style="position:absolute; top:-14px; left:24px; background:linear-gradient(135deg, #E06D14, #EA580C); color:#FFF; padding:4px 16px; border-radius:20px; font-weight:800; font-size:0.8rem; letter-spacing:0.5px; box-shadow:0 4px 12px rgba(224,109,20,0.4);">
-            ${recommended.tag || '⭐ BEST OVERALL OPTION'}
-          </div>
+        ${renderScenarioCard(recommended, 'recommended')}
 
-          <div style="margin-top:10px; margin-bottom:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-              <div>
-                <h3 style="font-size:1.45rem; font-weight:800; color:var(--primary-navy); margin:0;">
-                  ${recommended.shortName || recommended.centerName}
-                </h3>
-                <div style="font-size:0.85rem; color:var(--text-muted); margin-top:3px;">
-                  <i class="fas fa-location-dot" style="color:var(--saffron);"></i> ${recommended.district}, ${recommended.state}
-                </div>
-              </div>
-              <span class="status-pill completed" style="font-size:0.75rem; flex-shrink:0;">
-                <i class="fas fa-bolt"></i> ₹${recommended.pricePerQuintal}/Q
-              </span>
+        <!-- SCENARIO 2: ALTERNATIVE OPTION -->
+        ${alternative ? renderScenarioCard(alternative, 'alternative') : ''}
+
+      </div>
+
+      <!-- Transparent Calculation Breakdown Accordion -->
+      <div class="glass-panel" style="border-radius:16px; margin-bottom:30px; overflow:hidden;">
+        <div 
+          style="padding:18px 24px; background:var(--bg-card); cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+          onclick="toggleBreakdownAccordion()"
+        >
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:34px; height:34px; border-radius:50%; background:rgba(224,109,20,0.12); color:var(--saffron); display:flex; align-items:center; justify-content:center; font-size:1rem;">
+              <i class="fas fa-chart-pie"></i>
             </div>
-          </div>
-
-          <!-- Key Metrics Grid -->
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-            <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-route"></i> Distance</div>
-              <div style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
-                ${recommended.distance} km away
-              </div>
-            </div>
-
-            <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-hourglass-half"></i> Estimated Waiting</div>
-              <div style="font-size:1.15rem; font-weight:800; color:var(--green-gov); margin-top:2px;">
-                ~${recommended.waitingDays} day wait
-              </div>
-            </div>
-
-            <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-              <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-truck"></i> Est. Travel Cost</div>
-              <div style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
-                ~${recommended.formattedTransport}
-              </div>
-            </div>
-
-            <div style="background:#ECFDF5; padding:12px 14px; border-radius:10px; border:1px solid #A7F3D0;">
-              <div style="font-size:0.75rem; color:#065F46; font-weight:700;"><i class="fas fa-coins"></i> Net Outcome</div>
-              <div style="font-size:1.25rem; font-weight:900; color:#047857; margin-top:2px;">
-                ${recommended.formattedNev}
-              </div>
-            </div>
-          </div>
-
-          <!-- Why this is recommended (Plain Language) -->
-          <div style="background:rgba(224,109,20,0.08); padding:14px; border-radius:10px; margin-bottom:20px; border-left:4px solid var(--saffron);">
-            <div style="font-size:0.78rem; font-weight:800; color:var(--saffron); text-transform:uppercase; margin-bottom:3px;">
-              Why this is recommended:
-            </div>
-            <p style="font-size:0.88rem; color:var(--primary-navy); margin:0; line-height:1.45; font-weight:600;">
-              "${recommended.whyRecommended}"
-            </p>
-          </div>
-
-          <!-- Primary Action Button -->
-          <button 
-            class="btn btn-primary" 
-            style="width:100%; justify-content:center; padding:14px; font-size:1.05rem; font-weight:800; border-radius:12px;"
-            onclick="selectAndProceedToBooking('${recommended.centerId}', '${recommended.crop}', ${recommended.acceptedQuantity})"
-          >
-            <i class="fas fa-check-circle"></i> Choose This Recommended Centre
-          </button>
-        </div>
-
-        <!-- SCENARIO 2: ALTERNATIVE OPTION (If available) -->
-        ${alternative ? `
-          <div class="glass-card" style="border:1px solid var(--border-color); border-radius:18px; padding:28px; position:relative; background:var(--bg-card);">
-            <!-- Alternative Badge -->
-            <div style="position:absolute; top:-14px; left:24px; background:var(--navy-light); color:#FFF; padding:4px 16px; border-radius:20px; font-weight:800; font-size:0.8rem; letter-spacing:0.5px;">
-              ${alternative.tag || '🚜 ALTERNATIVE OPTION'}
-            </div>
-
-            <div style="margin-top:10px; margin-bottom:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-                <div>
-                  <h3 style="font-size:1.45rem; font-weight:800; color:var(--primary-navy); margin:0;">
-                    ${alternative.shortName || alternative.centerName}
-                  </h3>
-                  <div style="font-size:0.85rem; color:var(--text-muted); margin-top:3px;">
-                    <i class="fas fa-location-dot"></i> ${alternative.district}, ${alternative.state}
-                  </div>
-                </div>
-                <span class="status-pill waiting" style="font-size:0.75rem; flex-shrink:0;">
-                  ₹${alternative.pricePerQuintal}/Q
-                </span>
-              </div>
-            </div>
-
-            <!-- Key Metrics Grid -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-              <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-route"></i> Distance</div>
-                <div style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
-                  ${alternative.distance} km away
-                </div>
-              </div>
-
-              <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-hourglass-half"></i> Estimated Waiting</div>
-                <div style="font-size:1.15rem; font-weight:800; color:${alternative.waitingDays > 3 ? '#D97706' : 'var(--primary-navy)'}; margin-top:2px;">
-                  ~${alternative.waitingDays} days wait
-                </div>
-              </div>
-
-              <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-truck"></i> Est. Travel Cost</div>
-                <div style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
-                  ~${alternative.formattedTransport}
-                </div>
-              </div>
-
-              <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
-                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;"><i class="fas fa-coins"></i> Net Outcome</div>
-                <div style="font-size:1.25rem; font-weight:900; color:var(--primary-navy); margin-top:2px;">
-                  ${alternative.formattedNev}
-                </div>
-              </div>
-            </div>
-
-            <!-- Plain Trade-off Explanation -->
-            <div style="background:var(--bg-main); padding:14px; border-radius:10px; margin-bottom:20px; border-left:4px solid var(--navy-light);">
-              <div style="font-size:0.78rem; font-weight:800; color:var(--navy-light); text-transform:uppercase; margin-bottom:3px;">
-                Trade-off note:
-              </div>
-              <p style="font-size:0.88rem; color:var(--text-main); margin:0; line-height:1.45;">
-                "${alternative.whyTradeOff}"
+            <div>
+              <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:var(--primary-navy);">
+                Transparent Economic & Weather Breakdown (गणना का विवरण)
+              </h4>
+              <p style="margin:2px 0 0; font-size:0.8rem; color:var(--text-muted);">
+                See how OpenWeather feeds, travel transit, crop perishability, and yard delays combine into your Net Outcome.
               </p>
             </div>
+          </div>
+          <i id="breakdown-chevron" class="fas fa-chevron-down" style="color:var(--text-muted); transition:transform 0.2s;"></i>
+        </div>
 
-            <!-- Alternative Action Button -->
-            <button 
-              class="btn btn-outline" 
-              style="width:100%; justify-content:center; padding:14px; font-size:1.05rem; font-weight:700; border-radius:12px;"
-              onclick="selectAndProceedToBooking('${alternative.centerId}', '${alternative.crop}', ${alternative.acceptedQuantity})"
-            >
-              <i class="fas fa-tractor"></i> Choose This Alternative Centre
-            </button>
+        <div id="breakdown-accordion-body" style="display:none; padding:24px; border-top:1px solid var(--border-color); background:rgba(14,42,71,0.02);">
+          ${renderBreakdownTable(recommended, alternative)}
+        </div>
+      </div>
+
+    </div>
+  `;
+};
+
+/**
+ * Render Farmer-Facing Scenario Card (Section 26 & 27)
+ */
+const renderScenarioCard = (data, type) => {
+  const isRec = type === 'recommended';
+  const weatherClass = data.weatherClassification || {};
+  const weatherDelay = data.weatherDelay || {};
+
+  return `
+    <div class="glass-card" style="border:2px solid ${isRec ? 'var(--saffron)' : 'var(--border-color)'}; border-radius:18px; padding:28px; position:relative; box-shadow:${isRec ? '0 12px 32px rgba(224,109,20,0.15)' : 'none'}; background:${isRec ? 'linear-gradient(180deg, var(--bg-card) 0%, rgba(255,247,237,0.4) 100%)' : 'var(--bg-card)'};">
+      
+      <!-- Top Tag Badge -->
+      <div style="position:absolute; top:-14px; left:24px; background:${isRec ? 'linear-gradient(135deg, #E06D14, #EA580C)' : 'var(--navy-light)'}; color:#FFF; padding:4px 16px; border-radius:20px; font-weight:800; font-size:0.8rem; letter-spacing:0.5px; box-shadow:${isRec ? '0 4px 12px rgba(224,109,20,0.4)' : 'none'};">
+        ${data.tag || (isRec ? '⭐ RECOMMENDED CENTRE' : '🚜 CLOSER OPTION')}
+      </div>
+
+      <!-- Centre Header -->
+      <div style="margin-top:10px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+          <div>
+            <h3 style="font-size:1.45rem; font-weight:800; color:var(--primary-navy); margin:0;">
+              ${data.shortName || data.centerName}
+            </h3>
+            <div style="font-size:0.85rem; color:var(--text-muted); margin-top:3px;">
+              <i class="fas fa-location-dot" style="color:var(--saffron);"></i> ${data.district}, ${data.state} &bull; <strong>${data.distance} km away</strong>
+            </div>
+          </div>
+          <span class="status-pill ${isRec ? 'completed' : 'waiting'}" style="font-size:0.78rem; flex-shrink:0;">
+            <i class="fas fa-tag"></i> ₹${data.pricePerQuintal}/Q
+          </span>
+        </div>
+      </div>
+
+      <!-- Weather & Transit Advisory Block (Section 3, 4, 14, 22) -->
+      <div style="background:var(--bg-main); padding:14px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="font-size:0.82rem; font-weight:700; color:var(--primary-navy); display:flex; align-items:center; gap:6px;">
+            <i class="fas ${weatherClass.icon || 'fa-cloud-sun'}" style="color:${weatherClass.color || 'var(--saffron)'};"></i>
+            Weather near procurement centre: <strong>${weatherClass.label || 'Clear'}</strong>
+          </div>
+          <span style="font-size:0.75rem; color:var(--text-muted);">
+            ${data.weather ? `${Math.round(data.weather.temp || 28)}°C, ${data.weather.humidity || 55}% Hum` : ''}
+          </span>
+        </div>
+        
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.85rem; margin-top:4px;">
+          <span style="color:var(--text-muted);"><i class="fas fa-clock"></i> Expected Arrival Window:</span>
+          <strong style="color:var(--primary-navy);">${weatherDelay.arrivalDisplay || '10:00 AM'}</strong>
+        </div>
+
+        ${weatherDelay.expectedDelayHours > 0 ? `
+          <div style="font-size:0.78rem; color:#D97706; margin-top:6px; font-weight:600;">
+            <i class="fas fa-triangle-exclamation"></i> ${weatherDelay.advisoryNote || 'Arrival may vary because of rainfall along transit path.'}
           </div>
         ` : ''}
+      </div>
+
+      <!-- Key Economic Metrics Grid (Section 26 & 27) -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;">
+        
+        <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-hourglass-half"></i> Est. Mandi Wait</div>
+          <div style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
+            ~${data.waitingDays} day wait
+          </div>
+        </div>
+
+        <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-truck"></i> Transport Cost</div>
+          <div style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin-top:2px;">
+            ${data.formattedTransport}
+          </div>
+        </div>
+
+        <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-clock-rotate-left"></i> Delay Economic Cost</div>
+          <div style="font-size:1.15rem; font-weight:800; color:#D97706; margin-top:2px;">
+            ${data.formattedDelay}
+          </div>
+        </div>
+
+        <div style="background:#ECFDF5; padding:12px 14px; border-radius:10px; border:1px solid #A7F3D0;">
+          <div style="font-size:0.75rem; color:#065F46; font-weight:700;"><i class="fas fa-coins"></i> Estimated Net Return</div>
+          <div style="font-size:1.25rem; font-weight:900; color:#047857; margin-top:2px;">
+            ${data.formattedNev}
+          </div>
+        </div>
 
       </div>
 
-      <!-- TRANSPARENT FINANCIAL BREAKDOWN & RELATIVE DETERIORATION ACCORDION -->
-      <div class="glass-panel" style="border-radius:14px; overflow:hidden; margin-bottom:24px;">
-        <div 
-          style="padding:16px 22px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); user-select:none;"
-          onclick="toggleTransparentBreakdown()"
-        >
-          <div style="display:flex; align-items:center; gap:10px;">
-            <i class="fas fa-calculator" style="color:var(--saffron); font-size:1.1rem;"></i>
-            <span style="font-weight:800; font-size:1rem; color:var(--primary-navy);">
-              Why was this recommended? (पारदर्शी वित्तीय विवरण एवं अनुमानित फसल जोखिम)
-            </span>
-          </div>
-          <i id="breakdown-toggle-icon" class="fas fa-chevron-down" style="color:var(--text-muted); transition:transform 0.3s ease;"></i>
+      <!-- Why Recommended (Section 28) -->
+      <div style="background:${isRec ? 'rgba(224,109,20,0.08)' : 'rgba(14,42,71,0.04)'}; padding:14px; border-radius:10px; margin-bottom:20px; border-left:4px solid ${isRec ? 'var(--saffron)' : 'var(--navy-light)'};">
+        <div style="font-size:0.78rem; font-weight:800; color:${isRec ? 'var(--saffron)' : 'var(--primary-navy)'}; text-transform:uppercase; margin-bottom:3px;">
+          ${isRec ? 'Why was this centre recommended?' : 'Trade-Off Explanation:'}
         </div>
-
-        <div id="breakdown-content-slot" style="display:none; padding:22px; border-top:1px solid var(--border-color); background:var(--bg-main);">
-          
-          <!-- 5-Step Linear Model Explanation Card -->
-          <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:12px; padding:16px 20px; margin-bottom:20px;">
-            <div style="font-weight:800; color:#1E40AF; font-size:0.95rem; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-              <i class="fas fa-circle-info"></i> How is Relative Crop Loss Estimated? (Simulated estimate)
-            </div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; font-size:0.8rem; color:#1E3A8A; margin-bottom:10px;">
-              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
-                <strong>1. Extra Exposure:</strong><br/>
-                Travel distance + Mandi yard wait + Processing time
-              </div>
-              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
-                <strong>2. Crop Sensitivity:</strong><br/>
-                Crop simulated base rate (${recommended.deterioration.cropBaseRatePercent || '0.1%'} / ref unit)
-              </div>
-              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
-                <strong>3. Weather Factor:</strong><br/>
-                Live weather multiplier (${recommended.deterioration.weatherFactor}x)
-              </div>
-              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
-                <strong>4. Deterioration %:</strong><br/>
-                Base Rate × Exposure × Weather (Capped at ${recommended.deterioration.maxDeteriorationCapPercent})
-              </div>
-              <div style="background:rgba(255,255,255,0.7); padding:8px 10px; border-radius:8px;">
-                <strong>5. Estimated Money Loss:</strong><br/>
-                Crop Value × Deterioration %
-              </div>
-            </div>
-            <div style="font-size:0.75rem; color:#3B82F6; font-style:italic;">
-              * Note: This is a relative/simulated estimate to compare options, not an exact prediction of physical crop deterioration.
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
-            
-            <!-- Recommended Option Breakdown -->
-            <div style="background:var(--bg-card); padding:18px; border-radius:12px; border:1px solid var(--saffron);">
-              <div style="font-weight:800; color:var(--saffron); margin-bottom:12px; font-size:0.95rem; display:flex; justify-content:space-between;">
-                <span>⭐ ${recommended.shortName || recommended.centerName}</span>
-                <span class="status-pill completed" style="font-size:0.7rem;">RECOMMENDED</span>
-              </div>
-              <div style="display:flex; flex-direction:column; gap:8px; font-size:0.88rem;">
-                <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">Accepted Produce:</span>
-                  <strong>${recommended.acceptedQuantity} Quintals</strong>
-                </div>
-                <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">Expected Gross Revenue:</span>
-                  <strong>${recommended.formattedRevenue} <span style="font-size:0.75rem; color:var(--text-muted);">(@ ₹${recommended.pricePerQuintal}/Q)</span></strong>
-                </div>
-                <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">Estimated Transport Cost:</span>
-                  <strong style="color:#EF4444;">- ${recommended.formattedTransport}</strong>
-                </div>
-                <div style="display:flex; justify-content:space-between;">
-                  <span style="color:var(--text-muted);">Estimated Storage & Waiting Cost:</span>
-                  <strong style="color:#EF4444;">- ${recommended.formattedStorage}</strong>
-                </div>
-                <div style="display:flex; justify-content:space-between; background:rgba(239,68,68,0.06); padding:4px 8px; border-radius:6px;">
-                  <span style="color:#991B1B; font-weight:600;">Estimated Crop Loss (${recommended.deterioration.deteriorationPercentDisplay}):</span>
-                  <strong style="color:#DC2626;">- ${recommended.formattedDeterioration}</strong>
-                </div>
-                <div style="display:flex; justify-content:space-between; padding-top:10px; margin-top:4px; border-top:1px dashed var(--border-color); font-size:1.05rem; font-weight:900; color:var(--green-gov);">
-                  <span>Expected Net Economic Value (NEV):</span>
-                  <span>${recommended.formattedNev}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Alternative Breakdown (If exists) -->
-            ${alternative ? `
-              <div style="background:var(--bg-card); padding:18px; border-radius:12px; border:1px solid var(--border-color);">
-                <div style="font-weight:800; color:var(--primary-navy); margin-bottom:12px; font-size:0.95rem; display:flex; justify-content:space-between;">
-                  <span>🚜 ${alternative.shortName || alternative.centerName}</span>
-                  <span class="status-pill waiting" style="font-size:0.7rem;">ALTERNATIVE</span>
-                </div>
-                <div style="display:flex; flex-direction:column; gap:8px; font-size:0.88rem;">
-                  <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">Accepted Produce:</span>
-                    <strong>${alternative.acceptedQuantity} Quintals</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">Expected Gross Revenue:</span>
-                    <strong>${alternative.formattedRevenue} <span style="font-size:0.75rem; color:var(--text-muted);">(@ ₹${alternative.pricePerQuintal}/Q)</span></strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">Estimated Transport Cost:</span>
-                    <strong style="color:#EF4444;">- ${alternative.formattedTransport}</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">Estimated Storage & Waiting Cost:</span>
-                    <strong style="color:#EF4444;">- ${alternative.formattedStorage}</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; background:rgba(239,68,68,0.06); padding:4px 8px; border-radius:6px;">
-                    <span style="color:#991B1B; font-weight:600;">Estimated Crop Loss (${alternative.deterioration.deteriorationPercentDisplay}):</span>
-                    <strong style="color:#DC2626;">- ${alternative.formattedDeterioration}</strong>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; padding-top:10px; margin-top:4px; border-top:1px dashed var(--border-color); font-size:1.05rem; font-weight:900; color:var(--primary-navy);">
-                    <span>Expected Net Economic Value (NEV):</span>
-                    <span>${alternative.formattedNev}</span>
-                  </div>
-                </div>
-              </div>
-            ` : ''}
-
-          </div>
-        </div>
+        <p style="font-size:0.86rem; color:var(--primary-navy); margin:0; line-height:1.45; font-weight:600;">
+          "${data.whyRecommended || data.whyTradeOff}"
+        </p>
       </div>
+
+      <!-- Action Button -->
+      <button 
+        class="btn ${isRec ? 'btn-primary' : 'btn-outline'}" 
+        style="width:100%; justify-content:center; padding:14px; font-size:1.05rem; font-weight:800; border-radius:12px;"
+        onclick="selectAndProceedToBooking('${data.centerId}', '${data.crop}', ${data.acceptedQuantity})"
+      >
+        <i class="fas fa-check-circle"></i> Choose This Centre
+      </button>
 
     </div>
   `;
 };
 
 /**
- * Toggle Expandable Transparent Calculation
+ * Transparent Economic Calculation Table
  */
-const toggleTransparentBreakdown = () => {
-  const slot = document.getElementById('breakdown-content-slot');
-  const icon = document.getElementById('breakdown-toggle-icon');
-  if (!slot) return;
-
-  if (slot.style.display === 'none' || slot.style.display === '') {
-    slot.style.display = 'block';
-    if (icon) icon.style.transform = 'rotate(180deg)';
-  } else {
-    slot.style.display = 'none';
-    if (icon) icon.style.transform = 'rotate(0deg)';
-  }
+const renderBreakdownTable = (rec, alt) => {
+  return `
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.88rem; text-align:left;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border-color); color:var(--primary-navy);">
+            <th style="padding:10px 14px;">Calculation Factor</th>
+            <th style="padding:10px 14px;">⭐ ${rec.shortName}</th>
+            ${alt ? `<th style="padding:10px 14px;">🚜 ${alt.shortName}</th>` : ''}
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:10px 14px; font-weight:600;">Destination Weather Condition</td>
+            <td style="padding:10px 14px;"><i class="fas ${rec.weatherClassification.icon}"></i> ${rec.weatherClassification.label}</td>
+            ${alt ? `<td style="padding:10px 14px;"><i class="fas ${alt.weatherClassification.icon}"></i> ${alt.weatherClassification.label}</td>` : ''}
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:10px 14px; font-weight:600;">Expected Transit Window</td>
+            <td style="padding:10px 14px;">${rec.weatherDelay.arrivalDisplay}</td>
+            ${alt ? `<td style="padding:10px 14px;">${alt.weatherDelay.arrivalDisplay}</td>` : ''}
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:10px 14px; font-weight:600;">Gross Produce Value (Q × Price)</td>
+            <td style="padding:10px 14px; font-weight:700;">${rec.formattedRevenue}</td>
+            ${alt ? `<td style="padding:10px 14px; font-weight:700;">${alt.formattedRevenue}</td>` : ''}
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:10px 14px; font-weight:600;">Transport Logistics Cost (−)</td>
+            <td style="padding:10px 14px; color:#EF4444;">− ${rec.formattedTransport}</td>
+            ${alt ? `<td style="padding:10px 14px; color:#EF4444;">− ${alt.formattedTransport}</td>` : ''}
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:10px 14px; font-weight:600;">Yard Delay & Queue Cost (−)</td>
+            <td style="padding:10px 14px; color:#D97706;">− ${rec.formattedDelay}</td>
+            ${alt ? `<td style="padding:10px 14px; color:#D97706;">− ${alt.formattedDelay}</td>` : ''}
+          </tr>
+          <tr style="border-bottom:2px solid var(--border-color); background:rgba(16,185,129,0.06);">
+            <td style="padding:12px 14px; font-weight:800; color:var(--primary-navy);">Expected Net Economic Value (NEV)</td>
+            <td style="padding:12px 14px; font-weight:900; color:#047857; font-size:1.1rem;">${rec.formattedNev}</td>
+            ${alt ? `<td style="padding:12px 14px; font-weight:900; color:#047857; font-size:1.1rem;">${alt.formattedNev}</td>` : ''}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
 };
 
-/**
- * Handle Edge Case: No Centres Available View
- */
-const renderNoCentresAvailableView = (message) => {
+const toggleBreakdownAccordion = () => {
+  const body = document.getElementById('breakdown-accordion-body');
+  const icon = document.getElementById('breakdown-chevron');
+  if (!body) return;
+  const isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (icon) icon.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+};
+
+const selectAndProceedToBooking = (centreId, cropName, quantity) => {
+  showToast('Booking slot with selected centre recommendations...', 'success');
+  routeTo('#book-slot');
+  setTimeout(() => {
+    const cropSelect = document.getElementById('booking-crop');
+    const qtyInput = document.getElementById('booking-quantity');
+    const centreSelect = document.getElementById('booking-center');
+    if (cropSelect) cropSelect.value = cropName;
+    if (qtyInput) qtyInput.value = quantity;
+    if (centreSelect) centreSelect.value = centreId;
+  }, 250);
+};
+
+const renderNoCentresAvailableView = (msg) => {
   const container = document.getElementById('smart-booking-stage-container');
   if (!container) return;
-
   container.innerHTML = `
     <div class="glass-panel" style="padding:48px 24px; text-align:center; border-radius:18px;">
-      <div style="width:64px; height:64px; border-radius:50%; background:#FEE2E2; color:#DC2626; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.8rem;">
-        <i class="fas fa-store-slash"></i>
-      </div>
-      <h3 style="font-size:1.4rem; font-weight:800; color:var(--primary-navy); margin-bottom:8px;">
-        No Suitable Procurement Centre Currently Available
-      </h3>
-      <p style="color:var(--text-muted); font-size:0.95rem; max-width:550px; margin:0 auto 24px;">
-        ${message} You can try selecting a different registered crop or inspect standard mandi schedules.
-      </p>
-      <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="renderSmartBookingForm()">
-          <i class="fas fa-wheat-awn"></i> Choose Another Crop
-        </button>
-        <button class="btn btn-outline" onclick="routeTo('#book-slot')">
-          <i class="fas fa-building"></i> View All Mandi Centers
-        </button>
-      </div>
+      <div style="font-size:3rem; color:#EF4444; margin-bottom:16px;"><i class="fas fa-circle-xmark"></i></div>
+      <h3 style="color:var(--primary-navy); font-weight:800;">No Eligible Centres Found</h3>
+      <p style="color:var(--text-muted); max-width:500px; margin:8px auto 24px;">${msg}</p>
+      <button class="btn btn-primary" onclick="renderSmartBookingForm()">Try Another Crop</button>
     </div>
   `;
 };
 
-/**
- * Modal to view All Ranked Centres
- */
 const openOtherCentresModal = () => {
   const results = smartBookingState.results;
-  if (!results || !results.rankedResults) return;
-
+  if (!results) return;
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
-  document.getElementById('modal-title').textContent = `All Eligible Mandis for ${smartBookingState.selectedCrop}`;
-
+  document.getElementById('modal-title').textContent = `All Eligible Mandis for ${results.crop}`;
   body.innerHTML = `
     <div>
-      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
-        Ranked in order of estimated net outcome for ${smartBookingState.quantity} Quintals.
-      </p>
-      <div style="display:flex; flex-direction:column; gap:12px; max-height:420px; overflow-y:auto; padding-right:4px;">
-        ${results.rankedResults.map((c, idx) => `
-          <div class="glass-card" style="padding:14px; border-radius:12px; border:${idx === 0 ? '2px solid var(--saffron)' : '1px solid var(--border-color)'};">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-              <div>
-                <strong style="color:var(--primary-navy); font-size:1rem;">#${idx + 1} ${c.shortName || c.centerName}</strong>
-                <div style="font-size:0.78rem; color:var(--text-muted);">${c.district}, ${c.state} • ${c.distance} km away</div>
-              </div>
-              <div style="text-align:right;">
-                <div style="font-weight:900; color:var(--green-gov); font-size:1.05rem;">${c.formattedNev}</div>
-                <div style="font-size:0.72rem; color:var(--text-muted);">Rate: ₹${c.pricePerQuintal}/Q</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        ${results.rankedResults.map((r, idx) => `
+          <div style="padding:14px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-card); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; color:var(--primary-navy);">#${idx + 1} ${r.shortName}</div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">
+                ${r.distance} km away &bull; ~${r.waitingDays} day wait &bull; ${r.weatherClassification.label}
               </div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid var(--border-color); font-size:0.8rem;">
-              <span style="color:var(--text-muted);">Wait: ~${c.waitingDays} day(s) | Travel: ${c.formattedTransport}</span>
-              <button class="btn btn-primary btn-sm" onclick="closeModal(); selectAndProceedToBooking('${c.centerId}', '${c.crop}', ${c.acceptedQuantity})">
-                Select This
-              </button>
+            <div style="text-align:right;">
+              <div style="font-weight:800; color:#047857;">${r.formattedNev}</div>
+              <button class="btn btn-outline btn-sm" style="margin-top:4px;" onclick="closeModal(); selectAndProceedToBooking('${r.centerId}', '${r.crop}', ${r.acceptedQuantity})">Select</button>
             </div>
           </div>
         `).join('')}
       </div>
     </div>
   `;
-
   modal.classList.add('active');
 };
-
-/**
- * Selection & Seamless Transition to Existing Slot Booking System (#book-slot)
- */
-const selectAndProceedToBooking = (centerId, cropName, quantity) => {
-  // Store prefill information globally
-  window.smartBookingPrefill = {
-    centerId: centerId,
-    crop: cropName,
-    quantity: quantity || smartBookingState.quantity
-  };
-
-  showToast(`Selected ${cropName} (${quantity} Q). Opening slot reservation...`, 'success');
-
-  // Navigate to existing #book-slot portal
-  routeTo('#book-slot');
-};
-
-// Global exports
-if (typeof window !== 'undefined') {
-  window.loadSmartBookingPage = loadSmartBookingPage;
-  window.selectSmartCrop = selectSmartCrop;
-  window.onSmartQuantityChange = onSmartQuantityChange;
-  window.setQuickQuantity = setQuickQuantity;
-  window.handleFindBestOptionClick = handleFindBestOptionClick;
-  window.toggleTransparentBreakdown = toggleTransparentBreakdown;
-  window.openOtherCentresModal = openOtherCentresModal;
-  window.selectAndProceedToBooking = selectAndProceedToBooking;
-}

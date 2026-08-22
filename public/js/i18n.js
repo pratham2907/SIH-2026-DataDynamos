@@ -23,7 +23,10 @@ const translations = {
     step4_title: "4. Quality & Weigh",
     step4_desc: "Transparent moisture inspection & digital scale measurement.",
     step5_title: "5. Instant DBT",
-    step5_desc: "Payment credited directly to your bank account within 48 hours."
+    step5_desc: "Payment credited directly to your bank account within 48 hours.",
+    perishability_high: "High Perishable",
+    perishability_medium: "Medium Perishable",
+    perishability_low: "Low Perishable"
   },
   hi: {
     system_title: "किसान खरीद प्रबंधन प्रणाली",
@@ -49,7 +52,10 @@ const translations = {
     step4_title: "४. गुणवत्ता एवं तुलाई",
     step4_desc: "पारदर्शी नमी परीक्षण एवं डिजिटल कांटा माप।",
     step5_title: "५. सीधा डीबीटी भुगतान",
-    step5_desc: "उपार्जन पूर्ण होने पर सीधे बैंक खाते में भुगतान।"
+    step5_desc: "उपार्जन पूर्ण होने पर सीधे बैंक खाते में भुगतान।",
+    perishability_high: "अत्यधिक खराब होने वाली (High Perishable)",
+    perishability_medium: "मध्यम खराब होने वाली (Medium Perishable)",
+    perishability_low: "कम खराब होने वाली (Low Perishable)"
   },
   gu: {
     system_title: "કિસાન ખરીદ વ્યવસ્થાપન પ્રણાલી",
@@ -75,7 +81,10 @@ const translations = {
     step4_title: "૪. ગુણવત્તા ચકાસણી",
     step4_desc: "નમી અને વજનની પારદર્શક ચકાસણી.",
     step5_title: "૫. સીધી ચુકવણી",
-    step5_desc: "સીધા બેંક ખાતામાં ૪૮ કલાકમાં પૈસા."
+    step5_desc: "સીધા બેંક ખાતામાં ૪૮ કલાકમાં પૈસા.",
+    perishability_high: "વધુ બગડતી જણસ (High Perishable)",
+    perishability_medium: "મધ્યમ બગડતી જણસ (Medium Perishable)",
+    perishability_low: "ઓછી બગડતી જણસ (Low Perishable)"
   },
   mr: {
     system_title: "किसान खरेदी व्यवस्थापन प्रणाली",
@@ -101,7 +110,10 @@ const translations = {
     step4_title: "४. प्रतवारी व वजन",
     step4_desc: "डिजिटल काट्यावर पारदर्शक मोजमाप.",
     step5_title: "५. बँक खात्यात पैसे",
-    step5_desc: "थेट बँक खात्यात हमीभाव रक्कम वर्ग."
+    step5_desc: "थेट बँक खात्यात हमीभाव रक्कम वर्ग.",
+    perishability_high: "अति नाशवंत (High Perishable)",
+    perishability_medium: "मध्यम नाशवंत (Medium Perishable)",
+    perishability_low: "कमी नाशवंत (Low Perishable)"
   },
   pa: {
     system_title: "ਕਿਸਾਨ ਖਰੀਦ ਪ੍ਰਬੰਧਨ ਪ੍ਰਣਾਲੀ",
@@ -127,7 +139,10 @@ const translations = {
     step4_title: "੪. ਕੁਆਲਿਟੀ ਤੇ ਤੁਲਾਈ",
     step4_desc: "ਪਾਰਦਰਸ਼ੀ ਨਮੀ ਜਾਂਚ ਅਤੇ ਡਿਜੀਟਲ ਕੰਡਾ।",
     step5_title: "੫. ਸਿੱਧਾ ਭੁਗਤਾਨ",
-    step5_desc: "ਸਿੱਧਾ ਬੈਂਕ ਖਾਤੇ ਵਿੱਚ ਐਮਐਸਪੀ ਜਮ੍ਹਾਂ।"
+    step5_desc: "ਸਿੱਧਾ ਬੈਂਕ ਖਾਤੇ ਵਿੱਚ ਐਮਐਸਪੀ ਜਮ੍ਹਾਂ।",
+    perishability_high: "ਜਲਦੀ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (High Perishable)",
+    perishability_medium: "ਦਰਮਿਆਨੀ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (Medium Perishable)",
+    perishability_low: "ਘੱਟ ਖਰਾਬ ਹੋਣ ਵਾਲੀ (Low Perishable)"
   },
   ta: {
     system_title: "விவசாயிகள் கொள்முதல் மேலாண்மை அமைப்பு",
@@ -153,7 +168,10 @@ const translations = {
     step4_title: "4. தரம் மற்றும் எடை",
     step4_desc: "துல்லியமான எடை மற்றும் தர மதிப்பீடு.",
     step5_title: "5. வங்கி பரிமாற்றம்",
-    step5_desc: "நேரடியாக வங்கி கணக்கில் பணம்."
+    step5_desc: "நேரடியாக வங்கி கணக்கில் பணம்.",
+    perishability_high: "எளிதில் அழுகக்கூடியது (High Perishable)",
+    perishability_medium: "மிதமான அழுகக்கூடியது (Medium Perishable)",
+    perishability_low: "குறைந்த அழுகக்கூடியது (Low Perishable)"
   },
   te: {
     system_title: "కిసాన్ సేకరణ నిర్వహణ వ్యవస్థ",
@@ -176,10 +194,13 @@ const translations = {
     step2_desc: "తేదీ మరియు సమయం ఎంచుకుని QR పాస్ పొందండి.",
     step3_title: "3. చెక్-ఇన్",
     step3_desc: "గేట్ వద్ద QR స్కాన్ చేసి టోకెన్ తీసుకోండి.",
-    step4_title: "4. నాణ్యత & బరువు",
+    step4_title: "4. నాణ್ಯత & బరువు",
     step4_desc: "పారదర్శక బరువు మరియు నాణ్యత తనిఖీ.",
     step5_title: "5. ప్రత్యక్ష చెల్లింపు",
-    step5_desc: "బ్యాంకు ఖాతాలో నేరుగా నగదు జమ."
+    step5_desc: "బ్యాంకు ఖాతాలో నేరుగా నగదు జమ.",
+    perishability_high: "త్వరగా పాడయ్యే పంట (High Perishable)",
+    perishability_medium: "మధ్యస్థంగా పాడయ్యే పంట (Medium Perishable)",
+    perishability_low: "తక్కువ పాడయ్యే పంట (Low Perishable)"
   },
   kn: {
     system_title: "ಕಿಸಾನ್ ಖರೀದಿ ನಿರ್ವಹಣಾ ವ್ಯವಸ್ಥೆ",
@@ -205,7 +226,10 @@ const translations = {
     step4_title: "೪. ತೂಕ ಮತ್ತು ಗುಣಮಟ್ಟ",
     step4_desc: "ಡಿಜಿಟಲ್ ಮಾಪನ ಮತ್ತು ತಪಾಸಣೆ.",
     step5_title: "೫. ನೇರ ಪಾವತಿ",
-    step5_desc: "ನೇರವಾಗಿ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಹಣ ಜಮೆ."
+    step5_desc: "ನೇರವಾಗಿ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಹಣ ಜಮೆ.",
+    perishability_high: "ಬೇಗನೆ ಹಾಳಾಗುವ ಬೆಳೆ (High Perishable)",
+    perishability_medium: "ಮಧ್ಯಮ ಹಾಳಾಗುವ ಬೆಳೆ (Medium Perishable)",
+    perishability_low: "ಕಡಿಮೆ ಹಾಳಾಗುವ ಬೆಳೆ (Low Perishable)"
   },
   bn: {
     system_title: "কিষাণ সংগ্রহ ব্যবস্থাপনা পদ্ধতি",
@@ -231,7 +255,10 @@ const translations = {
     step4_title: "৪. মান ও ওজন",
     step4_desc: "স্বচ্ছ আর্দ্রতা পরীক্ষা এবং ডিজিটাল ওজন।",
     step5_title: "৫. সরাসরি ব্যাঙ্ক ট্রান্সফার",
-    step5_desc: "সরাসরি ব্যাঙ্ক অ্যাকাউন্টে এমএসপি টাকা জমা।"
+    step5_desc: "সরাসরি ব্যাঙ্ক অ্যাকাউন্টে এমএসপি টাকা জমা।",
+    perishability_high: "দ্রুত পচনশীল (High Perishable)",
+    perishability_medium: "মাঝারি পচনশীল (Medium Perishable)",
+    perishability_low: "কম পচনশীল (Low Perishable)"
   }
 };
 

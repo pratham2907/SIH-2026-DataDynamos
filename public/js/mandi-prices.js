@@ -388,6 +388,16 @@ const fetchMandiPricesForCommodity = async () => {
   }
 };
 
+const getPerishabilityBadge = (name) => {
+  const lower = (name || '').toLowerCase();
+  if (lower.includes('tomato') || lower.includes('leafy') || lower.includes('vegetable')) {
+    return '<span style="color:#DC2626; font-weight:800; font-size:0.75rem; background:#FEE2E2; padding:2px 8px; border-radius:10px;">🔴 HIGH PERISHABILITY</span>';
+  } else if (lower.includes('potato') || lower.includes('paddy') || lower.includes('rice') || lower.includes('soya')) {
+    return '<span style="color:#D97706; font-weight:800; font-size:0.75rem; background:#FEF3C7; padding:2px 8px; border-radius:10px;">🟠 MEDIUM PERISHABILITY</span>';
+  }
+  return '<span style="color:#047857; font-weight:800; font-size:0.75rem; background:#DCFCE7; padding:2px 8px; border-radius:10px;">🟢 LOW PERISHABILITY</span>';
+};
+
 /**
  * Render Spotlight Summary Box for Active Commodity
  */
@@ -407,9 +417,12 @@ const renderCommoditySpotlight = (cropMeta, datasetInfo) => {
             <i class="fas ${cropMeta.icon}"></i>
           </div>
           <div>
-            <h4 style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin:0;">
-              ${cropMeta.name} (${cropMeta.hindi})
-            </h4>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h4 style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin:0;">
+                ${cropMeta.name} (${cropMeta.hindi})
+              </h4>
+              ${getPerishabilityBadge(cropMeta.name)}
+            </div>
             <span style="font-size:0.75rem; color:var(--text-muted);">
               Category: <strong>${cropMeta.category.toUpperCase()}</strong> • API: ${datasetInfo.apiSource}
             </span>

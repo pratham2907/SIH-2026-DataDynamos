@@ -153,4 +153,28 @@ router.get('/email/status', emailCtrl.getEmailConfigStatus);
 router.post('/email/send-test', emailCtrl.sendTestEmail);
 router.post('/email/send', emailCtrl.sendCustomEmailEndpoint);
 
+// ----------------------------------------------------
+// 13. LIVE WEATHER & AGRO-METEOROLOGICAL ROUTES
+// ----------------------------------------------------
+const { getCentreWeather, getLiveWeatherAlerts } = require('../services/weatherService');
+router.get('/weather/centre', async (req, res) => {
+  try {
+    const lat = parseFloat(req.query.lat) || 23.2599;
+    const lon = parseFloat(req.query.lon) || 77.4126;
+    const city = req.query.city || 'Bhopal';
+    const data = await getCentreWeather(lat, lon, city);
+    return res.json({ success: true, data });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+router.get('/weather/alerts', async (req, res) => {
+  try {
+    const data = await getLiveWeatherAlerts();
+    return res.json({ success: true, data });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;

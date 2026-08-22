@@ -208,6 +208,119 @@ const classifyOpenMeteoAlert = (data, location) => {
 };
 
 /**
+ * Fetch from OpenWeatherMap API (if OPENWEATHER_API_KEY is configured in .env)
+ */
+const fetchOpenWeatherMap = (lat, lon) => {
+  const apiKey = process.env.OPENWEATHER_API_KEY || process.env.OPENWEATHERMAP_API_KEY;
+  if (!apiKey) return Promise.reject(new Error('No OpenWeather API key configured'));
+  return new Promise((resolve, reject) => {
+    const path = `/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    const options = { hostname: 'api.openweathermap.org', path, method: 'GET' };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.cod && Number(parsed.cod) !== 200) {
+            reject(new Error(`OpenWeather API: ${parsed.message}`));
+          } else {
+            resolve(parsed);
+          }
+        } catch (e) {
+          reject(new Error('Invalid JSON from OpenWeather API'));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(8000, () => { req.destroy(); reject(new Error('OpenWeather timeout')); });
+    req.end();
+  });
+};
+
+// In-memory weather cache (10 minute TTL to prevent unnecessary API hammering)
+const weatherCache = new Map();
+const CACHE_TTL_MS = 10 * 60 * 1000;
+
+/**
+ * Get weather for a specific mandi centre location
+ */
+const getCentreWeather = async (lat = 23.2599, lon = 77.4126, cityName = 'Bhopal') => {
+  const cacheKey = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+  const cached = weatherCache.get(cacheKey);
+  if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+    return cached.data;
+  }
+
+  try {
+    // 1. Try OpenWeatherMap if key is provided
+    if (process.env.OPENWEATHER_API_KEY || process.env.OPENWEATHERMAP_API_KEY) {
+      try {
+        const owm = await fetchOpenWeatherMap(lat, lon);
+        const data = {
+          city: cityName || owm.name,
+          lat,
+          lon,
+          temp: Math.round(owm.main.temp * 10) / 10,
+          feelsLike: Math.round(owm.main.feels_like * 10) / 10,
+          humidity: owm.main.humidity,
+          precipitation: owm.rain ? (owm.rain['1h'] || owm.rain['3h'] || 0) : 0,
+          condition: owm.weather[0] ? owm.weather[0].main : 'Clear',
+          description: owm.weather[0] ? owm.weather[0].description : 'Clear sky',
+          icon: owm.weather[0] ? owm.weather[0].icon : '01d',
+          windSpeed: owm.wind ? owm.wind.speed : 2.5,
+          visibility: owm.visibility ? (owm.visibility / 1000).toFixed(1) : 10.0,
+          source: 'OpenWeather'
+        };
+        weatherCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data;
+      } catch (owmErr) {
+        // Fall back to Open-Meteo gracefully
+      }
+    }
+
+    // 2. Open-Meteo High-Accuracy Agro Weather
+    const meteo = await fetchWeatherOpenMeteo(lat, lon);
+    const alert = classifyOpenMeteoAlert(meteo, { city: cityName, state: 'India' });
+    const live = alert.liveData;
+    const data = {
+      city: cityName,
+      lat,
+      lon,
+      temp: Number(live.temp),
+      feelsLike: Number(live.feelsLike),
+      humidity: Number(live.humidity),
+      precipitation: Number(meteo.current.precipitation || 0),
+      condition: live.condition,
+      description: live.description,
+      icon: live.icon,
+      windSpeed: Number(live.windSpeed),
+      visibility: live.visibility !== 'N/A' ? Number(live.visibility) : 10.0,
+      source: 'OpenWeather/Open-Meteo'
+    };
+    weatherCache.set(cacheKey, { timestamp: Date.now(), data });
+    return data;
+  } catch (err) {
+    // 3. Graceful Fallback if offline/network error
+    return {
+      city: cityName,
+      lat,
+      lon,
+      temp: 28.0,
+      feelsLike: 29.0,
+      humidity: 55,
+      precipitation: 0.0,
+      condition: 'Clear',
+      description: 'Clear sky (Offline proxy estimate)',
+      icon: '01d',
+      windSpeed: 3.0,
+      visibility: 10.0,
+      source: 'Fallback'
+    };
+  }
+};
+
+/**
  * Get live weather alerts for all mandi districts
  */
 const getLiveWeatherAlerts = async () => {
@@ -221,7 +334,7 @@ const getLiveWeatherAlerts = async () => {
   const alerts = results.filter(r => r.status === 'fulfilled').map(r => r.value);
 
   if (errors.length > 0) {
-    console.log(`⚠️  Open-Meteo issues: ${[...new Set(errors)].join(' | ')}`);
+    console.log(`⚠️  Weather service notice: ${[...new Set(errors)].join(' | ')}`);
   }
 
   if (alerts.length === 0) {
@@ -255,4 +368,9 @@ const getFallbackAlerts = () => [
   }
 ];
 
-module.exports = { getLiveWeatherAlerts };
+module.exports = {
+  getLiveWeatherAlerts,
+  getCentreWeather,
+  fetchOpenWeatherMap,
+  fetchWeatherOpenMeteo
+};

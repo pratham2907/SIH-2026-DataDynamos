@@ -49,26 +49,14 @@ const openLoginModal = () => {
 
   body.innerHTML = `
     <div>
-      <!-- Quick Login Bar -->
-      <div style="background:var(--bg-main); padding:12px; border-radius:8px; margin-bottom:18px;">
-        <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">
-          ⚡ 1-Click Quick Login:
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn btn-primary btn-sm" onclick="demoLogin('farmer')"><i class="fas fa-tractor"></i> Farmer</button>
-          <button class="btn btn-navy btn-sm" onclick="demoLogin('officer')"><i class="fas fa-shield-halved"></i> Officer</button>
-          <button class="btn btn-outline btn-sm" onclick="demoLogin('admin')"><i class="fas fa-landmark"></i> Super Admin</button>
-        </div>
-      </div>
-
       <form onsubmit="handleLoginForm(event)">
         <div class="form-group">
           <label class="form-label"><i class="fas fa-user"></i> Registered Mobile Number or Email *</label>
-          <input type="text" name="identifier" class="form-control" placeholder="e.g. 9876543210 or ramesh@farmer.in" value="ramesh@farmer.in" required />
+          <input type="text" name="identifier" class="form-control" placeholder="e.g. 9876543210 or ramesh@farmer.in" required autocomplete="username" />
         </div>
         <div class="form-group">
           <label class="form-label"><i class="fas fa-lock"></i> Password *</label>
-          <input type="password" name="password" class="form-control" placeholder="••••••••" value="Kisan@123" required />
+          <input type="password" name="password" class="form-control" placeholder="Enter your portal password" required autocomplete="current-password" />
         </div>
         <div class="form-group">
           <label class="form-label"><i class="fas fa-shield"></i> Portal Role (Optional)</label>

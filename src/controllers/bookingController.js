@@ -5,6 +5,7 @@ const { generateQRCode } = require('../services/qrService');
 const { generateBookingPassPDF } = require('../services/pdfService');
 const { sendNotification } = require('../services/notificationService');
 const { emitToCenter } = require('../services/socketService');
+const { sendSlotBookingEmail } = require('../services/emailService');
 
 /**
  * Helper to generate time slot intervals
@@ -202,14 +203,33 @@ const bookSlot = async (req, res) => {
       ]
     });
 
-    // Send Notification
+    const farmerEmail = farmer.email || (req.user && req.user.email) || 'upadhyayhem0@gmail.com';
+
+    // Dispatch dedicated Brevo email confirmation to the logged in farmer
+    sendSlotBookingEmail({
+      to: farmerEmail,
+      fullName: farmer.fullName,
+      booking: {
+        tokenNumber: bookingNumber,
+        centerName: center.name,
+        slotTime: `${date} (${timeSlot})`,
+        cropName,
+        quantity
+      }
+    }).then(res => {
+      console.log(`📧 Slot booking confirmation email dispatched to ${farmerEmail} (Provider: ${res.provider})`);
+    }).catch(err => {
+      console.error('Booking confirmation email error:', err);
+    });
+
+    // Send In-App Notification & SMS log
     await sendNotification({
       userId,
       role: 'farmer',
       title: 'Slot Booking Confirmed',
       message: `Your slot for ${cropName} (${quantity} Q) at ${center.name} on ${date} (${timeSlot}) is confirmed. Booking No: ${bookingNumber}`,
       type: 'booking',
-      metadata: { bookingNumber, date, timeSlot, mobile: farmer.mobile, email: farmer.email }
+      metadata: { bookingNumber, date, timeSlot, mobile: farmer.mobile, email: farmerEmail, fullName: farmer.fullName }
     });
 
     // Real-time update for center officer dashboard
