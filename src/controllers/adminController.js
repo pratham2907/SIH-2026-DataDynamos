@@ -1,5 +1,5 @@
 const {
-  Users, Farmers, Centers, Bookings, Queues, Procurements, Payments, Inventory, AuditLogs, Backups, Holidays, getMemoryStore
+  Users, Farmers, Centers, Bookings, Queues, Procurements, Payments, Inventory, AuditLogs, Backups, Holidays
 } = require('../models/dbStore');
 const bcrypt = require('bcryptjs');
 
@@ -99,16 +99,39 @@ const getNationalMapData = async (req, res) => {
 /**
  * Center Management CRUD
  */
+/**
+ * Center Management CRUD
+ */
+const getCenters = async (req, res) => {
+  try {
+    const centers = await Centers.find({});
+    return res.json({ success: true, data: centers });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 const createCenter = async (req, res) => {
   try {
     const count = await Centers.countDocuments();
     const centerId = req.body.centerId || `CTR-${String(count + 1).padStart(2, '0')}`;
     const newCenter = await Centers.create({
       centerId,
-      isActive: true,
-      ...req.body
+      isActive: req.body.isActive !== undefined ? req.body.isActive : true,
+      name: req.body.name || 'APMC Mandi',
+      state: req.body.state || 'Madhya Pradesh',
+      district: req.body.district || 'Bhopal',
+      fullAddress: req.body.fullAddress || req.body.address || 'APMC Yard',
+      latitude: parseFloat(req.body.latitude || req.body.lat || 23.2599),
+      longitude: parseFloat(req.body.longitude || req.body.lng || 77.4126),
+      maxDailyCapacity: parseInt(req.body.maxDailyCapacity || req.body.capacity || 250),
+      countersCount: parseInt(req.body.countersCount || req.body.counters || 4),
+      openingTime: req.body.openingTime || '08:00 AM',
+      closingTime: req.body.closingTime || '06:00 PM',
+      contactNumber: req.body.contactNumber || '1800-180-1551',
+      supportedCrops: req.body.supportedCrops || ['Wheat', 'Paddy', 'Gram', 'Mustard']
     });
-    return res.status(201).json({ success: true, message: 'Center created', data: newCenter });
+    return res.status(201).json({ success: true, message: 'Mandi Center created successfully', data: newCenter });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -116,8 +139,16 @@ const createCenter = async (req, res) => {
 
 const updateCenter = async (req, res) => {
   try {
-    const updated = await Centers.findByIdAndUpdate(req.params.id, { $set: req.body });
-    return res.json({ success: true, message: 'Center updated', data: updated });
+    const { id } = req.params;
+    const updateData = { ...req.body };
+    if (updateData.maxDailyCapacity) updateData.maxDailyCapacity = parseInt(updateData.maxDailyCapacity);
+    if (updateData.countersCount) updateData.countersCount = parseInt(updateData.countersCount);
+
+    const updated = await Centers.findByIdAndUpdate(id, { $set: updateData }) ||
+      await Centers.findOneAndUpdate({ centerId: id }, { $set: updateData });
+
+    if (!updated) return res.status(404).json({ success: false, message: 'Mandi Center not found' });
+    return res.json({ success: true, message: 'Mandi Center updated successfully', data: updated });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -125,15 +156,16 @@ const updateCenter = async (req, res) => {
 
 const deleteCenter = async (req, res) => {
   try {
-    await Centers.findByIdAndDelete(req.params.id);
-    return res.json({ success: true, message: 'Center removed' });
+    const { id } = req.params;
+    await Centers.findByIdAndDelete(id) || await Centers.findOneAndDelete({ centerId: id });
+    return res.json({ success: true, message: 'Mandi Center removed successfully' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
 
 /**
- * Officer Management CRUD
+ * Officer Management CRUD & Center Allocation
  */
 const getOfficers = async (req, res) => {
   try {
@@ -147,6 +179,10 @@ const getOfficers = async (req, res) => {
 const createOfficer = async (req, res) => {
   try {
     const { name, email, mobile, password, designation, assignedCenterId, assignedCounter, shift } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ success: false, message: 'Officer name and email are required' });
+    }
+
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password || 'Officer@123', salt);
 
@@ -156,18 +192,52 @@ const createOfficer = async (req, res) => {
     const newOfficer = await Users.create({
       name,
       email,
-      mobile,
+      mobile: mobile || '9800000000',
       password: passwordHash,
       role: 'officer',
       officerId,
       designation: designation || 'Procurement Officer',
       assignedCenterId: assignedCenterId || 'CTR-01',
       assignedCounter: assignedCounter || 'Counter 1',
-      shift: shift || 'Morning Shift',
+      shift: shift || 'Morning (08:00 AM - 02:00 PM)',
       isVerified: true
     });
 
-    return res.status(201).json({ success: true, message: 'Officer created', data: newOfficer });
+    return res.status(201).json({ success: true, message: 'Officer created and allocated successfully', data: newOfficer });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const updateOfficer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, mobile, designation, assignedCenterId, assignedCounter, shift, isVerified } = req.body;
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (mobile !== undefined) updateData.mobile = mobile;
+    if (designation !== undefined) updateData.designation = designation;
+    if (assignedCenterId !== undefined) updateData.assignedCenterId = assignedCenterId;
+    if (assignedCounter !== undefined) updateData.assignedCounter = assignedCounter;
+    if (shift !== undefined) updateData.shift = shift;
+    if (isVerified !== undefined) updateData.isVerified = isVerified;
+
+    const officer = await Users.findByIdAndUpdate(id, { $set: updateData }) ||
+      await Users.findOneAndUpdate({ officerId: id }, { $set: updateData });
+
+    if (!officer) return res.status(404).json({ success: false, message: 'Officer record not found' });
+    return res.json({ success: true, message: 'Officer allocation updated successfully', data: officer });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const deleteOfficer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Users.findByIdAndDelete(id) || await Users.findOneAndDelete({ officerId: id });
+    return res.json({ success: true, message: 'Officer removed from system' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -246,19 +316,67 @@ const getAuditLogs = async (req, res) => {
 
 const backupDatabase = async (req, res) => {
   try {
-    const store = getMemoryStore();
+    const [usersCount, farmersCount, procurementsCount, paymentsCount] = await Promise.all([
+      Users.countDocuments(),
+      Farmers.countDocuments(),
+      Procurements.countDocuments(),
+      Payments.countDocuments()
+    ]);
     const backupId = `BKP-${Date.now()}`;
     await Backups.create({
       backupId,
       timestamp: new Date().toISOString(),
       recordCounts: {
-        users: store.users.length,
-        farmers: store.farmers.length,
-        procurements: store.procurements.length,
-        payments: store.payments.length
+        users: usersCount,
+        farmers: farmersCount,
+        procurements: procurementsCount,
+        payments: paymentsCount
       }
     });
-    return res.json({ success: true, message: `Database backup ${backupId} created successfully!` });
+    return res.json({ success: true, message: `National Database Snapshot (${backupId}) created successfully!` });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const getBackupsList = async (req, res) => {
+  try {
+    const list = await Backups.find({});
+    return res.json({ success: true, data: list.reverse() });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const exportDatabaseJSON = async (req, res) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const storePath = path.join(__dirname, '../../data-store.json');
+    if (fs.existsSync(storePath)) {
+      const data = fs.readFileSync(storePath, 'utf8');
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="KPMS_Database_Export_${new Date().toISOString().split('T')[0]}.json"`);
+      return res.send(data);
+    }
+    return res.status(404).json({ success: false, message: 'Data store file not found' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const restoreDatabase = async (req, res) => {
+  try {
+    const { backupData } = req.body;
+    if (!backupData) {
+      return res.status(400).json({ success: false, message: 'Valid backup JSON payload is required' });
+    }
+    const fs = require('fs');
+    const path = require('path');
+    const storePath = path.join(__dirname, '../../data-store.json');
+    const content = typeof backupData === 'string' ? backupData : JSON.stringify(backupData, null, 2);
+    fs.writeFileSync(storePath, content, 'utf8');
+    return res.json({ success: true, message: 'Database restored successfully from backup file!' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -267,13 +385,19 @@ const backupDatabase = async (req, res) => {
 module.exports = {
   getGovernmentDashboard,
   getNationalMapData,
+  getCenters,
   createCenter,
   updateCenter,
   deleteCenter,
   getOfficers,
   createOfficer,
+  updateOfficer,
+  deleteOfficer,
   moderateFarmer,
   getSystemAnalytics,
   getAuditLogs,
-  backupDatabase
+  backupDatabase,
+  getBackupsList,
+  exportDatabaseJSON,
+  restoreDatabase
 };

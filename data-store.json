@@ -2793,6 +2793,28 @@
       "action": "LOGIN",
       "details": "User logged in from ::1",
       "timestamp": "2026-08-22T10:28:18.270Z"
+    },
+    {
+      "_id": "a_mt492do0vgm49",
+      "createdAt": "2026-08-22T10:43:10.128Z",
+      "updatedAt": "2026-08-22T10:43:10.128Z",
+      "userId": "usr_admin_01",
+      "userName": "Dr. Rajesh Verma (IAS)",
+      "role": "admin",
+      "action": "LOGIN",
+      "details": "User logged in from ::1",
+      "timestamp": "2026-08-22T10:43:10.128Z"
+    },
+    {
+      "_id": "a_mt498z2rzowyw",
+      "createdAt": "2026-08-22T10:48:17.811Z",
+      "updatedAt": "2026-08-22T10:48:17.811Z",
+      "userId": "usr_admin_01",
+      "userName": "Dr. Rajesh Verma (IAS)",
+      "role": "admin",
+      "action": "LOGIN",
+      "details": "User logged in from ::1",
+      "timestamp": "2026-08-22T10:48:17.811Z"
     }
   ],
   "holidays": [],

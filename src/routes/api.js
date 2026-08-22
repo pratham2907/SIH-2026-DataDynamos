@@ -110,15 +110,21 @@ router.get('/officer/inventory', verifyToken, requireRole('officer', 'admin'), o
 // ----------------------------------------------------
 router.get('/admin/dashboard', verifyToken, requireRole('admin'), adminCtrl.getGovernmentDashboard);
 router.get('/admin/map-data', adminCtrl.getNationalMapData); // Accessible for national live map
+router.get('/admin/centers', verifyToken, requireRole('admin'), adminCtrl.getCenters);
 router.post('/admin/centers', verifyToken, requireRole('admin'), adminCtrl.createCenter);
 router.put('/admin/centers/:id', verifyToken, requireRole('admin'), adminCtrl.updateCenter);
 router.delete('/admin/centers/:id', verifyToken, requireRole('admin'), adminCtrl.deleteCenter);
 router.get('/admin/officers', verifyToken, requireRole('admin'), adminCtrl.getOfficers);
 router.post('/admin/officers', verifyToken, requireRole('admin'), adminCtrl.createOfficer);
+router.put('/admin/officers/:id', verifyToken, requireRole('admin'), adminCtrl.updateOfficer);
+router.delete('/admin/officers/:id', verifyToken, requireRole('admin'), adminCtrl.deleteOfficer);
 router.put('/admin/farmers/:farmerId/moderate', verifyToken, requireRole('admin'), adminCtrl.moderateFarmer);
 router.get('/admin/analytics', verifyToken, requireRole('admin'), adminCtrl.getSystemAnalytics);
 router.get('/admin/audit-logs', verifyToken, requireRole('admin'), adminCtrl.getAuditLogs);
+router.get('/admin/backups', verifyToken, requireRole('admin'), adminCtrl.getBackupsList);
 router.post('/admin/backup', verifyToken, requireRole('admin'), adminCtrl.backupDatabase);
+router.get('/admin/backup/export', verifyToken, requireRole('admin'), adminCtrl.exportDatabaseJSON);
+router.post('/admin/backup/restore', verifyToken, requireRole('admin'), adminCtrl.restoreDatabase);
 
 // ----------------------------------------------------
 // 9. AI, RECOMMENDATION & CHATBOT ROUTES
