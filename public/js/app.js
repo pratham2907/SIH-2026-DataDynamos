@@ -236,8 +236,10 @@ const renderRoute = (hash = window.location.hash || '#landing') => {
     loadFarmerFarmsPage();
   } else if (hash === '#farmer-profile') {
     loadFarmerProfilePage();
-  } else if (hash === '#officer-dashboard' || hash === '#officer-queue') {
+  } else if (hash === '#officer-dashboard') {
     loadOfficerDashboard();
+  } else if (hash === '#officer-queue') {
+    loadOfficerQueueView();
   } else if (hash === '#admin-dashboard') {
     loadAdminDashboard();
   } else if (hash === '#tv-display') {

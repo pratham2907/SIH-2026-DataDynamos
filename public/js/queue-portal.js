@@ -119,5 +119,9 @@ const refreshQueueView = () => {
   const hash = window.location.hash;
   if (hash === '#farmer-queue') {
     loadFarmerQueuePage();
+  } else if (hash === '#officer-queue' && typeof loadOfficerQueueView === 'function') {
+    loadOfficerQueueView(typeof currentOfficerQueueFilter !== 'undefined' ? currentOfficerQueueFilter : 'ALL');
+  } else if (hash === '#officer-dashboard' && typeof loadOfficerDashboard === 'function') {
+    loadOfficerDashboard();
   }
 };

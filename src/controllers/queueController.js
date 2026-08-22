@@ -222,23 +222,40 @@ const getFarmerQueueStatus = async (req, res) => {
  */
 const callNext = async (req, res) => {
   try {
-    const { centerId, counterNumber } = req.body;
-    const activeCenterId = centerId || req.user.assignedCenterId || 'CTR-01';
-    const activeCounter = counterNumber || req.user.assignedCounter || 'Counter 1';
+    const { centerId, counterNumber, tokenId } = req.body;
+    const activeCenterId = centerId || (req.user && req.user.assignedCenterId) || 'CTR-01';
+    const activeCounter = counterNumber || (req.user && req.user.assignedCounter) || 'Counter 1';
 
-    // Find first priority waiting, otherwise first waiting
-    const waitingTokens = await Queues.find({ centerId: activeCenterId, status: 'waiting' });
-    if (waitingTokens.length === 0) {
-      return res.status(404).json({ success: false, message: 'No waiting farmers in queue.' });
+    let targetToken;
+    if (tokenId) {
+      targetToken = await Queues.findById(tokenId);
+      if (!targetToken) {
+        return res.status(404).json({ success: false, message: 'Token not found in queue.' });
+      }
+    } else {
+      // Find waiting tokens in center
+      let query = { centerId: activeCenterId, status: 'waiting' };
+      if (counterNumber) {
+        query.counterNumber = counterNumber;
+      }
+      let waitingTokens = await Queues.find(query);
+      if (waitingTokens.length === 0 && counterNumber) {
+        waitingTokens = await Queues.find({ centerId: activeCenterId, status: 'waiting' });
+      }
+      if (waitingTokens.length === 0) {
+        return res.status(404).json({ success: false, message: 'No waiting farmers in queue.' });
+      }
+
+      // Priority sort: priority farmers first
+      waitingTokens.sort((a, b) => (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0));
+      targetToken = waitingTokens[0];
     }
 
-    // Priority sort: priority farmers first
-    waitingTokens.sort((a, b) => (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0));
-    const targetToken = waitingTokens[0];
+    const assignedCounter = targetToken.counterNumber || activeCounter;
 
     const updated = await Queues.findByIdAndUpdate(targetToken._id, {
       status: 'called',
-      counterNumber: activeCounter,
+      counterNumber: assignedCounter,
       officerId: req.user ? req.user.officerId : 'OFF-01',
       calledTime: new Date().toISOString()
     });
@@ -249,8 +266,8 @@ const callNext = async (req, res) => {
       await sendNotification({
         userId: booking.userId,
         role: 'farmer',
-        title: `Your Turn! Proceed to ${activeCounter}`,
-        message: `Token ${targetToken.tokenNumber}: Please proceed immediately to ${activeCounter} for quality inspection.`,
+        title: `Your Turn! Proceed to ${assignedCounter}`,
+        message: `Token ${targetToken.tokenNumber}: Please proceed immediately to ${assignedCounter} for quality inspection.`,
         type: 'queue'
       });
     }
@@ -259,12 +276,12 @@ const callNext = async (req, res) => {
     emitToCenter(activeCenterId, 'queue:called', {
       tokenNumber: targetToken.tokenNumber,
       farmerName: targetToken.farmerName,
-      counterNumber: activeCounter
+      counterNumber: assignedCounter
     });
 
     return res.json({
       success: true,
-      message: `Token ${targetToken.tokenNumber} called to ${activeCounter}!`,
+      message: `Token ${targetToken.tokenNumber} called to ${assignedCounter}!`,
       data: updated
     });
   } catch (err) {
