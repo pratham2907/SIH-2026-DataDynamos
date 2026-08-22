@@ -218,6 +218,10 @@ const routeTo = (hash) => {
 const renderRoute = (hash = window.location.hash || '#landing') => {
   if (hash === '#landing' || hash === '' || hash === '#') {
     renderLandingPage();
+  } else if (hash === '#smart-booking') {
+    loadSmartBookingPage();
+  } else if (hash === '#mandi-prices') {
+    loadMandiPricesPage();
   } else if (hash === '#farmer-dashboard') {
     loadFarmerDashboard();
   } else if (hash === '#book-slot') {
@@ -253,7 +257,8 @@ const renderLandingPage = () => {
           Kisan Procurement Management System (KPMS) eliminates long mandi queues by empowering farmers to pre-book verified procurement slots, track real-time queue tokens, ensure transparent weighbridge measurements, and receive instant direct bank transfer (DBT) MSP disbursements.
         </p>
         <div style="display:flex; gap:14px; flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="openLoginModal()"><i class="fas fa-calendar-plus"></i> Book Procurement Slot</button>
+          <button class="btn btn-primary" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> 🌾 Smart Mandi Finder</button>
+          <button class="btn btn-navy" onclick="openLoginModal()"><i class="fas fa-calendar-plus"></i> Standard Slot Booking</button>
           <button class="btn btn-outline" onclick="startJudgeGuidedTour()"><i class="fas fa-play"></i> SIH Guided Tour</button>
           <button class="btn btn-outline" onclick="openKisanAIChat()"><i class="fas fa-robot"></i> Kisan Sahayak AI</button>
         </div>

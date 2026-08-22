@@ -32,7 +32,9 @@ const loadFarmerDashboard = async () => {
           </div>
           <div class="sidebar-heading">Farmer Menu</div>
           <a class="nav-link active" onclick="loadFarmerDashboard()"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> Smart Slot Booking</a>
+          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> 🌾 Smart Mandi Finder</a>
+          <a class="nav-link" onclick="routeTo('#mandi-prices')"><i class="fas fa-carrot" style="color:var(--green-gov);"></i> 🥕 Mandi Live Prices</a>
+          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> Slot Booking</a>
           <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> Live Queue Tracker</a>
           <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> My Bookings</a>
           <a class="nav-link" onclick="routeTo('#farmer-payments')"><i class="fas fa-money-check-dollar"></i> DBT Payment Tracker</a>
@@ -56,8 +58,9 @@ const loadFarmerDashboard = async () => {
                 Mandi Center: <strong>${farmer.preferredCenterId || 'APMC Bhopal'}</strong> | Village: <strong>${farmer.village || 'Ratibad'}</strong> | Total Land: <strong>${farmer.totalLandArea || 5} Acres</strong>
               </p>
             </div>
-            <div style="display:flex; gap:10px;">
-              <button class="btn btn-primary" onclick="routeTo('#book-slot')"><i class="fas fa-plus"></i> Book Procurement Slot</button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> 🌾 Smart Mandi Finder</button>
+              <button class="btn btn-outline" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> Standard Booking</button>
               <button class="btn btn-outline" onclick="openKisanAIChat()"><i class="fas fa-robot"></i> Kisan Sahayak AI</button>
             </div>
           </div>

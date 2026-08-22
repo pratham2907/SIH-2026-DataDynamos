@@ -15,6 +15,7 @@ const officerCtrl = require('../controllers/officerController');
 const adminCtrl = require('../controllers/adminController');
 const aiCtrl = require('../controllers/aiController');
 const demoCtrl = require('../controllers/demoController');
+const mandiPriceCtrl = require('../controllers/mandiPriceController');
 
 // ----------------------------------------------------
 // 1. AUTHENTICATION & KYC ROUTES
@@ -130,5 +131,11 @@ router.post('/ai/voice', aiCtrl.handleVoiceIntent);
 // ----------------------------------------------------
 router.post('/demo/reset', demoCtrl.resetDemo);
 router.post('/demo/simulate', demoCtrl.simulateLiveCycle);
+
+// ----------------------------------------------------
+// 11. NEARBY MANDI PRICES & LEAFLET GEOSPATIAL ROUTES
+// ----------------------------------------------------
+router.get('/mandi-prices/commodities', mandiPriceCtrl.getCommoditiesList);
+router.get('/mandi-prices', mandiPriceCtrl.getNearbyMandiPrices);
 
 module.exports = router;

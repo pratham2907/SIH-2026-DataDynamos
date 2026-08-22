@@ -20,12 +20,36 @@ const loadBookingPortal = async () => {
     const centers = centersData.data || [];
 
     const today = new Date().toISOString().split('T')[0];
+    const prefill = window.smartBookingPrefill || null;
+    window.smartBookingPrefill = null; // consume once
+
+    // Ensure prefilled centre is available in list if from smart engine
+    let selectedCenterVal = prefill ? prefill.centerId : 'CTR-01';
+    let matchedCenter = centers.find(c => c.centerId === selectedCenterVal);
+    let centerOptionsHtml = centers.map(c => `
+      <option value="${c.centerId}" ${c.centerId === selectedCenterVal ? 'selected' : ''}>
+        ${c.name} (${c.district}, ${c.state}) - Cap: ${c.maxDailyCapacity} Q/day
+      </option>
+    `).join('');
+
+    if (prefill && !matchedCenter && window.SmartBookingEngine) {
+      const smartCentres = window.SmartBookingEngine.DEFAULT_PROCUREMENT_CENTRES || [];
+      const sCenter = smartCentres.find(sc => sc.id === prefill.centerId || sc.code === prefill.centerId);
+      if (sCenter) {
+        centerOptionsHtml = `
+          <option value="${sCenter.id}" selected>
+            ${sCenter.name} (${sCenter.district}, ${sCenter.state}) - Cap: ${sCenter.maxDailyCapacity || 300} Q/day [Smart Recommended]
+          </option>
+        ` + centerOptionsHtml;
+      }
+    }
 
     container.innerHTML = `
       <div class="app-container">
         <aside class="sidebar">
           <div class="sidebar-heading">Slot Booking</div>
           <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> Smart Mandi Finder</a>
           <a class="nav-link active" onclick="loadBookingPortal()"><i class="fas fa-calendar-plus"></i> New Reservation</a>
           <a class="nav-link" onclick="loadMyBookings()"><i class="fas fa-ticket-alt"></i> My Active Bookings</a>
           <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> Live Queue</a>
@@ -33,6 +57,19 @@ const loadBookingPortal = async () => {
 
         <main class="main-content">
           <div class="glass-panel" style="padding:28px; max-width:900px; margin:0 auto;">
+            
+            ${prefill ? `
+              <div class="glass-panel" style="padding:14px 18px; margin-bottom:20px; background:linear-gradient(135deg, rgba(224,109,20,0.1), rgba(26,122,68,0.08)); border-left:4px solid var(--saffron); border-radius:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <i class="fas fa-wand-magic-sparkles" style="color:var(--saffron); font-size:1.2rem;"></i>
+                  <span style="font-size:0.92rem; font-weight:700; color:var(--primary-navy);">
+                    Pre-filled from Smart Recommendation: <strong>${prefill.crop}</strong> (${prefill.quantity} Quintals)
+                  </span>
+                </div>
+                <span class="status-pill completed" style="font-size:0.75rem;">Optimized Route</span>
+              </div>
+            ` : ''}
+
             <div style="text-align:center; margin-bottom:24px;">
               <span class="hero-pill"><i class="fas fa-bolt"></i> Smart AI Slot Allocation Engine</span>
               <h2 style="font-size:2rem; font-weight:800; color:var(--primary-navy);">Reserve Mandi Procurement Slot</h2>
@@ -48,11 +85,7 @@ const loadBookingPortal = async () => {
                   <label class="form-label"><i class="fas fa-building"></i> Select Procurement Center (Mandi) *</label>
                   <select id="booking-center-select" class="form-control" onchange="onBookingCenterOrDateChange()" required>
                     <option value="">-- Choose Mandi Centre --</option>
-                    ${centers.map(c => `
-                      <option value="${c.centerId}" ${c.centerId === 'CTR-01' ? 'selected' : ''}>
-                        ${c.name} (${c.district}, ${c.state}) - Cap: ${c.maxDailyCapacity} Q/day
-                      </option>
-                    `).join('')}
+                    ${centerOptionsHtml}
                   </select>
                 </div>
 
@@ -68,18 +101,19 @@ const loadBookingPortal = async () => {
                 <div class="form-group">
                   <label class="form-label"><i class="fas fa-wheat-awn"></i> Crop Commodity *</label>
                   <select id="booking-crop-select" class="form-control" required>
-                    <option value="Wheat (Sharbati)">Wheat (Sharbati) - MSP ₹2,275/Q</option>
-                    <option value="Gram (Chana)">Gram (Chana) - MSP ₹5,440/Q</option>
-                    <option value="Mustard (Sarson)">Mustard (Sarson) - MSP ₹5,650/Q</option>
-                    <option value="Paddy (Common)">Paddy (Common) - MSP ₹2,300/Q</option>
-                    <option value="Soyabean (Yellow)">Soyabean (Yellow) - MSP ₹4,892/Q</option>
+                    <option value="Wheat (Sharbati)" ${prefill && prefill.crop && prefill.crop.includes('Wheat') ? 'selected' : ''}>Wheat (Sharbati) - MSP ₹2,275/Q</option>
+                    <option value="Paddy (Common)" ${prefill && prefill.crop && prefill.crop.includes('Paddy') ? 'selected' : ''}>Paddy (Common) - MSP ₹2,300/Q</option>
+                    <option value="Maize (Makka)" ${prefill && prefill.crop && prefill.crop.includes('Maize') ? 'selected' : ''}>Maize (Makka) - MSP ₹2,225/Q</option>
+                    <option value="Gram (Chana)" ${prefill && prefill.crop && prefill.crop.includes('Gram') ? 'selected' : ''}>Gram (Chana) - MSP ₹5,440/Q</option>
+                    <option value="Mustard (Sarson)" ${prefill && prefill.crop && prefill.crop.includes('Mustard') ? 'selected' : ''}>Mustard (Sarson) - MSP ₹5,650/Q</option>
+                    <option value="Soyabean (Yellow)" ${prefill && prefill.crop && prefill.crop.includes('Soyabean') ? 'selected' : ''}>Soyabean (Yellow) - MSP ₹4,892/Q</option>
                   </select>
                 </div>
 
                 <!-- Quantity -->
                 <div class="form-group">
                   <label class="form-label"><i class="fas fa-weight-scale"></i> Quantity (Quintals) *</label>
-                  <input type="number" id="booking-quantity-input" class="form-control" min="1" max="500" value="45" required />
+                  <input type="number" id="booking-quantity-input" class="form-control" min="1" max="5000" value="${prefill ? prefill.quantity : 45}" required />
                 </div>
 
                 <!-- Vehicle Number -->
