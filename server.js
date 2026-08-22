@@ -36,8 +36,16 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// Serve static frontend files
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static frontend files with no-cache in dev
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  maxAge: 0,
+  setHeaders: (res) => {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+}));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Mount API routes
