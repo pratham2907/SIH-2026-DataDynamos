@@ -2,6 +2,7 @@ const {
   Centers, Queues, Bookings, Procurements
 } = require('../models/dbStore');
 const { predictWaitTime, getRecommendations, answerAIQuery } = require('../services/aiService');
+const { getLiveWeatherAlerts } = require('../services/weatherService');
 
 /**
  * AI Insights Dashboard
@@ -24,20 +25,8 @@ const getAIDashboard = async (req, res) => {
 
     const highRiskCenters = centerInsights.filter(c => c.congestionLevel === 'High');
 
-    const weatherAlerts = [
-      {
-        type: 'Rain & Humidity Warning',
-        severity: 'Moderate',
-        affectedDistricts: ['Bhopal', 'Sehore', 'Raisen'],
-        advisory: 'Light scattered rainfall expected in 24 hours. Ensure grain tarpaulins and covered shed storage at Mandi Gate 2 & 3.'
-      },
-      {
-        type: 'Optimal Harvest Window',
-        severity: 'Favorable',
-        affectedDistricts: ['Karnal', 'Kurukshetra'],
-        advisory: 'Clear skies with 31°C dry conditions. Ideal time for wheat harvesting and direct Mandi delivery.'
-      }
-    ];
+    // Fetch LIVE weather alerts from OpenWeatherMap
+    const weatherAlerts = await getLiveWeatherAlerts();
 
     const demandForecast = {
       peakArrivalHours: '09:30 AM - 12:30 PM',
@@ -60,6 +49,7 @@ const getAIDashboard = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 /**
  * Smart Slot & Center Recommendations
