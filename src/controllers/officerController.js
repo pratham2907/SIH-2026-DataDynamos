@@ -117,9 +117,37 @@ const getInventory = async (req, res) => {
   }
 };
 
+/**
+ * Get Pending Bookings for Gate Check-in
+ */
+const getPendingBookings = async (req, res) => {
+  try {
+    const centerId = req.query.centerId || (req.user && req.user.assignedCenterId) || 'CTR-01';
+    const allBookings = await Bookings.find({ centerId });
+    const existingQueues = await Queues.find({
+      centerId,
+      status: { $in: ['waiting', 'called', 'processing', 'completed'] }
+    });
+    const checkedInBkgNos = new Set(existingQueues.map(q => q.bookingNumber));
+
+    // Pending bookings that haven't been checked in yet
+    const pending = allBookings.filter(b => b.status !== 'Cancelled' && !checkedInBkgNos.has(b.bookingNumber));
+
+    return res.json({
+      success: true,
+      centerId,
+      count: pending.length,
+      data: pending
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 module.exports = {
   getOfficerDashboard,
   searchFarmers,
   postAnnouncement,
-  getInventory
+  getInventory,
+  getPendingBookings
 };

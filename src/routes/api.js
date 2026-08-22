@@ -100,6 +100,7 @@ router.post('/payments/complaint', verifyToken, paymentCtrl.raisePaymentComplain
 // 7. OFFICER PORTAL ROUTES
 // ----------------------------------------------------
 router.get('/officer/dashboard', verifyToken, requireRole('officer', 'admin'), officerCtrl.getOfficerDashboard);
+router.get('/officer/bookings/pending', verifyToken, requireRole('officer', 'admin'), officerCtrl.getPendingBookings);
 router.get('/officer/farmers/search', verifyToken, requireRole('officer', 'admin'), officerCtrl.searchFarmers);
 router.post('/officer/announcements', verifyToken, requireRole('officer', 'admin'), officerCtrl.postAnnouncement);
 router.get('/officer/inventory', verifyToken, requireRole('officer', 'admin'), officerCtrl.getInventory);
