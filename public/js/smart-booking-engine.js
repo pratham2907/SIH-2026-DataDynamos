@@ -25,6 +25,7 @@ const cropProfiles = {
     optimalTemperatureMax: 28,
     defaultPrice: 2425,
     baseMsp: 2425,
+    image: "/images/crops/wheat.jpg",
     icon: "fa-wheat-awn",
     color: "#E06D14",
     bg: "#FFF7ED"
@@ -46,6 +47,7 @@ const cropProfiles = {
     optimalTemperatureMax: 32,
     defaultPrice: 2369,
     baseMsp: 2369,
+    image: "/images/crops/rice.jpg",
     icon: "fa-seedling",
     color: "#16A34A",
     bg: "#F0FDF4"
@@ -67,6 +69,7 @@ const cropProfiles = {
     optimalTemperatureMax: 32,
     defaultPrice: 2369,
     baseMsp: 2369,
+    image: "/images/crops/rice.jpg",
     icon: "fa-seedling",
     color: "#16A34A",
     bg: "#F0FDF4"
@@ -88,6 +91,7 @@ const cropProfiles = {
     optimalTemperatureMax: 22,
     defaultPrice: 1800,
     baseMsp: 1800,
+    image: "/images/crops/potato.jpg",
     icon: "fa-bowl-rice",
     color: "#B45309",
     bg: "#FEF3C7"
@@ -109,6 +113,7 @@ const cropProfiles = {
     optimalTemperatureMax: 26,
     defaultPrice: 2100,
     baseMsp: 2100,
+    image: "/images/crops/tomato.jpg",
     icon: "fa-apple-whole",
     color: "#DC2626",
     bg: "#FEE2E2"
@@ -130,6 +135,7 @@ const cropProfiles = {
     optimalTemperatureMax: 22,
     defaultPrice: 2400,
     baseMsp: 2400,
+    image: "/images/crops/leafyvegetables.jpg",
     icon: "fa-leaf",
     color: "#15803D",
     bg: "#DCFCE7"
@@ -151,6 +157,7 @@ const cropProfiles = {
     optimalTemperatureMax: 30,
     defaultPrice: 2225,
     baseMsp: 2225,
+    image: "/images/crops/maize.jpg",
     icon: "fa-cubes-stacked",
     color: "#D97706",
     bg: "#FFFBEB"
@@ -172,6 +179,7 @@ const cropProfiles = {
     optimalTemperatureMax: 30,
     defaultPrice: 5440,
     baseMsp: 5440,
+    image: "/images/crops/gram.jpg",
     icon: "fa-circle-dot",
     color: "#9333EA",
     bg: "#FAF5FF"
@@ -193,6 +201,7 @@ const cropProfiles = {
     optimalTemperatureMax: 28,
     defaultPrice: 5650,
     baseMsp: 5650,
+    image: "/images/crops/mustard.jpg",
     icon: "fa-sun",
     color: "#CA8A04",
     bg: "#FEF9C3"
@@ -214,6 +223,7 @@ const cropProfiles = {
     optimalTemperatureMax: 32,
     defaultPrice: 4892,
     baseMsp: 4892,
+    image: "/images/crops/soyabean.jpg",
     icon: "fa-leaf",
     color: "#059669",
     bg: "#ECFDF5"

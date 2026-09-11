@@ -117,6 +117,7 @@ const scripts = [
   'public/js/ai-assistant.js',
   'public/js/sih-tour.js',
   'public/js/registration.js',
+  'public/js/landing-page.js',
   'public/js/app.js'
 ];
 

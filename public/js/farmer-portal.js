@@ -4,34 +4,34 @@ const getFarmerSidebar = (farmer, activeRoute = 'dashboard') => `
   <aside class="sp-sidebar">
     <nav class="sp-nav-list">
       <a class="sp-nav-item ${activeRoute === 'dashboard' ? 'active' : ''}" onclick="routeTo('#farmer-dashboard')">
-        <i class="fas fa-leaf"></i> Dashboard
+        <i class="fas fa-leaf"></i> ${getT('nav_dashboard', 'Dashboard')}
       </a>
       <a class="sp-nav-item ${activeRoute === 'smart-booking' ? 'active' : ''}" onclick="routeTo('#smart-booking')">
-        <i class="fas fa-wand-magic-sparkles"></i> Smart Mandi Finder
+        <i class="fas fa-wand-magic-sparkles"></i> ${getT('pillar_mandi_title', 'Smart Mandi Finder')}
       </a>
       <a class="sp-nav-item ${activeRoute === 'book-slot' ? 'active' : ''}" onclick="routeTo('#book-slot')">
-        <i class="fas fa-calendar-plus"></i> Book Slot
+        <i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot', 'Book Slot')}
       </a>
       <a class="sp-nav-item ${activeRoute === 'my-bookings' ? 'active' : ''}" onclick="routeTo('#my-bookings')">
-        <i class="fas fa-ticket-alt"></i> My Bookings
+        <i class="fas fa-ticket-alt"></i> ${getT('my_bookings', 'My Bookings')}
       </a>
       <a class="sp-nav-item ${activeRoute === 'farmer-queue' ? 'active' : ''}" onclick="routeTo('#farmer-queue')">
-        <i class="fas fa-users-line"></i> Live Queue
+        <i class="fas fa-users-line"></i> ${getT('live_queue_tracker', 'Live Queue')}
       </a>
-      <a class="sp-nav-item ${activeRoute === 'procurement-status' ? 'active' : ''}" onclick="routeTo('#farmer-queue')">
-        <i class="fas fa-clipboard-check"></i> Procurement Status
+      <a class="sp-nav-item ${activeRoute === 'procurement-status' ? 'active' : ''}" onclick="routeTo('#procurement-status')">
+        <i class="fas fa-clipboard-check"></i> ${getT('status_completed', 'Procurement Status')}
       </a>
       <a class="sp-nav-item ${activeRoute === 'farmer-payments' ? 'active' : ''}" onclick="routeTo('#farmer-payments')">
-        <i class="fas fa-money-check-dollar"></i> Payments
+        <i class="fas fa-money-check-dollar"></i> ${getT('dbt_tracker', 'Payments')}
       </a>
       <a class="sp-nav-item ${activeRoute === 'notifications' ? 'active' : ''}" onclick="openNotificationsModal()">
-        <i class="far fa-bell"></i> Notifications <span class="sp-nav-badge">3</span>
+        <i class="far fa-bell"></i> ${getT('nav_notifications', 'Notifications')} <span class="sp-nav-badge" id="sp-sidebar-notif-badge">${window.unreadNotificationCount || 3}</span>
       </a>
       <a class="sp-nav-item ${activeRoute === 'grievances' ? 'active' : ''}" onclick="openGrievanceModal()">
-        <i class="fas fa-headset"></i> Grievances
+        <i class="fas fa-headset"></i> ${getT('nav_grievances', 'Grievances')}
       </a>
       <a class="sp-nav-item ${activeRoute === 'farmer-profile' ? 'active' : ''}" onclick="routeTo('#farmer-profile')">
-        <i class="fas fa-user-circle"></i> My Profile
+        <i class="fas fa-user-circle"></i> ${getT('kyc_profile', 'My Profile')}
       </a>
     </nav>
 
@@ -48,6 +48,8 @@ const getFarmerSidebar = (farmer, activeRoute = 'dashboard') => `
     </div>
   </aside>
 `;
+window.getFarmerSidebar = getFarmerSidebar;
+
 
 /**
  * Renders the comprehensive SmartProcure Farmer Dashboard
@@ -86,7 +88,7 @@ const renderSmartProcureFarmerView = (data = {}) => {
           
           <div class="sp-hero-content">
             <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.16); border:1px solid rgba(255,255,255,0.25); border-radius:20px; padding:4px 12px; font-size:0.74rem; font-weight:700; color:#86EFAC; margin-bottom:12px;">
-              <i class="fas fa-leaf"></i> SmartProcure &bull; SIH 2026 PS 26032
+              <i class="fas fa-leaf"></i> SmartProcure &bull; Smart Agriculture
             </div>
             <h1 class="sp-hero-title">
               Smart Agricultural Procurement System
@@ -95,10 +97,10 @@ const renderSmartProcureFarmerView = (data = {}) => {
               Find the best procurement centre, book your slot, track your queue and monitor your payment — all from one platform.
             </p>
             <div class="sp-hero-actions">
-              <button class="sp-hero-btn-primary" onclick="routeTo('#smart-booking')">
+              <button class="sp-hero-btn-primary" onclick="handleHeroFindMandi()">
                 <i class="fas fa-wand-magic-sparkles"></i> 🌾 Find Best Mandi
               </button>
-              <button class="sp-hero-btn-secondary" onclick="routeTo('#farmer-queue')">
+              <button class="sp-hero-btn-secondary" onclick="routeTo('#procurement-status')">
                 <i class="fas fa-users-line"></i> Track Procurement
               </button>
             </div>
@@ -208,7 +210,7 @@ const renderSmartProcureFarmerView = (data = {}) => {
           <div class="sp-left-col">
             
             <!-- Smart Mandi Finder Interactive Card -->
-            <div class="sp-card sp-finder-card">
+            <div class="sp-card sp-finder-card" id="sp-finder-section">
               <div class="sp-finder-header">
                 <div class="sp-finder-title-row">
                   <div class="sp-finder-icon-box">
@@ -294,12 +296,203 @@ const renderSmartProcureFarmerView = (data = {}) => {
             </div>
 
             <!-- "Why these centres?" Callout Bar -->
-            <div class="sp-callout-bar">
+            <div class="sp-callout-bar" style="margin-bottom:22px;">
               <div><strong>Why these centres?</strong></div>
               <div class="sp-callout-item"><i class="fas fa-check-circle" style="color:#16A34A;"></i> Best net price after transit</div>
               <div class="sp-callout-item"><i class="fas fa-check-circle" style="color:#16A34A;"></i> Lowest yard waiting time</div>
               <div class="sp-callout-item"><i class="fas fa-check-circle" style="color:#16A34A;"></i> Fair grading guarantee</div>
             </div>
+
+            <!-- Active Token & Booking Quick Status Card -->
+            ${(() => {
+              const storedBkg = JSON.parse(localStorage.getItem('kpms_last_booking') || 'null');
+              const currBkg = activeBooking || storedBkg;
+              const bkgNum = (queueEntry && queueEntry.tokenNumber) || (currBkg && currBkg.bookingNumber);
+              const centerTitle = (currBkg && (currBkg.centerName || currBkg.centerId)) || 'APMC Central Mandi Bhopal';
+              const slotTime = (currBkg && currBkg.date) ? `${currBkg.date} • ${currBkg.timeSlot || '10:00 - 10:30 AM'}` : null;
+              const cropName = (currBkg && currBkg.cropName) || 'Wheat';
+              const qtyVal = (currBkg && currBkg.quantity) || 50;
+
+              if (currBkg) {
+                return `
+                  <div class="sp-card" style="padding:20px 24px; margin-bottom:22px; border-left:4px solid #0D5C3A; background:#FFFFFF;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+                      <div>
+                        <span class="sp-tag-badge sp-tag-green" style="font-size:0.75rem; margin-bottom:6px; display:inline-block;">
+                          <i class="fas fa-circle-check"></i> Active Procurement Token
+                        </span>
+                        <h4 style="font-size:1.15rem; font-weight:800; color:#111827; margin:2px 0;">
+                          ${cropName} (${qtyVal} Q) &bull; Token #${bkgNum || 'BKG-2026-001'}
+                        </h4>
+                        <div style="font-size:0.82rem; color:#4B5563; margin-top:3px;">
+                          <i class="fas fa-location-dot" style="color:#0D5C3A;"></i> ${centerTitle} &bull; <i class="fas fa-clock" style="color:#0D5C3A;"></i> ${slotTime || 'Scheduled Slot'}
+                        </div>
+                      </div>
+                      <div style="display:flex; gap:8px;">
+                        <button class="btn btn-primary btn-sm" onclick="routeTo('#farmer-queue')" style="font-weight:700;">
+                          <i class="fas fa-users-rays"></i> Track Live Queue
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="routeTo('#my-bookings')">
+                          <i class="fas fa-qrcode"></i> View QR Pass
+                        </button>
+                      </div>
+                    </div>
+                    <div style="display:flex; gap:16px; flex-wrap:wrap; background:#FAF6EF; padding:12px 16px; border-radius:10px; font-size:0.8rem; color:#4B5563;">
+                      <div><strong style="color:#111827;">Gate Entry:</strong> Counter Gate 2</div>
+                      <div><strong style="color:#111827;">Expected Weighment:</strong> Weighbridge #3</div>
+                      <div><strong style="color:#111827;">Estimated Payout:</strong> ₹${(qtyVal * 2425).toLocaleString('en-IN')} (MSP ₹2,425/Q)</div>
+                    </div>
+                  </div>
+                `;
+              } else {
+                return `
+                  <div class="sp-card" style="padding:18px 22px; margin-bottom:22px; background:linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 100%); border:1px solid #DCFCE7;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                      <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:42px; height:42px; border-radius:50%; background:#DCFCE7; color:#16A34A; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">
+                          <i class="fas fa-ticket-simple"></i>
+                        </div>
+                        <div>
+                          <strong style="font-size:0.95rem; color:#111827; display:block;">No Active Procurement Token Today</strong>
+                          <span style="font-size:0.8rem; color:#4B5563;">Book your arrival slot in advance to avoid mandi gate queues and secure guaranteed MSP weighment.</span>
+                        </div>
+                      </div>
+                      <button class="btn btn-primary btn-sm" onclick="routeTo('#book-slot')" style="font-weight:700; white-space:nowrap;">
+                        <i class="fas fa-calendar-plus"></i> Book Slot Now
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }
+            })()}
+
+            <!-- Live Market MSP & Mandi Rates Ticker Card -->
+            <div class="sp-card" style="padding:22px 24px; margin-bottom:22px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:38px; height:38px; border-radius:10px; background:rgba(13,92,58,0.1); color:#0D5C3A; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                    <i class="fas fa-chart-line"></i>
+                  </div>
+                  <div>
+                    <h4 style="font-size:1.15rem; font-weight:800; color:#111827; margin:0;">Live APMC Market Rates &bull; MSP Benchmark</h4>
+                    <span style="font-size:0.78rem; color:#6B7280;">Real-time Agmarknet mandi terminal rates & central MSP floor prices</span>
+                  </div>
+                </div>
+                <a class="sp-view-all-link" onclick="routeTo('#mandi-prices')" style="font-size:0.82rem; font-weight:700;">
+                  Full Mandi Price Board <i class="fas fa-arrow-right"></i>
+                </a>
+              </div>
+
+              <!-- Rates Table -->
+              <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:left;">
+                  <thead>
+                    <tr style="border-bottom:2px solid #E5E2DC; color:#4B5563; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">
+                      <th style="padding:10px 8px;">Commodity</th>
+                      <th style="padding:10px 8px;">FAQ Grade</th>
+                      <th style="padding:10px 8px;">MSP Rate</th>
+                      <th style="padding:10px 8px;">Modal Mandi Rate</th>
+                      <th style="padding:10px 8px;">Difference</th>
+                      <th style="padding:10px 8px; text-align:right;">Arrival Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid #F3F4F6;">
+                      <td style="padding:12px 8px; font-weight:700; color:#111827;"><img src="/images/crops/wheat.jpg" alt="Wheat" style="width:24px; height:24px; border-radius:50%; object-fit:cover; vertical-align:middle; margin-right:8px; border:1px solid #E5E7EB; box-shadow:0 1px 3px rgba(0,0,0,0.1);" /> Wheat (गेहूं)</td>
+                      <td style="padding:12px 8px; color:#4B5563;">Grade-A (Fair Avg)</td>
+                      <td style="padding:12px 8px; font-weight:700; color:#0D5C3A;">₹2,425 / Q</td>
+                      <td style="padding:12px 8px; font-weight:800; color:#111827;">₹2,450 / Q</td>
+                      <td style="padding:12px 8px; color:#16A34A; font-weight:700;">+₹25 / Q <i class="fas fa-arrow-up"></i></td>
+                      <td style="padding:12px 8px; text-align:right;"><span class="sp-tag-badge sp-tag-green">Heavy Intake</span></td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #F3F4F6;">
+                      <td style="padding:12px 8px; font-weight:700; color:#111827;"><img src="/images/crops/gram.jpg" alt="Gram" style="width:24px; height:24px; border-radius:50%; object-fit:cover; vertical-align:middle; margin-right:8px; border:1px solid #E5E7EB; box-shadow:0 1px 3px rgba(0,0,0,0.1);" /> Gram / Chana (चना)</td>
+                      <td style="padding:12px 8px; color:#4B5563;">FAQ Standard</td>
+                      <td style="padding:12px 8px; font-weight:700; color:#0D5C3A;">₹5,440 / Q</td>
+                      <td style="padding:12px 8px; font-weight:800; color:#111827;">₹5,520 / Q</td>
+                      <td style="padding:12px 8px; color:#16A34A; font-weight:700;">+₹80 / Q <i class="fas fa-arrow-up"></i></td>
+                      <td style="padding:12px 8px; text-align:right;"><span class="sp-tag-badge sp-tag-blue">Normal Intake</span></td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #F3F4F6;">
+                      <td style="padding:12px 8px; font-weight:700; color:#111827;"><img src="/images/crops/mustard.jpg" alt="Mustard" style="width:24px; height:24px; border-radius:50%; object-fit:cover; vertical-align:middle; margin-right:8px; border:1px solid #E5E7EB; box-shadow:0 1px 3px rgba(0,0,0,0.1);" /> Mustard (सरसों)</td>
+                      <td style="padding:12px 8px; color:#4B5563;">42% Oil Content</td>
+                      <td style="padding:12px 8px; font-weight:700; color:#0D5C3A;">₹5,650 / Q</td>
+                      <td style="padding:12px 8px; font-weight:800; color:#111827;">₹5,710 / Q</td>
+                      <td style="padding:12px 8px; color:#16A34A; font-weight:700;">+₹60 / Q <i class="fas fa-arrow-up"></i></td>
+                      <td style="padding:12px 8px; text-align:right;"><span class="sp-tag-badge sp-tag-green">High Demand</span></td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #F3F4F6;">
+                      <td style="padding:12px 8px; font-weight:700; color:#111827;"><img src="/images/crops/soyabean.jpg" alt="Soybean" style="width:24px; height:24px; border-radius:50%; object-fit:cover; vertical-align:middle; margin-right:8px; border:1px solid #E5E7EB; box-shadow:0 1px 3px rgba(0,0,0,0.1);" /> Soybean (सोयाबीन)</td>
+                      <td style="padding:12px 8px; color:#4B5563;">Yellow Standard</td>
+                      <td style="padding:12px 8px; font-weight:700; color:#0D5C3A;">₹4,892 / Q</td>
+                      <td style="padding:12px 8px; font-weight:800; color:#111827;">₹4,910 / Q</td>
+                      <td style="padding:12px 8px; color:#16A34A; font-weight:700;">+₹18 / Q <i class="fas fa-arrow-up"></i></td>
+                      <td style="padding:12px 8px; text-align:right;"><span class="sp-tag-badge sp-tag-orange">Moderate</span></td>
+                    </tr>
+                    <tr>
+                      <td style="padding:12px 8px; font-weight:700; color:#111827;"><img src="/images/crops/rice.jpg" alt="Paddy" style="width:24px; height:24px; border-radius:50%; object-fit:cover; vertical-align:middle; margin-right:8px; border:1px solid #E5E7EB; box-shadow:0 1px 3px rgba(0,0,0,0.1);" /> Paddy / Dhan (धान)</td>
+                      <td style="padding:12px 8px; color:#4B5563;">Common Grade</td>
+                      <td style="padding:12px 8px; font-weight:700; color:#0D5C3A;">₹2,320 / Q</td>
+                      <td style="padding:12px 8px; font-weight:800; color:#111827;">₹2,360 / Q</td>
+                      <td style="padding:12px 8px; color:#16A34A; font-weight:700;">+₹40 / Q <i class="fas fa-arrow-up"></i></td>
+                      <td style="padding:12px 8px; text-align:right;"><span class="sp-tag-badge sp-tag-green">Active Mandi</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Kisan Quick Actions Grid (Crisp 4-Col Row on Desktop, 2x2 on Tablet, 1-Col on Mobile) -->
+            <div class="sp-quick-actions-grid">
+              <div class="sp-card sp-quick-action-card" onclick="routeTo('#book-slot')">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div class="sp-qa-icon-box" style="background:#DCFCE7; color:#16A34A;">
+                    <i class="fas fa-calendar-plus"></i>
+                  </div>
+                  <div>
+                    <strong style="font-size:0.88rem; color:#111827; display:block;">Book Preferred Slot</strong>
+                    <span style="font-size:0.75rem; color:#6B7280;">Pre-reserve mandi arrival</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sp-card sp-quick-action-card" onclick="routeTo('#farmer-queue')">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div class="sp-qa-icon-box" style="background:#DBEAFE; color:#2563EB;">
+                    <i class="fas fa-users-line"></i>
+                  </div>
+                  <div>
+                    <strong style="font-size:0.88rem; color:#111827; display:block;">Live Queue Position</strong>
+                    <span style="font-size:0.75rem; color:#6B7280;">Real-time token caller</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sp-card sp-quick-action-card" onclick="routeTo('#farmer-payments')">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div class="sp-qa-icon-box" style="background:#FEF3C7; color:#D97706;">
+                    <i class="fas fa-building-columns"></i>
+                  </div>
+                  <div>
+                    <strong style="font-size:0.88rem; color:#111827; display:block;">DBT Payment Ledger</strong>
+                    <span style="font-size:0.75rem; color:#6B7280;">Direct bank transfer status</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sp-card sp-quick-action-card" onclick="if(typeof openContactModal==='function') openContactModal();">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div class="sp-qa-icon-box" style="background:#F3E8FF; color:#9333EA;">
+                    <i class="fas fa-headset"></i>
+                  </div>
+                  <div>
+                    <strong style="font-size:0.88rem; color:#111827; display:block;">Kisan Helpline</strong>
+                    <span style="font-size:0.75rem; color:#6B7280;">Toll-Free 1800-180-1551</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- RIGHT COLUMN (35% width) -->
@@ -317,85 +510,105 @@ const renderSmartProcureFarmerView = (data = {}) => {
               <div class="sp-timeline-container">
                 <div class="sp-timeline-line"></div>
 
-                <!-- Step 1 -->
-                <div class="sp-timeline-step">
-                  <div class="sp-timeline-node sp-node-completed"><i class="fas fa-check"></i></div>
-                  <div class="sp-step-header">
-                    <span class="sp-step-name">1. Centre Selection</span>
-                    <span class="sp-step-pill sp-pill-completed">Completed</span>
-                  </div>
-                  <div class="sp-step-time">Centre C - Vidisha selected</div>
-                </div>
+                ${(() => {
+                  const storedBkg = JSON.parse(localStorage.getItem('kpms_last_booking') || 'null');
+                  const currBkg = activeBooking || storedBkg;
+                  const hasBkg = !!currBkg;
+                  const hasToken = !!(queueEntry || (currBkg && currBkg.bookingNumber));
+                  const bkgNum = (queueEntry && queueEntry.tokenNumber) || (currBkg && currBkg.bookingNumber) || 'BKG-2026-081';
+                  const centerTitle = (currBkg && (currBkg.centerName || currBkg.centerId)) || 'Centre C - Vidisha';
+                  const slotTime = (currBkg && currBkg.date) ? `${currBkg.date} • ${currBkg.timeSlot || '10:00 AM'}` : '12 Apr 2026 • 10:00 - 11:30 AM';
 
-                <!-- Step 2 -->
-                <div class="sp-timeline-step">
-                  <div class="sp-timeline-node sp-node-completed"><i class="fas fa-check"></i></div>
-                  <div class="sp-step-header">
-                    <span class="sp-step-name">2. Slot Booking</span>
-                    <span class="sp-step-pill sp-pill-completed">Completed</span>
-                  </div>
-                  <div class="sp-step-time">${activeBooking ? `${activeBooking.date} • ${activeBooking.timeSlot}` : '12 Apr 2026 • 10:00 - 11:30 AM'}</div>
-                </div>
+                  return `
+                    <!-- Step 1: Centre Selection -->
+                    <div class="sp-timeline-step">
+                      <div class="sp-timeline-node ${hasBkg ? 'sp-node-completed' : 'sp-node-inprogress'}">
+                        ${hasBkg ? '<i class="fas fa-check"></i>' : '<i class="fas fa-location-dot"></i>'}
+                      </div>
+                      <div class="sp-step-header">
+                        <span class="sp-step-name">1. Centre Selection</span>
+                        <span class="sp-step-pill ${hasBkg ? 'sp-pill-completed' : 'sp-pill-inprogress'}">${hasBkg ? 'Completed' : 'In Progress'}</span>
+                      </div>
+                      <div class="sp-step-time">${hasBkg ? `${centerTitle} selected` : 'Select best mandi below'}</div>
+                    </div>
 
-                <!-- Step 3 -->
-                <div class="sp-timeline-step">
-                  <div class="sp-timeline-node sp-node-completed"><i class="fas fa-check"></i></div>
-                  <div class="sp-step-header">
-                    <span class="sp-step-name">3. Digital Token</span>
-                    <span class="sp-step-pill sp-pill-completed">Active</span>
-                  </div>
-                  <div class="sp-step-time">${queueEntry ? `Token: ${queueEntry.tokenNumber}` : 'Pass #TK-204 Issued'}</div>
-                </div>
+                    <!-- Step 2: Slot Booking -->
+                    <div class="sp-timeline-step">
+                      <div class="sp-timeline-node ${hasBkg ? 'sp-node-completed' : 'sp-node-pending'}">
+                        ${hasBkg ? '<i class="fas fa-check"></i>' : '2'}
+                      </div>
+                      <div class="sp-step-header">
+                        <span class="sp-step-name">2. Slot Booking</span>
+                        <span class="sp-step-pill ${hasBkg ? 'sp-pill-completed' : 'sp-pill-pending'}">${hasBkg ? 'Confirmed' : 'Upcoming'}</span>
+                      </div>
+                      <div class="sp-step-time">${hasBkg ? slotTime : 'Pre-book arrival window'}</div>
+                    </div>
 
-                <!-- Step 4 -->
-                <div class="sp-timeline-step">
-                  <div class="sp-timeline-node sp-node-inprogress"><i class="fas fa-arrow-right"></i></div>
-                  <div class="sp-step-header">
-                    <span class="sp-step-name">4. Gate Entry</span>
-                    <span class="sp-step-pill sp-pill-inprogress">In Progress</span>
-                  </div>
-                  <div class="sp-step-time">Proceed to Gate 2 &bull; QR Verified</div>
-                </div>
+                    <!-- Step 3: Digital Token -->
+                    <div class="sp-timeline-step">
+                      <div class="sp-timeline-node ${hasToken ? 'sp-node-completed' : 'sp-node-pending'}">
+                        ${hasToken ? '<i class="fas fa-check"></i>' : '3'}
+                      </div>
+                      <div class="sp-step-header">
+                        <span class="sp-step-name">3. Digital QR Pass</span>
+                        <span class="sp-step-pill ${hasToken ? 'sp-pill-completed' : 'sp-pill-pending'}">${hasToken ? 'Pass Active' : 'Upcoming'}</span>
+                      </div>
+                      <div class="sp-step-time">${hasToken ? `Pass #${bkgNum} issued` : 'Digital token with QR code'}</div>
+                    </div>
 
-                <!-- Step 5 -->
-                <div class="sp-timeline-step">
-                  <div class="sp-timeline-node sp-node-pending">5</div>
-                  <div class="sp-step-header">
-                    <span class="sp-step-name">5. Quality Testing</span>
-                    <span class="sp-step-pill sp-pill-pending">Upcoming</span>
-                  </div>
-                  <div class="sp-step-time">Moisture & purity evaluation</div>
-                </div>
+                    <!-- Step 4: Gate Entry -->
+                    <div class="sp-timeline-step">
+                      <div class="sp-timeline-node ${queueEntry && (queueEntry.status === 'called' || queueEntry.status === 'processing') ? 'sp-node-inprogress' : 'sp-node-pending'}">
+                        ${queueEntry && (queueEntry.status === 'called' || queueEntry.status === 'processing') ? '<i class="fas fa-arrow-right"></i>' : '4'}
+                      </div>
+                      <div class="sp-step-header">
+                        <span class="sp-step-name">4. Gate Entry</span>
+                        <span class="sp-step-pill ${queueEntry && queueEntry.status === 'called' ? 'sp-pill-inprogress' : 'sp-pill-pending'}">${queueEntry && queueEntry.status === 'called' ? 'In Progress' : 'Upcoming'}</span>
+                      </div>
+                      <div class="sp-step-time">${queueEntry && queueEntry.status === 'called' ? 'Proceed to Gate 2 • QR Verified' : 'Scan QR pass upon physical arrival'}</div>
+                    </div>
 
-                <!-- Step 6 -->
-                <div class="sp-timeline-step">
-                  <div class="sp-timeline-node sp-node-pending">6</div>
-                  <div class="sp-step-header">
-                    <span class="sp-step-name">6. Weighment</span>
-                    <span class="sp-step-pill sp-pill-pending">Upcoming</span>
-                  </div>
-                  <div class="sp-step-time">Gross & tare electronic scale</div>
-                </div>
+                    <!-- Step 5: Quality Testing -->
+                    <div class="sp-timeline-step">
+                      <div class="sp-timeline-node sp-node-pending">5</div>
+                      <div class="sp-step-header">
+                        <span class="sp-step-name">5. Quality Testing</span>
+                        <span class="sp-step-pill sp-pill-pending">Upcoming</span>
+                      </div>
+                      <div class="sp-step-time">Moisture & purity evaluation</div>
+                    </div>
 
-                <!-- Step 7 -->
-                <div class="sp-timeline-step">
-                  <div class="sp-timeline-node sp-node-pending">7</div>
-                  <div class="sp-step-header">
-                    <span class="sp-step-name">7. J-Form Receipt</span>
-                    <span class="sp-step-pill sp-pill-pending">Upcoming</span>
-                  </div>
-                  <div class="sp-step-time">Digital signed procurement slip</div>
-                </div>
+                    <!-- Step 6: Weighment -->
+                    <div class="sp-timeline-step">
+                      <div class="sp-timeline-node sp-node-pending">6</div>
+                      <div class="sp-step-header">
+                        <span class="sp-step-name">6. Weighment</span>
+                        <span class="sp-step-pill sp-pill-pending">Upcoming</span>
+                      </div>
+                      <div class="sp-step-time">Gross & tare electronic scale</div>
+                    </div>
 
-                <!-- Step 8 -->
-                <div class="sp-timeline-step">
-                  <div class="sp-timeline-node sp-node-pending">8</div>
-                  <div class="sp-step-header">
-                    <span class="sp-step-name">8. DBT Payment</span>
-                    <span class="sp-step-pill sp-pill-pending">Upcoming</span>
-                  </div>
-                  <div class="sp-step-time">Direct transfer: ₹1,21,250 (48-72h)</div>
-                </div>
+                    <!-- Step 7: J-Form Receipt -->
+                    <div class="sp-timeline-step">
+                      <div class="sp-timeline-node sp-node-pending">7</div>
+                      <div class="sp-step-header">
+                        <span class="sp-step-name">7. J-Form Receipt</span>
+                        <span class="sp-step-pill sp-pill-pending">Upcoming</span>
+                      </div>
+                      <div class="sp-step-time">Digital signed procurement slip</div>
+                    </div>
+
+                    <!-- Step 8: DBT Payment -->
+                    <div class="sp-timeline-step">
+                      <div class="sp-timeline-node sp-node-pending">8</div>
+                      <div class="sp-step-header">
+                        <span class="sp-step-name">8. DBT Payment</span>
+                        <span class="sp-step-pill sp-pill-pending">Upcoming</span>
+                      </div>
+                      <div class="sp-step-time">Direct bank transfer (48-72h)</div>
+                    </div>
+                  `;
+                })()}
               </div>
             </div>
 
@@ -461,9 +674,9 @@ const renderSmartProcureFarmerView = (data = {}) => {
 
               <div id="sp-nearby-map" class="sp-mini-map-box"></div>
               
-              <div style="font-size:0.74rem; color:#4B5563; font-weight:600; margin-top:10px; display:flex; justify-content:space-between;">
+              <div id="sp-nearby-dist-pills" style="font-size:0.74rem; color:#4B5563; font-weight:600; margin-top:10px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+                <span><i class="fas fa-circle" style="color:#0D5C3A; font-size:0.65rem;"></i> Vidisha (28 km)</span>
                 <span><i class="fas fa-circle" style="color:#2563EB; font-size:0.65rem;"></i> Bhopal (12 km)</span>
-                <span><i class="fas fa-circle" style="color:#16A34A; font-size:0.65rem;"></i> Vidisha (28 km)</span>
                 <span><i class="fas fa-circle" style="color:#EA580C; font-size:0.65rem;"></i> Sehore (65 km)</span>
               </div>
             </div>
@@ -477,48 +690,120 @@ const renderSmartProcureFarmerView = (data = {}) => {
                 <a class="sp-widget-link" onclick="openNotificationsModal()">View All &gt;</a>
               </div>
 
-              <div class="sp-notif-list">
-                <div class="sp-notif-item">
-                  <div class="sp-notif-icon sp-chip-green">
-                    <i class="fas fa-check"></i>
-                  </div>
-                  <div class="sp-notif-content">
-                    <div class="sp-notif-title-row">
-                      <span class="sp-notif-title">Slot Confirmed</span>
-                      <span class="sp-notif-time">2h ago</span>
+              <div class="sp-notif-list" id="sp-dashboard-notif-list">
+                ${(window.spNotifications || [
+                  { id: 'notif-1', title: 'Slot Confirmed - Vidisha Terminal', time: '2h ago', desc: 'Wheat (50 Q) confirmed for 12 Apr 2026. Pass #TK-204 ready.', chipClass: 'sp-chip-green', icon: 'fa-check' },
+                  { id: 'notif-2', title: 'Token #TK-204 Called', time: '4h ago', desc: 'Gate 2 cleared for weighbridge electronic scale.', chipClass: 'sp-chip-blue', icon: 'fa-ticket-alt' },
+                  { id: 'notif-3', title: 'DBT Processed ₹48,500', time: '1d ago', desc: 'PFMS UTR SBIN48291 credited into bank account.', chipClass: 'sp-chip-orange', icon: 'fa-indian-rupee-sign' }
+                ]).slice(0, 3).map(n => `
+                  <div class="sp-notif-item" onclick="handleNotificationClick('${n.id}')" style="cursor:pointer;" title="Click to view details">
+                    <div class="sp-notif-icon ${n.chipClass}">
+                      <i class="fas ${n.icon}"></i>
                     </div>
-                    <div class="sp-notif-desc">Centre C - Vidisha for 12 Apr 2026, 10:00 AM</div>
+                    <div class="sp-notif-content">
+                      <div class="sp-notif-title-row">
+                        <span class="sp-notif-title">${n.title}</span>
+                        <span class="sp-notif-time">${n.time}</span>
+                      </div>
+                      <div class="sp-notif-desc">${n.desc}</div>
+                    </div>
                   </div>
-                </div>
+                `).join('')}
+              </div>
+            </div>
 
-                <div class="sp-notif-item">
-                  <div class="sp-notif-icon sp-chip-blue">
-                    <i class="fas fa-ticket-alt"></i>
-                  </div>
-                  <div class="sp-notif-content">
-                    <div class="sp-notif-title-row">
-                      <span class="sp-notif-title">Token #TK-204 Called</span>
-                      <span class="sp-notif-time">4h ago</span>
-                    </div>
-                    <div class="sp-notif-desc">Gate 2 entry cleared for electronic weighment</div>
-                  </div>
+            <!-- Widget 5: Mandi Helpdesk & Operations -->
+            <div class="sp-card sp-widget-card">
+              <div class="sp-widget-header">
+                <div class="sp-widget-title">
+                  <i class="fas fa-headset" style="color:#0D5C3A;"></i> Mandi Operations &amp; Support
                 </div>
+                <span class="sp-live-pill" style="font-size:0.7rem; padding:2px 8px;">
+                  <span class="sp-pulse-dot"></span> Live Helpdesk
+                </span>
+              </div>
 
-                <div class="sp-notif-item">
-                  <div class="sp-notif-icon sp-chip-orange">
-                    <i class="fas fa-indian-rupee-sign"></i>
-                  </div>
-                  <div class="sp-notif-content">
-                    <div class="sp-notif-title-row">
-                      <span class="sp-notif-title">DBT Processed ₹48,500</span>
-                      <span class="sp-notif-time">1d ago</span>
-                    </div>
-                    <div class="sp-notif-desc">Direct transfer completed via PFMS UTR SBIN48291</div>
-                  </div>
+              <div style="background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px; padding:12px 14px; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <span style="font-size:0.75rem; color:#6B7280; font-weight:600;">Yard Operating Hours</span>
+                  <span style="font-size:0.75rem; color:#15803D; font-weight:700;">06:00 AM – 08:00 PM</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <span style="font-size:0.75rem; color:#6B7280; font-weight:600;">Weighbridges Operational</span>
+                  <span style="font-size:0.75rem; color:#111827; font-weight:700;">4 of 4 Active</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:0.75rem; color:#6B7280; font-weight:600;">Moisture Testing Lab</span>
+                  <span style="font-size:0.75rem; color:#111827; font-weight:700;">2 Counters Open</span>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <a href="tel:18001801551" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:8px; text-decoration:none; color:#065F46; font-size:0.82rem; font-weight:700; transition:background 0.15s ease;">
+                  <span><i class="fas fa-phone-volume" style="margin-right:8px; color:#10B981;"></i> Kisan Call Centre (Toll-Free)</span>
+                  <span>1800-180-1551 &gt;</span>
+                </a>
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px; font-size:0.82rem; color:#1E40AF; font-weight:700; cursor:pointer; transition:background 0.15s ease;" onclick="if(typeof openContactModal==='function') openContactModal();">
+                  <span><i class="fas fa-comments" style="margin-right:8px; color:#3B82F6;"></i> Mandi Support &amp; Grievances</span>
+                  <span>Helpdesk &gt;</span>
                 </div>
               </div>
             </div>
 
+            <!-- Widget 6: Government Quality & Moisture Guidelines -->
+            <div class="sp-card sp-widget-card">
+              <div class="sp-widget-header">
+                <div class="sp-widget-title">
+                  <i class="fas fa-scale-balanced" style="color:#0D5C3A;"></i> Fair Assay &amp; Quality Guide
+                </div>
+                <span style="font-size:0.72rem; color:#0D5C3A; font-weight:700; background:#DCFCE7; padding:2px 8px; border-radius:6px;">FAQ 2026-27</span>
+              </div>
+
+              <div style="font-size:0.8rem; color:#4B5563; line-height:1.45; margin-bottom:12px;">
+                Meet Central Government Fair Average Quality (FAQ) benchmarks to avoid deductions:
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+                <div style="background:#FAF6EF; border:1px solid #E5E2DC; border-radius:8px; padding:8px 10px;">
+                  <div style="font-size:0.7rem; color:#6B7280; font-weight:600;">Max Moisture</div>
+                  <div style="font-size:1rem; font-weight:800; color:#0D5C3A;">&le; 12.0%</div>
+                </div>
+                <div style="background:#FAF6EF; border:1px solid #E5E2DC; border-radius:8px; padding:8px 10px;">
+                  <div style="font-size:0.7rem; color:#6B7280; font-weight:600;">Foreign Matter</div>
+                  <div style="font-size:1rem; font-weight:800; color:#0D5C3A;">&le; 0.75%</div>
+                </div>
+                <div style="background:#FAF6EF; border:1px solid #E5E2DC; border-radius:8px; padding:8px 10px;">
+                  <div style="font-size:0.7rem; color:#6B7280; font-weight:600;">Damaged Grains</div>
+                  <div style="font-size:1rem; font-weight:800; color:#0D5C3A;">&le; 2.00%</div>
+                </div>
+                <div style="background:#FAF6EF; border:1px solid #E5E2DC; border-radius:8px; padding:8px 10px;">
+                  <div style="font-size:0.7rem; color:#6B7280; font-weight:600;">Sound Grains</div>
+                  <div style="font-size:1rem; font-weight:800; color:#0D5C3A;">&ge; 95.0%</div>
+                </div>
+              </div>
+
+              <div style="font-size:0.74rem; color:#6B7280; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-circle-info" style="color:#0D5C3A;"></i> Bring Aadhaar card &amp; Khasra copy for instant gate entry.
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Full-width Advisory & Fair Weighment Guarantee Banner -->
+        <section class="sp-full-advisory-banner">
+          <div class="sp-advisory-icon-box">
+            <i class="fas fa-shield-halved"></i>
+          </div>
+          <div class="sp-advisory-text">
+            <div class="sp-advisory-title">National Agricultural Procurement Assurance &amp; Fair Weighment Guarantee</div>
+            <div class="sp-advisory-desc">
+              All procurement centres operate certified electronic weighbridges calibrated per Legal Metrology Standards. Assayed moisture readings and gross/tare weighments are cryptographically stamped into your digital J-Form receipt and transmitted instantly to the DBT Public Financial Management System (PFMS).
+            </div>
+          </div>
+          <div class="sp-advisory-badges">
+            <span class="sp-adv-badge"><i class="fas fa-certificate"></i> ISO 9001 Certified</span>
+            <span class="sp-adv-badge"><i class="fas fa-lock"></i> SHA-256 Tamper-Proof</span>
           </div>
         </section>
 
@@ -569,6 +854,19 @@ const renderSmartProcureFarmerView = (data = {}) => {
 
 window.renderSmartProcureFarmerView = renderSmartProcureFarmerView;
 window.getFarmerSidebar = getFarmerSidebar;
+
+const handleHeroFindMandi = () => {
+  const finderEl = document.getElementById('sp-finder-section') || document.querySelector('.sp-finder-card');
+  if (finderEl) {
+    finderEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (typeof window.runSmartMandiFinderSearch === 'function') {
+      window.runSmartMandiFinderSearch(false);
+    }
+  } else {
+    routeTo('#smart-booking');
+  }
+};
+window.handleHeroFindMandi = handleHeroFindMandi;
 
 const loadFarmerDashboard = async () => {
 

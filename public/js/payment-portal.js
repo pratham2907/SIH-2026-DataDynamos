@@ -285,3 +285,6 @@ const initiateRazorpayPayment = async (paymentId = null, amount = 500, receiptNu
 };
 
 window.initiateRazorpayPayment = initiateRazorpayPayment;
+window.openGrievanceModal = openGrievanceModal;
+window.handleGrievanceSubmit = handleGrievanceSubmit;
+window.loadFarmerPaymentsPage = loadFarmerPaymentsPage;

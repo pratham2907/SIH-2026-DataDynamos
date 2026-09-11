@@ -87,7 +87,9 @@ const renderCentralAuthHub = (body, modalTitle) => {
         <!-- 1. Farmer Card -->
         <div class="role-auth-card farmer-theme" onclick="openLoginModal('farmer')">
           <div>
-            <div class="role-icon-circle farmer-bg">🌾</div>
+            <div class="role-icon-circle" style="overflow:hidden; border:2px solid #10B981; padding:0; width:54px; height:54px; border-radius:50%; margin:0 auto 12px; box-shadow:0 3px 10px rgba(16,185,129,0.3); background:#FFF;">
+              <img src="/images/roles/farmer.jpg" alt="Farmer" style="width:100%; height:100%; object-fit:cover; display:block;" />
+            </div>
             <span class="role-badge farmer">Farmer Portal</span>
             <h4 style="font-size:1.1rem; font-weight:800; color:var(--text-main); margin-bottom:6px;">Kisan Login</h4>
             <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
@@ -104,7 +106,9 @@ const renderCentralAuthHub = (body, modalTitle) => {
         <!-- 2. Procurement Officer Card -->
         <div class="role-auth-card officer-theme" onclick="openLoginModal('officer')">
           <div>
-            <div class="role-icon-circle officer-bg">👨‍💼</div>
+            <div class="role-icon-circle" style="overflow:hidden; border:2px solid #2563EB; padding:0; width:54px; height:54px; border-radius:50%; margin:0 auto 12px; box-shadow:0 3px 10px rgba(37,99,235,0.3); background:#FFF;">
+              <img src="/images/roles/officer.jpg" alt="Procurement Officer" style="width:100%; height:100%; object-fit:cover; display:block;" />
+            </div>
             <span class="role-badge officer">Procurement Officer</span>
             <h4 style="font-size:1.1rem; font-weight:800; color:var(--text-main); margin-bottom:6px;">Officer Portal</h4>
             <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
@@ -121,7 +125,9 @@ const renderCentralAuthHub = (body, modalTitle) => {
         <!-- 3. Super Admin Card -->
         <div class="role-auth-card admin-theme" onclick="openLoginModal('admin')">
           <div>
-            <div class="role-icon-circle admin-bg">🛡️</div>
+            <div class="role-icon-circle" style="overflow:hidden; border:2px solid #E06D14; padding:0; width:54px; height:54px; border-radius:50%; margin:0 auto 12px; box-shadow:0 3px 10px rgba(224,109,20,0.3); background:#FFF;">
+              <img src="/images/roles/admin.jpg" alt="Super Admin" style="width:100%; height:100%; object-fit:cover; display:block;" />
+            </div>
             <span class="role-badge admin">State Admin</span>
             <h4 style="font-size:1.1rem; font-weight:800; color:var(--text-main); margin-bottom:6px;">Super Admin</h4>
             <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
@@ -154,7 +160,7 @@ const renderRoleLoginForm = (body, modalTitle, role) => {
   const roleConfig = {
     farmer: {
       title: 'Kisan Portal Sign In',
-      icon: '🌾',
+      photo: '/images/roles/farmer.jpg',
       badgeClass: 'farmer',
       badgeText: 'Farmer Authentication',
       idLabel: 'Farmer ID or Mobile Number',
@@ -166,7 +172,7 @@ const renderRoleLoginForm = (body, modalTitle, role) => {
     },
     officer: {
       title: 'Procurement Officer Login',
-      icon: '👨‍💼',
+      photo: '/images/roles/officer.jpg',
       badgeClass: 'officer',
       badgeText: 'Authorized Mandi Cadre',
       idLabel: 'Official Email or Employee ID',
@@ -178,7 +184,7 @@ const renderRoleLoginForm = (body, modalTitle, role) => {
     },
     admin: {
       title: 'Super Admin Security Portal',
-      icon: '🛡️',
+      photo: '/images/roles/admin.jpg',
       badgeClass: 'admin',
       badgeText: 'Root Level Control',
       idLabel: 'Super Admin Official Email',
@@ -191,15 +197,21 @@ const renderRoleLoginForm = (body, modalTitle, role) => {
   };
 
   const cfg = roleConfig[role] || roleConfig.farmer;
-  modalTitle.innerHTML = `<span>${cfg.icon} ${cfg.title}</span>`;
+  modalTitle.innerHTML = `<span style="display:flex; align-items:center; gap:8px;"><img src="${cfg.photo}" alt="${role}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; border:1.5px solid ${cfg.color};" /> ${cfg.title}</span>`;
 
   body.innerHTML = `
     <div>
       <!-- Role Switcher Tabs -->
       <div style="display:flex; gap:6px; margin-bottom:18px; background:var(--bg-main); padding:4px; border-radius:8px;">
-        <button type="button" class="btn btn-sm ${role === 'farmer' ? 'btn-primary' : 'btn-outline'}" style="flex:1; font-size:0.8rem; padding:8px 4px; justify-content:center;" onclick="openLoginModal('farmer')">🌾 Farmer</button>
-        <button type="button" class="btn btn-sm ${role === 'officer' ? 'btn-primary' : 'btn-outline'}" style="flex:1; font-size:0.8rem; padding:8px 4px; justify-content:center;" onclick="openLoginModal('officer')">👨‍💼 Officer</button>
-        <button type="button" class="btn btn-sm ${role === 'admin' ? 'btn-primary' : 'btn-outline'}" style="flex:1; font-size:0.8rem; padding:8px 4px; justify-content:center;" onclick="openLoginModal('admin')">🛡️ Super Admin</button>
+        <button type="button" class="btn btn-sm ${role === 'farmer' ? 'btn-primary' : 'btn-outline'}" style="flex:1; font-size:0.8rem; padding:7px 4px; justify-content:center; display:flex; align-items:center; gap:6px;" onclick="openLoginModal('farmer')">
+          <img src="/images/roles/farmer.jpg" alt="Farmer" style="width:16px; height:16px; border-radius:50%; object-fit:cover;" /> Farmer
+        </button>
+        <button type="button" class="btn btn-sm ${role === 'officer' ? 'btn-primary' : 'btn-outline'}" style="flex:1; font-size:0.8rem; padding:7px 4px; justify-content:center; display:flex; align-items:center; gap:6px;" onclick="openLoginModal('officer')">
+          <img src="/images/roles/officer.jpg" alt="Officer" style="width:16px; height:16px; border-radius:50%; object-fit:cover;" /> Officer
+        </button>
+        <button type="button" class="btn btn-sm ${role === 'admin' ? 'btn-primary' : 'btn-outline'}" style="flex:1; font-size:0.8rem; padding:7px 4px; justify-content:center; display:flex; align-items:center; gap:6px;" onclick="openLoginModal('admin')">
+          <img src="/images/roles/admin.jpg" alt="Super Admin" style="width:16px; height:16px; border-radius:50%; object-fit:cover;" /> Super Admin
+        </button>
       </div>
 
       <!-- Role Badge Header -->
@@ -920,9 +932,9 @@ const openForgotPasswordModal = (presetRole = 'farmer') => {
         <div class="form-group" style="margin-bottom:14px;">
           <label class="form-label">User Role <span style="color:#EF4444;">*</span></label>
           <select id="fp-role" class="form-control" style="background:var(--bg-card);">
-            <option value="farmer" ${presetRole === 'farmer' ? 'selected' : ''}>🌾 Farmer (Kisan)</option>
-            <option value="officer" ${presetRole === 'officer' ? 'selected' : ''}>👨‍💼 Procurement Officer</option>
-            <option value="admin" ${presetRole === 'admin' ? 'selected' : ''}>🛡️ Super Admin</option>
+            <option value="farmer" ${presetRole === 'farmer' ? 'selected' : ''}>Farmer (Kisan)</option>
+            <option value="officer" ${presetRole === 'officer' ? 'selected' : ''}>Procurement Officer</option>
+            <option value="admin" ${presetRole === 'admin' ? 'selected' : ''}>Super Admin</option>
           </select>
         </div>
 

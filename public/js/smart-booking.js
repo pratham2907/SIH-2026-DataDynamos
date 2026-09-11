@@ -151,25 +151,35 @@ const renderSmartBookingForm = () => {
           </span>
         </div>
 
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:14px;" id="crop-card-grid">
+        <div class="sp-crop-grid-3x3" id="crop-card-grid">
           ${displayCrops.map(crop => {
             const isSelected = currentProfile && currentProfile.name === crop.name;
+            const cropImg = crop.image || `/images/crops/${crop.name.toLowerCase().replace(/[^a-z]/g, '')}.jpg`;
             return `
               <div 
-                class="glass-card crop-select-card"
-                style="padding:18px 14px; text-align:center; cursor:pointer; border-radius:14px; transition:all 0.2s ease; ${isSelected ? `border:2px solid var(--saffron); background:${crop.bg}; box-shadow:0 6px 18px rgba(224,109,20,0.2); transform:translateY(-2px);` : 'border:1px solid var(--border-color);'}"
+                class="sp-crop-card crop-select-card ${isSelected ? 'selected' : ''}"
                 onclick="selectSmartCrop('${crop.name}')"
               >
-                <div style="width:50px; height:50px; border-radius:50%; background:${isSelected ? '#FFF' : crop.bg}; color:${crop.color}; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.4rem; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-                  <i class="fas ${crop.icon}"></i>
+                <div class="sp-crop-card-img-wrap">
+                  <img src="${cropImg}" alt="${crop.name}" class="sp-crop-card-img" onerror="this.onerror=null; this.src='/images/crops/wheat.jpg';" />
+                  <div class="sp-crop-pill-perish">
+                    ${crop.badge || ''}
+                  </div>
+                  ${isSelected ? `
+                    <div class="sp-crop-pill-selected">
+                      <i class="fas fa-check-circle"></i> Selected
+                    </div>
+                  ` : ''}
                 </div>
-                <div style="font-weight:800; font-size:1.05rem; color:var(--primary-navy);">${crop.name}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${crop.displayName && crop.displayName.split('(')[1] ? '(' + crop.displayName.split('(')[1] : ''}</div>
-                <div style="margin-top:6px; font-size:0.72rem; font-weight:800;">
-                  ${crop.badge || ''}
-                </div>
-                <div style="margin-top:6px; display:inline-block; font-size:0.72rem; font-weight:700; color:${crop.color}; background:rgba(255,255,255,0.9); padding:2px 8px; border-radius:12px;">
-                  MSP: ₹${crop.defaultPrice}/Q
+                <div class="sp-crop-body">
+                  <div class="sp-crop-name-row">
+                    <span class="sp-crop-name">${crop.name}</span>
+                    <span class="sp-crop-hindi">${crop.displayName && crop.displayName.split('(')[1] ? '(' + crop.displayName.split('(')[1] : ''}</span>
+                  </div>
+                  <div class="sp-crop-footer">
+                    <span class="sp-crop-msp-label">Govt MSP Floor:</span>
+                    <span class="sp-crop-msp-val">₹${crop.defaultPrice}/Q</span>
+                  </div>
                 </div>
               </div>
             `;
@@ -178,14 +188,17 @@ const renderSmartBookingForm = () => {
 
         <!-- Automatic Perishability Badge Banner (Section 8 & 29) -->
         ${currentProfile ? `
-          <div style="margin-top:18px; padding:14px 18px; border-radius:12px; background:rgba(14,42,71,0.03); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size:1.1rem; font-weight:800; color:var(--primary-navy);">
-                ${currentProfile.badge}
-              </span>
-              <span style="color:var(--text-muted); font-size:0.88rem;">
-                &bull; ${currentProfile.badgeDescription}
-              </span>
+          <div style="margin-top:18px; padding:14px 18px; border-radius:12px; background:rgba(14,42,71,0.03); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="${currentProfile.image || `/images/crops/${currentProfile.name.toLowerCase().replace(/[^a-z]/g, '')}.jpg`}" alt="${currentProfile.name}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border:2px solid #D1D5DB; box-shadow:0 2px 6px rgba(0,0,0,0.1);" />
+              <div>
+                <span style="font-size:1.05rem; font-weight:800; color:var(--primary-navy);">
+                  ${currentProfile.badge}
+                </span>
+                <span style="color:var(--text-muted); font-size:0.88rem; margin-left:6px;">
+                  &bull; ${currentProfile.badgeDescription}
+                </span>
+              </div>
             </div>
             <div style="font-size:0.78rem; color:var(--text-muted); font-weight:600;">
               Base Deterioration Rate: ${(currentProfile.baseDeteriorationRate * 100).toFixed(2)}%/day
@@ -447,9 +460,12 @@ const executeSmartBookingAlgorithm = async () => {
             <button class="btn btn-outline btn-sm" onclick="renderSmartBookingForm()">
               <i class="fas fa-arrow-left"></i> Change Crop or Quantity
             </button>
-            <span style="font-size:0.92rem; font-weight:700; color:var(--primary-navy);">
-              Producing: <strong style="color:var(--saffron);">${selectedCrop}</strong> (${quantity} Quintals) &bull; ${cropProfile.badge}
-            </span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <img src="${cropProfile.image || `/images/crops/${selectedCrop.toLowerCase().replace(/[^a-z]/g, '')}.jpg`}" alt="${selectedCrop}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1.5px solid #D1D5DB; box-shadow:0 1px 4px rgba(0,0,0,0.1);" onerror="this.onerror=null; this.src='/images/crops/wheat.jpg';" />
+              <span style="font-size:0.92rem; font-weight:700; color:var(--primary-navy);">
+                Producing: <strong style="color:var(--saffron);">${selectedCrop}</strong> (${quantity} Quintals) &bull; ${cropProfile.badge}
+              </span>
+            </div>
           </div>
           ${scenarios.otherCentres && scenarios.otherCentres.length > 0 ? `
             <button class="btn btn-outline btn-sm" onclick="openOtherCentresModal()">

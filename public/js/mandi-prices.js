@@ -297,13 +297,15 @@ const renderCommodityPills = () => {
   } else {
     pillsHtml += filtered.map(c => {
       const isSelected = !isAllSelected && c.name.toLowerCase() === selectedCommodity.toLowerCase();
+      const cropKey = c.name.toLowerCase().replace(/[^a-z]/g, '');
       return `
         <button 
           class="btn btn-sm"
-          style="white-space:nowrap; border-radius:20px; font-size:0.82rem; font-weight:700; display:flex; align-items:center; gap:6px; padding:6px 14px; transition:all 0.2s ease; ${isSelected ? `background:${c.color}; color:#FFF; border-color:${c.color}; box-shadow:0 4px 12px ${c.color}40; transform:scale(1.05);` : 'background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-color);'}"
+          style="white-space:nowrap; border-radius:20px; font-size:0.82rem; font-weight:700; display:flex; align-items:center; gap:8px; padding:6px 14px; transition:all 0.2s ease; ${isSelected ? `background:${c.color}; color:#FFF; border-color:${c.color}; box-shadow:0 4px 12px ${c.color}40; transform:scale(1.05);` : 'background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-color);'}"
           onclick="selectMandiCommodity('${c.name}')"
         >
-          <i class="fas ${c.icon}"></i>
+          <img src="/images/crops/${cropKey}.jpg" alt="${c.name}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; display:inline-block; border:1px solid #E5E7EB;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" />
+          <i class="fas ${c.icon}" style="display:none;"></i>
           <span>${c.name} (${c.hindi})</span>
           ${c.kgPrice ? `<span style="font-size:0.72rem; opacity:0.85; background:rgba(0,0,0,0.15); padding:1px 6px; border-radius:10px;">₹${c.kgPrice}/kg</span>` : ''}
         </button>
@@ -553,9 +555,9 @@ const renderCommoditySpotlight = (cropMeta, datasetInfo) => {
   container.innerHTML = `
     <div class="glass-card" style="padding:18px 22px; border-radius:14px; border:2px solid ${cropMeta.color}; background:linear-gradient(135deg, var(--bg-card) 0%, ${cropMeta.color}10 100%);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:42px; height:42px; border-radius:50%; background:${cropMeta.color}; color:#FFF; display:flex; align-items:center; justify-content:center; font-size:1.25rem;">
-            <i class="fas ${cropMeta.icon}"></i>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:48px; height:48px; border-radius:50%; overflow:hidden; border:2.5px solid ${cropMeta.color}; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 3px 8px rgba(0,0,0,0.12); background:#FFF;">
+            <img src="/images/crops/${cropMeta.name.toLowerCase().replace(/[^a-z]/g, '')}.jpg" alt="${cropMeta.name}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='/images/crops/wheat.jpg';" />
           </div>
           <div>
             <div style="display:flex; align-items:center; gap:8px;">

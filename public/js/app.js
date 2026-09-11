@@ -70,32 +70,49 @@ const closeModal = () => {
 
 const updateNavAuth = () => {
   const user = getCurrentUser();
-  
-  // Update SmartProcure Topbar Profile Chip
-  const nameEl = document.getElementById('sp-profile-name');
-  const roleEl = document.getElementById('sp-profile-role');
-  const avatarEl = document.getElementById('sp-avatar-el');
+  const token = localStorage.getItem('kpms_token');
+  const isAuthenticated = !!(user && token);
 
-  if (user) {
-    if (nameEl) nameEl.textContent = user.name || 'Ramesh Kumar';
+  const publicContainer = document.getElementById('sp-nav-public-actions');
+  const privateContainer = document.getElementById('sp-nav-private-actions');
+
+  if (isAuthenticated) {
+    if (publicContainer) publicContainer.style.display = 'none';
+    if (privateContainer) privateContainer.style.display = 'flex';
+
+    // Update Profile Chip
+    const nameEl = document.getElementById('sp-profile-name');
+    const roleEl = document.getElementById('sp-profile-role');
+    const avatarEl = document.getElementById('sp-avatar-el');
+
+    if (nameEl) nameEl.textContent = user.name || 'Citizen';
     if (roleEl) roleEl.textContent = user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Farmer';
     if (avatarEl) {
-      const initial = (user.name || 'R').charAt(0).toUpperCase();
+      const initial = (user.name || 'U').charAt(0).toUpperCase();
       avatarEl.innerHTML = initial;
       avatarEl.style.fontWeight = '800';
     }
-  } else {
-    if (nameEl) nameEl.textContent = 'Ramesh Kumar';
-    if (roleEl) roleEl.textContent = 'Farmer (Demo)';
-    if (avatarEl) {
-      avatarEl.innerHTML = '<i class="fas fa-user"></i>';
+
+    // Role-specific dashboard label in menu
+    const menuDash = document.getElementById('sp-menu-dashboard');
+    if (menuDash) {
+      const roleName = user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Farmer';
+      menuDash.innerHTML = `<i class="fas fa-gauge" style="color:#0D5C3A;"></i> ${roleName} Dashboard`;
     }
+
+    // Update unread notifications badge
+    if (typeof updateUnreadBadgeUI === 'function') {
+      updateUnreadBadgeUI();
+    }
+  } else {
+    if (publicContainer) publicContainer.style.display = 'flex';
+    if (privateContainer) privateContainer.style.display = 'none';
   }
 
   // Legacy nav actions container support if present
   const navContainer = document.getElementById('nav-auth-actions');
   if (navContainer) {
-    if (user) {
+    if (isAuthenticated) {
       navContainer.innerHTML = `
         <span style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);"><i class="fas fa-user-circle"></i> ${user.name} (${user.role.toUpperCase()})</span>
         <button class="btn btn-outline btn-sm" onclick="routeTo('${user.role === 'farmer' ? '#farmer-dashboard' : (user.role === 'officer' ? '#officer-dashboard' : '#admin-dashboard')}')"><i class="fas fa-gauge"></i> ${getT('nav_portal')}</button>
@@ -110,75 +127,160 @@ const updateNavAuth = () => {
   }
 };
 
+const handleBrandClick = () => {
+  const token = localStorage.getItem('kpms_token');
+  const user = getCurrentUser();
+  if (token && user) {
+    const target = user.role === 'admin' ? '#admin-dashboard' : (user.role === 'officer' ? '#officer-dashboard' : '#farmer-dashboard');
+    routeTo(target);
+  } else {
+    routeTo('#landing');
+  }
+};
+window.handleBrandClick = handleBrandClick;
+
+const handleHomeNavClick = () => {
+  routeTo('#landing');
+};
+window.handleHomeNavClick = handleHomeNavClick;
+
+const handleDashboardMenuClick = () => {
+  const user = getCurrentUser();
+  if (!user) {
+    routeTo('#landing');
+    return;
+  }
+  const target = user.role === 'admin' ? '#admin-dashboard' : (user.role === 'officer' ? '#officer-dashboard' : '#farmer-dashboard');
+  routeTo(target);
+};
+window.handleDashboardMenuClick = handleDashboardMenuClick;
+
 const routeTo = (hash) => {
   window.location.hash = hash;
   renderRoute(hash);
 };
+window.routeTo = routeTo;
 
 const renderRoute = (hash = window.location.hash || '#landing') => {
-  if (hash === '#landing' || hash === '' || hash === '#') {
+  const cleanHash = (hash.split('?')[0]).trim();
+  const token = localStorage.getItem('kpms_token');
+  const user = getCurrentUser();
+  const isAuthenticated = !!(token && user);
+
+
+  // Update navbar state on route change
+  updateNavAuth();
+
+  // 1. Public Routes
+  if (cleanHash === '#landing' || cleanHash === '' || cleanHash === '#') {
     renderLandingPage();
-  } else if (hash === '#login' || hash === '#login/') {
+    return;
+  }
+
+  if (cleanHash === '#login' || cleanHash === '#login/') {
     renderLandingPage();
     openLoginModal(null);
-  } else if (hash === '#login/farmer') {
+    return;
+  } else if (cleanHash === '#login/farmer') {
     renderLandingPage();
     openLoginModal('farmer');
-  } else if (hash === '#login/officer') {
+    return;
+  } else if (cleanHash === '#login/officer') {
     renderLandingPage();
     openLoginModal('officer');
-  } else if (hash === '#login/admin') {
+    return;
+  } else if (cleanHash === '#login/admin') {
     renderLandingPage();
     openLoginModal('admin');
-  } else if (hash === '#smart-booking') {
-    loadSmartBookingPage();
-  } else if (hash === '#mandi-prices') {
-    loadMandiPricesPage();
-  } else if (hash === '#farmer-dashboard') {
+    return;
+  }
+
+  // 2. Route Protection Guard: Block unauthenticated access to private dashboards
+  if (!isAuthenticated) {
+    showToast('Please login to access this portal.', 'error');
+    window.location.hash = '#landing';
+    renderLandingPage();
+    if (typeof openLandingLoginRole === 'function') {
+      openLandingLoginRole('farmer');
+    }
+    return;
+  }
+
+  // 3. Role-Based Access Control Guards
+  const role = user.role || 'farmer';
+
+  // Farmer Role Guard: Cannot access officer or admin portals
+  if (role === 'farmer') {
+    if (cleanHash.startsWith('#officer') || cleanHash.startsWith('#admin') || cleanHash === '#tv-display') {
+      showToast('Access Denied: You do not have permission to access administrative portals.', 'error');
+      window.location.hash = '#farmer-dashboard';
+      loadFarmerDashboard();
+      return;
+    }
+  }
+
+  // Officer Role Guard: Cannot access super admin portal
+  if (role === 'officer') {
+    if (cleanHash.startsWith('#admin')) {
+      showToast('Access Denied: Super Admin portal requires root administrator authorization.', 'error');
+      window.location.hash = '#officer-dashboard';
+      loadOfficerDashboard();
+      return;
+    }
+  }
+
+  // 4. Authorized Route Dispatching
+  if (cleanHash === '#farmer-dashboard') {
     loadFarmerDashboard();
-  } else if (hash === '#book-slot') {
+  } else if (cleanHash === '#smart-booking') {
+    loadSmartBookingPage();
+  } else if (cleanHash === '#mandi-prices') {
+    loadMandiPricesPage();
+  } else if (cleanHash === '#book-slot') {
     loadBookingPortal();
-  } else if (hash === '#farmer-queue') {
+  } else if (cleanHash === '#farmer-queue' || cleanHash === '#procurement-status') {
     loadFarmerQueuePage();
-  } else if (hash === '#my-bookings') {
+  } else if (cleanHash === '#my-bookings') {
     loadMyBookings();
-  } else if (hash === '#farmer-payments') {
+  } else if (cleanHash === '#farmer-payments') {
     loadFarmerPaymentsPage();
-  } else if (hash === '#farmer-farms') {
+  } else if (cleanHash === '#farmer-farms') {
     loadFarmerFarmsPage();
-  } else if (hash === '#farmer-profile') {
+  } else if (cleanHash === '#farmer-profile') {
     loadFarmerProfilePage();
-  } else if (hash === '#officer-dashboard') {
+  } else if (cleanHash === '#officer-dashboard') {
     loadOfficerDashboard();
-  } else if (hash === '#officer-queue') {
+  } else if (cleanHash === '#officer-queue') {
     loadOfficerQueueView();
-  } else if (hash === '#admin-dashboard') {
+  } else if (cleanHash === '#admin-dashboard') {
     loadAdminDashboard();
-  } else if (hash === '#tv-display') {
+  } else if (cleanHash === '#tv-display') {
     loadDisplayBoard();
-  } else if (hash === '#ai-insights') {
+  } else if (cleanHash === '#ai-insights') {
     loadAIInsightsDashboard();
+  } else {
+    // Default fallback based on authenticated role
+    if (role === 'admin') loadAdminDashboard();
+    else if (role === 'officer') loadOfficerDashboard();
+    else loadFarmerDashboard();
   }
 };
 window.renderRoute = renderRoute;
 window.routeTo = routeTo;
 
 const renderLandingPage = () => {
-  if (typeof window.renderSmartProcureFarmerView === 'function') {
-    window.renderSmartProcureFarmerView();
+  if (typeof window.renderPublicLandingPage === 'function') {
+    window.renderPublicLandingPage();
     return;
   }
-  if (typeof renderSmartProcureFarmerView === 'function') {
-    renderSmartProcureFarmerView();
+  if (typeof renderPublicLandingPage === 'function') {
+    renderPublicLandingPage();
     return;
   }
-  if (typeof window.loadFarmerDashboard === 'function') {
-    window.loadFarmerDashboard();
-    return;
-  }
-  if (typeof loadFarmerDashboard === 'function') {
-    loadFarmerDashboard();
-    return;
+  // Fallback if landing-page.js is still loading
+  const container = document.getElementById('app-view-container');
+  if (container) {
+    container.innerHTML = `<div style="text-align:center; padding:60px 20px;"><i class="fas fa-spinner fa-spin fa-2x" style="color:#0D5C3A;"></i><p style="margin-top:12px;">Loading SmartProcure Portal...</p></div>`;
   }
 };
 window.renderLandingPage = renderLandingPage;
@@ -206,7 +308,7 @@ const openAboutModal = () => {
     <div style="padding:10px 0; line-height:1.6; color:#374151;">
       <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
         <span style="background:#DCFCE7; color:#15803D; font-weight:800; padding:4px 10px; border-radius:6px; font-size:0.8rem;">
-          SIH 2026 PS 26032
+          Digital Mandi Platform
         </span>
         <span style="font-size:0.82rem; color:#6B7280; font-weight:600;">Smart Automation Theme</span>
       </div>
@@ -363,55 +465,178 @@ const openContactModal = () => {
 };
 window.openContactModal = openContactModal;
 
-const openNotificationsModal = () => {
-  showGenericModal(
-    `<i class="far fa-bell" style="color:#0D5C3A;"></i> All Notifications`,
-    `
-    <div style="padding:10px 0; color:#374151;">
-      <div class="sp-notif-list">
-        <div class="sp-notif-item">
-          <div class="sp-notif-icon sp-chip-green"><i class="fas fa-check"></i></div>
-          <div class="sp-notif-content">
-            <div class="sp-notif-title-row">
-              <span class="sp-notif-title">Slot Confirmed - Centre C Vidisha</span>
-              <span class="sp-notif-time">2h ago</span>
-            </div>
-            <div class="sp-notif-desc">Your appointment for Wheat (50 Q) is booked for 12 Apr 2026, 10:00 AM. QR Token TK-204 generated.</div>
-          </div>
+// ==========================================
+// Reactive Notification Management
+// ==========================================
+window.spNotifications = [
+  {
+    id: 'notif-1',
+    title: 'Slot Confirmed - Vidisha Terminal',
+    time: '2h ago',
+    desc: 'Your appointment for Wheat (50 Q) is booked for 12 Apr 2026, 10:00 AM. QR Pass generated.',
+    type: 'booking',
+    targetRoute: '#my-bookings',
+    read: false,
+    icon: 'fa-check',
+    chipClass: 'sp-chip-green'
+  },
+  {
+    id: 'notif-2',
+    title: 'Token #TK-204 Called at Gate 2',
+    time: '4h ago',
+    desc: 'Weighbridge electronic scale is ready for your tractor. Please proceed to Gate 2 scanner.',
+    type: 'queue',
+    targetRoute: '#farmer-queue',
+    read: false,
+    icon: 'fa-ticket-alt',
+    chipClass: 'sp-chip-blue'
+  },
+  {
+    id: 'notif-3',
+    title: 'DBT Payment Credited ₹48,500',
+    time: '1d ago',
+    desc: 'PFMS UTR SBIN0048291 confirmed into bank account ending 4829. J-Form receipt archived.',
+    type: 'payment',
+    targetRoute: '#farmer-payments',
+    read: false,
+    icon: 'fa-indian-rupee-sign',
+    chipClass: 'sp-chip-orange'
+  },
+  {
+    id: 'notif-4',
+    title: 'Weather Advisory: Clear Transit',
+    time: '2d ago',
+    desc: 'Sunny conditions expected across Bhopal and Vidisha yards. 0% rain forecast for the week.',
+    type: 'weather',
+    targetRoute: '#smart-booking',
+    read: true,
+    icon: 'fa-cloud-sun',
+    chipClass: 'sp-chip-yellow'
+  }
+];
+
+const updateNotificationBadges = () => {
+  const unreadCount = (window.spNotifications || []).filter(n => !n.read).length;
+  window.unreadNotificationCount = unreadCount;
+  
+  const headerBadge = document.getElementById('top-notif-count');
+  if (headerBadge) {
+    headerBadge.textContent = unreadCount;
+    headerBadge.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
+  }
+
+  const sidebarBadge = document.getElementById('sp-sidebar-notif-badge') || document.querySelector('.sp-nav-badge');
+  if (sidebarBadge) {
+    sidebarBadge.textContent = unreadCount;
+    sidebarBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+  }
+
+  // Also update dashboard list if element exists
+  const dashList = document.getElementById('sp-dashboard-notif-list');
+  if (dashList && window.spNotifications) {
+    dashList.innerHTML = window.spNotifications.slice(0, 3).map(n => `
+      <div class="sp-notif-item" onclick="handleNotificationClick('${n.id}')" style="cursor:pointer;" title="Click to view details">
+        <div class="sp-notif-icon ${n.chipClass}">
+          <i class="fas ${n.icon}"></i>
         </div>
-        <div class="sp-notif-item">
-          <div class="sp-notif-icon sp-chip-blue"><i class="fas fa-ticket-alt"></i></div>
-          <div class="sp-notif-content">
-            <div class="sp-notif-title-row">
-              <span class="sp-notif-title">Token #TK-204 Called at Gate 2</span>
-              <span class="sp-notif-time">4h ago</span>
-            </div>
-            <div class="sp-notif-desc">Weighbridge scale #3 is ready for your tractor. Please proceed to Gate 2 scanner.</div>
+        <div class="sp-notif-content">
+          <div class="sp-notif-title-row">
+            <span class="sp-notif-title">${n.title}</span>
+            <span class="sp-notif-time">${n.time}</span>
           </div>
-        </div>
-        <div class="sp-notif-item">
-          <div class="sp-notif-icon sp-chip-orange"><i class="fas fa-indian-rupee-sign"></i></div>
-          <div class="sp-notif-content">
-            <div class="sp-notif-title-row">
-              <span class="sp-notif-title">DBT Payment Credited ₹48,500</span>
-              <span class="sp-notif-time">1d ago</span>
-            </div>
-            <div class="sp-notif-desc">PFMS UTR SBIN0048291 confirmed into SBI Bank A/c ending 4829. J-Form receipt archived.</div>
-          </div>
-        </div>
-        <div class="sp-notif-item">
-          <div class="sp-notif-icon sp-chip-yellow"><i class="fas fa-cloud-sun"></i></div>
-          <div class="sp-notif-content">
-            <div class="sp-notif-title-row">
-              <span class="sp-notif-title">Weather Advisory: Clear Transit</span>
-              <span class="sp-notif-time">2d ago</span>
-            </div>
-            <div class="sp-notif-desc">Sunny conditions expected across Bhopal and Vidisha yards. 0% rain forecast for the week.</div>
-          </div>
+          <div class="sp-notif-desc">${n.desc}</div>
         </div>
       </div>
-      <div style="text-align:right; margin-top:20px;">
-        <button class="sp-btn-book" style="width:auto; padding:8px 18px;" onclick="closeModal()">Dismiss</button>
+    `).join('');
+  }
+};
+window.updateNotificationBadges = updateNotificationBadges;
+
+const handleNotificationClick = (id) => {
+  const notif = (window.spNotifications || []).find(n => n.id === id);
+  if (notif) {
+    notif.read = true;
+    updateNotificationBadges();
+
+    // Persist read state to backend if logged in
+    const token = localStorage.getItem('kpms_token');
+    if (token) {
+      fetch('/api/farmer/notifications/read', {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).catch(() => {});
+    }
+
+    if (typeof closeModal === 'function') closeModal();
+
+    if (notif.targetRoute) {
+      routeTo(notif.targetRoute);
+    }
+  }
+};
+window.handleNotificationClick = handleNotificationClick;
+
+const onProcurementBookingCreated = (bookingData) => {
+  if (!bookingData) return;
+
+  const newNotif = {
+    id: 'notif-' + Date.now(),
+    title: `Slot Confirmed - ${bookingData.centerName || bookingData.centerId}`,
+    time: 'Just now',
+    desc: `Appointment for ${bookingData.cropName} (${bookingData.quantity} Q) confirmed on ${bookingData.date} (${bookingData.timeSlot}). Pass #${bookingData.bookingNumber} active.`,
+    type: 'booking',
+    targetRoute: '#my-bookings',
+    read: false,
+    icon: 'fa-check',
+    chipClass: 'sp-chip-green'
+  };
+
+  if (!window.spNotifications) window.spNotifications = [];
+  window.spNotifications.unshift(newNotif);
+  updateNotificationBadges();
+
+  localStorage.setItem('kpms_last_booking', JSON.stringify(bookingData));
+
+  // If dashboard is open, re-render it to advance Journey immediately
+  if (window.location.hash === '#farmer-dashboard' || window.location.hash === '' || window.location.hash === '#landing') {
+    if (typeof loadFarmerDashboard === 'function') loadFarmerDashboard();
+  }
+};
+window.onProcurementBookingCreated = onProcurementBookingCreated;
+
+const openNotificationsModal = () => {
+  const unreadCount = (window.spNotifications || []).filter(n => !n.read).length;
+  const notifsHtml = (window.spNotifications || []).map(n => `
+    <div class="sp-notif-item" onclick="handleNotificationClick('${n.id}')" style="cursor:pointer; padding:12px; border-radius:10px; transition:background 0.15s ease; ${n.read ? 'opacity:0.7;' : 'background:#F0FDF4; border:1px solid #DCFCE7;'} margin-bottom:10px;">
+      <div class="sp-notif-icon ${n.chipClass}" style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <i class="fas ${n.icon}"></i>
+      </div>
+      <div class="sp-notif-content" style="flex:1; margin-left:12px;">
+        <div class="sp-notif-title-row" style="display:flex; justify-content:space-between; align-items:baseline;">
+          <span class="sp-notif-title" style="font-weight:${n.read ? '600' : '800'}; font-size:0.9rem; color:#111827;">${n.title}</span>
+          <span class="sp-notif-time" style="font-size:0.72rem; color:#9CA3AF;">${n.time}</span>
+        </div>
+        <div class="sp-notif-desc" style="font-size:0.78rem; color:#4B5563; margin-top:2px;">${n.desc}</div>
+        <div style="margin-top:6px; font-size:0.72rem; color:#0D5C3A; font-weight:700;">
+          <i class="fas fa-arrow-right"></i> Click to view details
+        </div>
+      </div>
+      ${!n.read ? '<span style="width:8px; height:8px; border-radius:50%; background:#EF4444; flex-shrink:0; margin-top:6px; margin-left:8px;"></span>' : ''}
+    </div>
+  `).join('');
+
+  showGenericModal(
+    `<i class="far fa-bell" style="color:#0D5C3A;"></i> All Notifications (${unreadCount} unread)`,
+    `
+    <div style="padding:4px 0; color:#374151;">
+      <div class="sp-notif-list" style="max-height:380px; overflow-y:auto; padding-right:4px;">
+        ${notifsHtml}
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px; border-top:1px solid #E5E2DC; padding-top:14px;">
+        <button class="btn btn-outline btn-sm" onclick="window.spNotifications.forEach(n => n.read = true); updateNotificationBadges(); openNotificationsModal();">
+          <i class="fas fa-check-double"></i> Mark All as Read
+        </button>
+        <button class="sp-btn-book" style="width:auto; padding:8px 20px;" onclick="closeModal()">Close</button>
       </div>
     </div>
     `
@@ -422,15 +647,15 @@ window.openNotificationsModal = openNotificationsModal;
 
 const openSihInfoModal = () => {
   showGenericModal(
-    `<i class="fas fa-award" style="color:#0D5C3A;"></i> Digital Mandi 2026 &bull; SIH Hackathon`,
+    `<i class="fas fa-leaf" style="color:#0D5C3A;"></i> Digital Mandi 2026 &bull; Smart Agriculture`,
     `
     <div style="padding:10px 0; color:#374151; line-height:1.6;">
       <div style="background:#F0FDF4; border:1px solid #DCFCE7; border-radius:10px; padding:14px; margin-bottom:14px;">
-        <div style="font-weight:800; color:#064E3B; font-size:0.95rem;">Smart India Hackathon 2026</div>
-        <div style="font-size:0.8rem; color:#15803D; margin-top:2px;">Problem Statement: PS 26032 &bull; Theme: Smart Automation</div>
+        <div style="font-weight:800; color:#064E3B; font-size:0.95rem;">SmartProcure Digital Mandi</div>
+        <div style="font-size:0.8rem; color:#15803D; margin-top:2px;">Digital Agriculture &bull; Smart Automation</div>
       </div>
       <p style="font-size:0.86rem; margin-bottom:10px;">
-        <strong>Problem Statement:</strong> "Farmers often face long waiting times, lack of information regarding procurement schedules, and uncertainty about procurement status."
+        <strong>Platform Objective:</strong> "Eliminating farmer waiting times, providing complete procurement schedule transparency, and ensuring guaranteed MSP returns."
       </p>
       <p style="font-size:0.86rem; margin-bottom:12px;">
         <strong>DataDynamos Solution:</strong> An automated, high-throughput digital procurement ecosystem delivering AI-based optimal mandi discovery, congestion-free slot allocation, live token queuing with multi-channel SMS/WhatsApp alerts, and tamper-proof DBT disbursement.
@@ -454,12 +679,12 @@ const toggleProfileDropdown = (event) => {
 };
 window.toggleProfileDropdown = toggleProfileDropdown;
 
-// Close dropdown on outside click
+// Close dropdown on outside click or item click
 window.addEventListener('click', (e) => {
   const menu = document.getElementById('sp-profile-menu');
   const chip = document.getElementById('sp-user-chip');
   if (menu && menu.classList.contains('active')) {
-    if (!chip || !chip.contains(e.target)) {
+    if (!chip || !chip.contains(e.target) || e.target.closest('.sp-dropdown-item')) {
       menu.classList.remove('active');
     }
   }
@@ -688,6 +913,14 @@ const updateDashboardWeatherWidget = (topCentre) => {
   if (condEl) {
     condEl.textContent = `${cClass.label || 'Favorable'} • ${cClass.travelRisk ? cClass.travelRisk + ' transit risk' : 'Ideal conditions'}`;
   }
+
+  const metricsEl = document.querySelector('.sp-weather-metrics');
+  if (metricsEl) {
+    const hum = w.humidity !== undefined ? w.humidity : 42;
+    const wind = w.windSpeed !== undefined ? w.windSpeed : 12;
+    const rain = w.precipitation !== undefined ? w.precipitation : (w.rain || 0);
+    metricsEl.innerHTML = `Humidity: <strong>${hum}%</strong> &bull; Wind: <strong>${wind} km/h</strong> &bull; Rain: <strong>${rain}%</strong>`;
+  }
 };
 
 // Book recommended slot action with prefilled data
@@ -833,6 +1066,15 @@ const updateNearbyMandisMiniMap = (userLoc, topCentres, crop = 'Wheat', qty = 50
         if (window.spMiniMap) window.spMiniMap.invalidateSize();
       }, 300);
     }
+
+    // Update distance pill labels underneath mini-map dynamically
+    const distPillsEl = document.getElementById('sp-nearby-dist-pills');
+    if (distPillsEl && topCentres.length > 0) {
+      const colorDots = ['#0D5C3A', '#2563EB', '#EA580C'];
+      distPillsEl.innerHTML = topCentres.slice(0, 3).map((c, i) => `
+        <span><i class="fas fa-circle" style="color:${colorDots[i] || '#0D5C3A'}; font-size:0.65rem;"></i> ${c.district || c.shortName} (${c.distance} km)</span>
+      `).join('');
+    }
   } catch (err) {
     console.warn('Map update notice:', err.message);
   }
@@ -851,6 +1093,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initSocketClient();
   initSIHTour();
   updateNavAuth();
+  updateNotificationBadges();
 
   // Initialize Global Geolocation & Spatial Intelligence
   if (window.KPMS_Location) {

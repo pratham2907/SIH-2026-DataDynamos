@@ -62,8 +62,8 @@ const loadBookingPortal = async () => {
             
             ${prefill ? `
               <div class="glass-panel" style="padding:14px 18px; margin-bottom:20px; background:linear-gradient(135deg, rgba(224,109,20,0.1), rgba(26,122,68,0.08)); border-left:4px solid var(--saffron); border-radius:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <i class="fas fa-wand-magic-sparkles" style="color:var(--saffron); font-size:1.2rem;"></i>
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <img src="/images/crops/${(prefill.crop || 'wheat').toLowerCase().replace(/[^a-z]/g, '')}.jpg" alt="${prefill.crop}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1.5px solid var(--saffron); box-shadow:0 1px 4px rgba(0,0,0,0.1);" onerror="this.onerror=null; this.src='/images/crops/wheat.jpg';" />
                   <span style="font-size:0.92rem; font-weight:700; color:var(--primary-navy);">
                     Pre-filled from Smart Recommendation: <strong>${prefill.crop}</strong> (${prefill.quantity} Quintals)
                   </span>
@@ -271,6 +271,9 @@ const handleSlotBookingSubmit = async (e) => {
     const data = await res.json();
     if (data.success) {
       showToast('Procurement slot confirmed!', 'success');
+      if (typeof window.onProcurementBookingCreated === 'function') {
+        window.onProcurementBookingCreated(data.data);
+      }
       openBookingQRModal(data.data.bookingNumber, data.data);
     } else {
       showToast(data.message, 'error');
