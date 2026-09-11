@@ -49,7 +49,7 @@ const seedDemoData = async (force = false) => {
       isVerified: true
     });
 
-    // 2. Procurement Centers
+    // 2. Procurement Centers (Synchronized Regional & National Mandis)
     const centers = [
       {
         centerId: 'CTR-01',
@@ -73,6 +73,86 @@ const seedDemoData = async (force = false) => {
       },
       {
         centerId: 'CTR-02',
+        name: 'Sehore Krishak Mega Mandi',
+        state: 'Madhya Pradesh',
+        district: 'Sehore',
+        taluka: 'Sehore',
+        village: 'Mandi Yard',
+        fullAddress: 'National Highway 86, Mandi Complex, Sehore, MP - 466001',
+        latitude: 23.2032,
+        longitude: 77.0844,
+        maxDailyCapacity: 450,
+        maxHourlyCapacity: 45,
+        countersCount: 5,
+        slotDurationMinutes: 30,
+        openingTime: '08:00 AM',
+        closingTime: '06:00 PM',
+        workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        isActive: true,
+        currentCrowdLevel: 'Low'
+      },
+      {
+        centerId: 'CTR-03',
+        name: 'Vidisha Agro Procurement Terminal',
+        state: 'Madhya Pradesh',
+        district: 'Vidisha',
+        taluka: 'Vidisha',
+        village: 'Ahmedpur Road Yard',
+        fullAddress: 'Ahmedpur By-pass Road, Vidisha, MP - 464001',
+        latitude: 23.5251,
+        longitude: 77.8081,
+        maxDailyCapacity: 280,
+        maxHourlyCapacity: 30,
+        countersCount: 3,
+        slotDurationMinutes: 30,
+        openingTime: '08:30 AM',
+        closingTime: '05:30 PM',
+        workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        isActive: true,
+        currentCrowdLevel: 'Low'
+      },
+      {
+        centerId: 'CTR-04',
+        name: 'Hoshangabad Krishak Mandi',
+        state: 'Madhya Pradesh',
+        district: 'Hoshangabad',
+        taluka: 'Hoshangabad',
+        village: 'Rasulia Yard',
+        fullAddress: 'Rasulia Mandi Complex, Narmadapuram, MP - 461001',
+        latitude: 22.7519,
+        longitude: 77.7289,
+        maxDailyCapacity: 320,
+        maxHourlyCapacity: 35,
+        countersCount: 4,
+        slotDurationMinutes: 30,
+        openingTime: '08:00 AM',
+        closingTime: '06:00 PM',
+        workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        isActive: true,
+        currentCrowdLevel: 'Medium'
+      },
+      {
+        centerId: 'CTR-05',
+        name: 'Raisen Kisan Procurement Hub',
+        state: 'Madhya Pradesh',
+        district: 'Raisen',
+        taluka: 'Raisen',
+        village: 'Sanchi Road Yard',
+        fullAddress: 'Sanchi Road, Near Industrial Area, Raisen, MP - 464551',
+        latitude: 23.3315,
+        longitude: 77.7818,
+        maxDailyCapacity: 250,
+        maxHourlyCapacity: 25,
+        countersCount: 3,
+        slotDurationMinutes: 30,
+        openingTime: '08:30 AM',
+        closingTime: '05:30 PM',
+        workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        isActive: true,
+        currentCrowdLevel: 'Low'
+      },
+      {
+        centerId: 'CTR-06',
         name: 'Karnal Grain Procurement Mandi',
         state: 'Haryana',
         district: 'Karnal',
@@ -92,7 +172,7 @@ const seedDemoData = async (force = false) => {
         currentCrowdLevel: 'High'
       },
       {
-        centerId: 'CTR-03',
+        centerId: 'CTR-07',
         name: 'Nashik Krishi Utpanna Bazar',
         state: 'Maharashtra',
         district: 'Nashik',
@@ -112,7 +192,7 @@ const seedDemoData = async (force = false) => {
         currentCrowdLevel: 'Low'
       },
       {
-        centerId: 'CTR-04',
+        centerId: 'CTR-08',
         name: 'Guntur Agri Procurement Terminal',
         state: 'Andhra Pradesh',
         district: 'Guntur',

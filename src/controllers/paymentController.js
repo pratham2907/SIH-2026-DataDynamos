@@ -203,10 +203,188 @@ const raisePaymentComplaint = async (req, res) => {
   }
 };
 
+/**
+ * ----------------------------------------------------
+ * RAZORPAY TEST GATEWAY INTEGRATION
+ * ----------------------------------------------------
+ */
+const razorpayService = require('../services/razorpayService');
+
+/**
+ * Get Public Razorpay Configuration (Key ID for frontend checkout)
+ */
+const getRazorpayConfig = (req, res) => {
+  return res.json({
+    success: true,
+    data: razorpayService.getPublicConfig()
+  });
+};
+
+/**
+ * Create a Razorpay Order
+ */
+const createRazorpayOrder = async (req, res) => {
+  try {
+    const { paymentId, amount, notes = {} } = req.body;
+
+    let targetPayment = null;
+    if (paymentId) {
+      targetPayment = await Payments.findOne({
+        $or: [{ _id: paymentId }, { paymentId: paymentId }]
+      });
+    }
+
+    const orderAmount = targetPayment ? targetPayment.amount : (Number(amount) || 100);
+    const receiptId = targetPayment ? (targetPayment.receiptNumber || targetPayment.paymentId) : `order_${Date.now().toString().slice(-8)}`;
+
+    const order = await razorpayService.createOrder({
+      amount: orderAmount,
+      receipt: receiptId,
+      notes: {
+        paymentId: targetPayment ? targetPayment.paymentId : 'DEMO',
+        farmerId: targetPayment ? targetPayment.farmerId : (req.user ? req.user.id : 'GUEST'),
+        ...notes
+      }
+    });
+
+    if (targetPayment) {
+      await Payments.findByIdAndUpdate(targetPayment._id, {
+        razorpayOrderId: order.id
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: razorpayService.getPublicConfig().keyId,
+        receipt: order.receipt
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || 'Failed to create Razorpay order'
+    });
+  }
+};
+
+/**
+ * Verify Razorpay Payment Signature and Complete Payment Settlement
+ */
+const verifyRazorpayPayment = async (req, res) => {
+  try {
+    const {
+      paymentId,
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature
+    } = req.body;
+
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required Razorpay payment credentials for verification'
+      });
+    }
+
+    // Verify cryptographic signature
+    const isValid = razorpayService.verifyPaymentSignature({
+      orderId: razorpayOrderId,
+      paymentId: razorpayPaymentId,
+      signature: razorpaySignature
+    });
+
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Razorpay payment signature verification failed. Untrusted payload.'
+      });
+    }
+
+    let updated = null;
+    let farmer = null;
+
+    if (paymentId) {
+      const payment = await Payments.findOne({
+        $or: [{ _id: paymentId }, { paymentId: paymentId }, { razorpayOrderId }]
+      });
+
+      if (payment) {
+        const timeline = (payment.timeline || []).map(t => {
+          t.done = true;
+          if (!t.timestamp) t.timestamp = new Date().toISOString();
+          return t;
+        });
+
+        updated = await Payments.findByIdAndUpdate(payment._id, {
+          status: 'Completed',
+          utrNumber: `RZP-${razorpayPaymentId}`,
+          razorpayPaymentId,
+          razorpayOrderId,
+          razorpaySignature,
+          paymentDate: new Date().toISOString().split('T')[0],
+          releasedBy: req.user ? req.user.name : 'Razorpay Gateway',
+          timeline
+        });
+
+        farmer = await Farmers.findOne({ farmerId: payment.farmerId });
+        if (farmer) {
+          await sendNotification({
+            userId: farmer.userId || farmer._id,
+            role: 'farmer',
+            title: 'Payment Settlement Complete via Razorpay',
+            message: `₹${payment.amount.toLocaleString('en-IN')} disbursed successfully via Razorpay (Txn ID: ${razorpayPaymentId}).`,
+            type: 'payment',
+            metadata: {
+              utr: `RZP-${razorpayPaymentId}`,
+              amount: payment.amount,
+              paymentId: razorpayPaymentId
+            }
+          });
+        }
+      }
+    }
+
+    // Audit Log
+    if (req.user) {
+      await AuditLogs.create({
+        userId: req.user.id,
+        userName: req.user.name,
+        role: req.user.role || 'system',
+        action: 'RAZORPAY_PAYMENT_VERIFIED',
+        details: `Verified Razorpay payment ${razorpayPaymentId} for order ${razorpayOrderId}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: `Razorpay payment verified successfully! Transaction ID: ${razorpayPaymentId}`,
+      data: {
+        paymentId: razorpayPaymentId,
+        orderId: razorpayOrderId,
+        status: 'Completed',
+        paymentRecord: updated
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || 'Error verifying Razorpay payment'
+    });
+  }
+};
+
 module.exports = {
   getFarmerPayments,
   getAllPayments,
   approvePayment,
   releasePayment,
-  raisePaymentComplaint
+  raisePaymentComplaint,
+  getRazorpayConfig,
+  createRazorpayOrder,
+  verifyRazorpayPayment
 };

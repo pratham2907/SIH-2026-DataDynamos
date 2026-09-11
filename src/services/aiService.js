@@ -118,7 +118,7 @@ const answerAIQuery = async (query, role = 'farmer', context = {}) => {
 
   // Generic fallback response
   return {
-    reply: `Namaste! I am Kisan Sahayak AI. I can assist you with slot booking, live queue positions, Mandi gate check-in, DBT payment verification, MSP rates, and Fair Average Quality (FAQ) standards. How can I help you today?`,
+    reply: `Namaste! I am Kisan Sahayak. I can assist you with slot booking, live queue positions, Mandi gate check-in, DBT payment verification, MSP rates, and Fair Average Quality (FAQ) standards. How can I help you today?`,
     suggestions: ["How to book a slot?", "Check MSP rates for 2025-26", "Track my DBT payment", "Check nearest Mandi wait time"]
   };
 };

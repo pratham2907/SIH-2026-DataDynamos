@@ -263,7 +263,7 @@ const moderateFarmer = async (req, res) => {
       moderationRemarks: remarks || ''
     });
 
-    return res.json({ success: true, message: `Farmer KYC status updated to ${status}`, data: updated });
+    return res.json({ success: true, message: `Farmer verification status updated to ${status}`, data: updated });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }

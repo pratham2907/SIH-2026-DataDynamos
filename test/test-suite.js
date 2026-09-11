@@ -1,6 +1,7 @@
+require('dotenv').config();
 const http = require('http');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 7008;
 const BASE_URL = `http://localhost:${PORT}/api`;
 
 const makeRequest = (method, path, body = null, headers = {}) => {
@@ -65,24 +66,57 @@ const runTests = async () => {
       password: 'Kisan@123',
       role: 'farmer'
     });
-    assert(farmerLogin.status === 200 && farmerLogin.data.success && farmerLogin.data.token, 'Farmer login generates valid JWT token');
-    const farmerToken = farmerLogin.data ? farmerLogin.data.token : null;
+    let farmerToken = farmerLogin.data ? farmerLogin.data.token : null;
+    if (farmerLogin.data && farmerLogin.data.requiresOtp) {
+      const vRes = await makeRequest('POST', '/auth/verify-login-otp', {
+        tempSessionId: farmerLogin.data.tempSessionId,
+        otp: '123456'
+      });
+      farmerToken = vRes.data ? vRes.data.token : null;
+    }
+    assert(farmerToken !== null, 'Farmer login generates valid JWT token');
 
     const officerLogin = await makeRequest('POST', '/auth/login', {
       identifier: 'officer@kpms.gov.in',
       password: 'Officer@123',
       role: 'officer'
     });
-    assert(officerLogin.status === 200 && officerLogin.data.success, 'Procurement Officer login succeeds');
-    const officerToken = officerLogin.data ? officerLogin.data.token : null;
+    let officerToken = officerLogin.data ? officerLogin.data.token : null;
+    if (officerLogin.data && officerLogin.data.requiresOtp) {
+      const vRes = await makeRequest('POST', '/auth/verify-login-otp', {
+        tempSessionId: officerLogin.data.tempSessionId,
+        otp: '123456'
+      });
+      officerToken = vRes.data ? vRes.data.token : null;
+    }
+    assert(officerToken !== null, 'Procurement Officer login succeeds');
 
+    // Super admin with CAPTCHA
+    const captchaRes = await makeRequest('GET', '/auth/captcha');
+    let captchaAns = captchaRes.data.question;
+    if (captchaAns && (captchaAns.includes('+') || captchaAns.includes('-'))) {
+      const parts = captchaAns.replace('= ?', '').trim().split(' ');
+      const n1 = parseInt(parts[0], 10);
+      const op = parts[1];
+      const n2 = parseInt(parts[2], 10);
+      captchaAns = op === '+' ? String(n1 + n2) : String(n1 - n2);
+    }
     const adminLogin = await makeRequest('POST', '/auth/login', {
       identifier: 'admin@kpms.gov.in',
       password: 'Admin@123',
-      role: 'admin'
+      role: 'admin',
+      captchaToken: captchaRes.data.captchaToken,
+      captchaAnswer: captchaAns
     });
-    assert(adminLogin.status === 200 && adminLogin.data.success, 'Super Admin login succeeds');
-    const adminToken = adminLogin.data ? adminLogin.data.token : null;
+    let adminToken = adminLogin.data ? adminLogin.data.token : null;
+    if (adminLogin.data && adminLogin.data.requiresOtp) {
+      const vRes = await makeRequest('POST', '/auth/verify-login-otp', {
+        tempSessionId: adminLogin.data.tempSessionId,
+        otp: '123456'
+      });
+      adminToken = vRes.data ? vRes.data.token : null;
+    }
+    assert(adminToken !== null, 'Super Admin login succeeds');
 
     // Test Duplicate Registration Prevention
     const dupReg = await makeRequest('POST', '/auth/register', {

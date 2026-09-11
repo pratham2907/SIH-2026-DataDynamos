@@ -32,10 +32,16 @@ const loadFarmerPaymentsPage = async () => {
         <main class="main-content">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
             <div>
-              <h2 style="color:var(--primary-navy); font-weight:800;">Direct Benefit Transfer (DBT) Payouts</h2>
-              <p style="color:var(--text-muted); font-size:0.9rem;">Track real-time treasury disbursements and download digital tax-exempt vouchers.</p>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <h2 style="color:var(--primary-navy); font-weight:800; margin:0;">Direct Benefit Transfer (DBT) Payouts</h2>
+                <span class="status-pill completed" style="font-size:0.75rem;"><i class="fas fa-shield-halved"></i> Razorpay Test Gateway</span>
+              </div>
+              <p style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">Track real-time treasury disbursements, test gateway settlements, and download digital tax-exempt vouchers.</p>
             </div>
-            <button class="btn btn-outline" onclick="openGrievanceModal()"><i class="fas fa-circle-exclamation"></i> Raise Payment Grievance</button>
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-primary" onclick="initiateRazorpayPayment(null, 500, 'TEST_SETTLEMENT', 'Demo Farmer')"><i class="fas fa-credit-card"></i> ⚡ Test Razorpay Checkout</button>
+              <button class="btn btn-outline" onclick="openGrievanceModal()"><i class="fas fa-circle-exclamation"></i> Raise Payment Grievance</button>
+            </div>
           </div>
 
           <!-- Summary Metric Cards -->
@@ -169,3 +175,113 @@ const handleGrievanceSubmit = async (e) => {
     showToast('Failed to submit complaint', 'error');
   }
 };
+
+/**
+ * Initiate Razorpay Test Gateway Checkout
+ */
+const initiateRazorpayPayment = async (paymentId = null, amount = 500, receiptNumber = 'TEST_VOUCHER', farmerName = 'Demo Farmer') => {
+  try {
+    showToast('Connecting to Razorpay Test Gateway...', 'info');
+
+    // 1. Fetch Razorpay Key ID
+    const configRes = await fetch('/api/payments/razorpay/config');
+    const configData = await configRes.json();
+    const keyId = configData.data ? configData.data.keyId : null;
+
+    if (!keyId) {
+      showToast('⚠️ Razorpay API key is not configured in .env yet. Please provide your Razorpay Test Key.', 'error');
+      return;
+    }
+
+    // 2. Create Order on backend
+    const token = localStorage.getItem('kpms_token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const orderRes = await fetch('/api/payments/razorpay/create-order', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        paymentId,
+        amount,
+        notes: { receiptNumber, farmerName }
+      })
+    });
+
+    const orderData = await orderRes.json();
+    if (!orderData.success) {
+      showToast(`Razorpay Error: ${orderData.message}`, 'error');
+      return;
+    }
+
+    const { orderId, amount: amountInPaise, currency } = orderData.data;
+
+    // 3. Open Razorpay Official Checkout Modal
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    const options = {
+      key: keyId,
+      amount: amountInPaise,
+      currency: currency || 'INR',
+      name: 'KPMS Agri-Procurement',
+      description: `DBT Disbursement Voucher ${receiptNumber}`,
+      image: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌾</text></svg>',
+      order_id: orderId,
+      handler: async function (response) {
+        showToast('Verifying payment signature with treasury...', 'info');
+        try {
+          const verifyRes = await fetch('/api/payments/razorpay/verify-payment', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              paymentId,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature
+            })
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            showToast(`✅ Payment Successful! Transaction ID: ${response.razorpay_payment_id}`, 'success');
+            if (typeof loadFarmerPaymentsPage === 'function' && window.location.hash === '#farmer-payments') {
+              loadFarmerPaymentsPage();
+            }
+            if (typeof loadAdminDashboard === 'function' && window.location.hash === '#admin-dashboard') {
+              loadAdminDashboard();
+            }
+          } else {
+            showToast(verifyData.message || 'Signature verification failed', 'error');
+          }
+        } catch (err) {
+          showToast('Payment verification network error', 'error');
+        }
+      },
+      prefill: {
+        name: farmerName || (user ? user.name : 'Indian Farmer'),
+        email: (user && user.email) || 'farmer@kpms.gov.in',
+        contact: (user && user.mobile) || '9876543210'
+      },
+      notes: {
+        receiptNumber: receiptNumber || 'KPMS_SETTLEMENT',
+        mode: 'Razorpay Test Gateway'
+      },
+      theme: {
+        color: '#E06D14'
+      }
+    };
+
+    if (typeof Razorpay === 'undefined') {
+      showToast('Razorpay SDK loading. Please retry in a moment.', 'info');
+      return;
+    }
+
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function (response) {
+      showToast(`Transaction Failed: ${response.error.description || 'Cancelled'}`, 'error');
+    });
+    rzp.open();
+  } catch (err) {
+    showToast('Failed to initialize Razorpay checkout', 'error');
+  }
+};
+
+window.initiateRazorpayPayment = initiateRazorpayPayment;

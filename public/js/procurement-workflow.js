@@ -38,7 +38,7 @@ const renderProcurementModal = () => {
       <div class="wizard-steps" style="margin-bottom:20px;">
         <div class="step-item active" id="proc-step-ind-1">
           <div class="step-circle">1</div>
-          <div class="step-title">KYC & Crop</div>
+          <div class="step-title">Farmer & Crop</div>
         </div>
         <div class="step-item" id="proc-step-ind-2">
           <div class="step-circle">2</div>

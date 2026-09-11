@@ -208,10 +208,95 @@ const classifyOpenMeteoAlert = (data, location) => {
 };
 
 /**
+ * Classify OpenWeatherMap live response into agro-meteorological advisory alert
+ */
+const classifyOpenWeatherAlert = (owm, location) => {
+  const curWeather = (owm.weather && owm.weather[0]) || { main: 'Clear', description: 'clear sky', icon: '01d' };
+  const temp = Math.round(owm.main.temp * 10) / 10;
+  const feelsLike = Math.round(owm.main.feels_like * 10) / 10;
+  const humidity = owm.main.humidity;
+  const windSpeed = owm.wind ? (Math.round(owm.wind.speed * 10) / 10).toFixed(1) : '2.5';
+  const precipitation = owm.rain ? (owm.rain['1h'] || owm.rain['3h'] || 0) : 0;
+  const pressure = owm.main.pressure;
+  const visibility = owm.visibility ? (owm.visibility / 1000).toFixed(1) : '10.0';
+
+  const sunrise = owm.sys && owm.sys.sunrise 
+    ? new Date(owm.sys.sunrise * 1000).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+    : '06:04 am';
+  const sunset = owm.sys && owm.sys.sunset 
+    ? new Date(owm.sys.sunset * 1000).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+    : '06:32 pm';
+
+  let type, severity, severityClass, advisory;
+  const main = curWeather.main;
+  const label = curWeather.description ? (curWeather.description.charAt(0).toUpperCase() + curWeather.description.slice(1)) : 'Clear sky';
+
+  if (main === 'Thunderstorm') {
+    type = 'Thunderstorm Warning';
+    severity = 'HIGH RISK';
+    severityClass = 'skipped';
+    advisory = `${label} with active lightning. Wind ${windSpeed} m/s. Halt all outdoor Mandi operations immediately. Secure grain storage.`;
+  } else if (main === 'Rain' || main === 'Drizzle') {
+    type = 'Rain & Humidity Warning';
+    severity = 'MODERATE';
+    severityClass = 'waiting';
+    advisory = `${label} with ${humidity}% humidity and ${precipitation}mm precipitation. Ensure grain tarpaulins are deployed. Covered shed storage recommended.`;
+  } else if (main === 'Fog' || main === 'Mist' || main === 'Haze') {
+    type = 'Low Visibility Advisory';
+    severity = 'MODERATE';
+    severityClass = 'waiting';
+    advisory = `${label} — visibility ${visibility} km. Wind ${windSpeed} m/s. Farmers transporting grain advised to delay transit until visibility clears.`;
+  } else if (temp > 40) {
+    type = 'Extreme Heat Advisory';
+    severity = 'HIGH RISK';
+    severityClass = 'skipped';
+    advisory = `Temperature ${temp}°C — severe heat stress. Restrict outdoor queueing 12–3 PM. Provide water and shaded canopies for farmers at Mandi yard.`;
+  } else if (main === 'Clear' && temp > 28 && humidity < 65) {
+    type = 'Optimal Harvest Window';
+    severity = 'FAVORABLE';
+    severityClass = 'completed';
+    advisory = `${label} with ${temp}°C and ${humidity}% humidity. Ideal dry conditions for harvesting, threshing, and direct Mandi delivery. Wind: ${windSpeed} m/s.`;
+  } else if (main === 'Clouds') {
+    type = 'Overcast Conditions';
+    severity = 'LOW RISK';
+    severityClass = 'completed';
+    advisory = `${label} at ${temp}°C with ${humidity}% humidity. Mandi gate check-in can proceed normally. Monitor for possible showers.`;
+  } else {
+    type = 'Normal Weather';
+    severity = 'CLEAR';
+    severityClass = 'completed';
+    advisory = `${label}. Temperature ${temp}°C, humidity ${humidity}%, wind ${windSpeed} m/s. Standard Mandi operations can proceed normally.`;
+  }
+
+  return {
+    type,
+    severity,
+    severityClass,
+    affectedDistricts: [location.city],
+    state: location.state,
+    advisory,
+    liveData: {
+      temp: temp.toFixed(1),
+      feelsLike: feelsLike.toFixed(1),
+      humidity,
+      windSpeed,
+      condition: main,
+      description: label,
+      icon: curWeather.icon,
+      pressure: pressure ? Math.round(pressure) : 'N/A',
+      visibility,
+      sunrise,
+      sunset,
+      source: 'OpenWeatherMap API'
+    }
+  };
+};
+
+/**
  * Fetch from OpenWeatherMap API (if OPENWEATHER_API_KEY is configured in .env)
  */
 const fetchOpenWeatherMap = (lat, lon) => {
-  const apiKey = process.env.OPENWEATHER_API_KEY || process.env.OPENWEATHERMAP_API_KEY;
+  const apiKey = (process.env.OPENWEATHER_API_KEY || process.env.OPENWEATHERMAP_API_KEY || '').trim();
   if (!apiKey) return Promise.reject(new Error('No OpenWeather API key configured'));
   return new Promise((resolve, reject) => {
     const path = `/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
@@ -270,7 +355,7 @@ const getCentreWeather = async (lat = 23.2599, lon = 77.4126, cityName = 'Bhopal
           icon: owm.weather[0] ? owm.weather[0].icon : '01d',
           windSpeed: owm.wind ? owm.wind.speed : 2.5,
           visibility: owm.visibility ? (owm.visibility / 1000).toFixed(1) : 10.0,
-          source: 'OpenWeather'
+          source: 'OpenWeatherMap'
         };
         weatherCache.set(cacheKey, { timestamp: Date.now(), data });
         return data;
@@ -296,7 +381,7 @@ const getCentreWeather = async (lat = 23.2599, lon = 77.4126, cityName = 'Bhopal
       icon: live.icon,
       windSpeed: Number(live.windSpeed),
       visibility: live.visibility !== 'N/A' ? Number(live.visibility) : 10.0,
-      source: 'OpenWeather/Open-Meteo'
+      source: 'OpenWeatherMap/Open-Meteo'
     };
     weatherCache.set(cacheKey, { timestamp: Date.now(), data });
     return data;
@@ -321,12 +406,73 @@ const getCentreWeather = async (lat = 23.2599, lon = 77.4126, cityName = 'Bhopal
 };
 
 /**
- * Get live weather alerts for all mandi districts
+ * Get live weather alerts for all mandi districts (and user's location if provided)
  */
-const getLiveWeatherAlerts = async () => {
+const getLiveWeatherAlerts = async (userLoc = null) => {
+  const apiKey = (process.env.OPENWEATHER_API_KEY || process.env.OPENWEATHERMAP_API_KEY || '').trim();
+
+  // Prepare locations list, prepending user's location if provided
+  let locationsToFetch = [...MANDI_LOCATIONS];
+  let customUserLocation = null;
+
+  if (userLoc && userLoc.lat && userLoc.lon) {
+    const uLat = parseFloat(userLoc.lat);
+    const uLon = parseFloat(userLoc.lon);
+    if (!isNaN(uLat) && !isNaN(uLon)) {
+      customUserLocation = {
+        city: userLoc.city || 'Your Location',
+        district: userLoc.district || userLoc.city || 'Your District',
+        state: userLoc.state || 'Local Area',
+        lat: uLat,
+        lon: uLon,
+        isLocalUser: true
+      };
+      // Prepend user location at start of list
+      locationsToFetch = [
+        customUserLocation,
+        ...MANDI_LOCATIONS.filter(l => l.city.toLowerCase() !== (userLoc.city || '').toLowerCase())
+      ];
+    }
+  }
+
+  // 1. Prioritize OpenWeatherMap API when key is configured
+  if (apiKey) {
+    try {
+      const owmResults = await Promise.allSettled(
+        locationsToFetch.map(async (loc) => {
+          const owm = await fetchOpenWeatherMap(loc.lat, loc.lon);
+          const alert = classifyOpenWeatherAlert(owm, loc);
+          if (loc.isLocalUser) {
+            alert.isLocalUser = true;
+            alert.localBadge = '📍 Your Detected Location';
+          }
+          return alert;
+        })
+      );
+
+      const successfulAlerts = owmResults
+        .filter(r => r.status === 'fulfilled')
+        .map(r => r.value);
+
+      if (successfulAlerts.length > 0) {
+        return successfulAlerts;
+      }
+    } catch (err) {
+      console.warn('OpenWeatherMap query notice, falling back:', err.message);
+    }
+  }
+
+  // 2. High-Accuracy Agro Weather Fallback
   const results = await Promise.allSettled(
-    MANDI_LOCATIONS.map(loc =>
-      fetchWeatherOpenMeteo(loc.lat, loc.lon).then(data => classifyOpenMeteoAlert(data, loc))
+    locationsToFetch.map(loc =>
+      fetchWeatherOpenMeteo(loc.lat, loc.lon).then(data => {
+        const alert = classifyOpenMeteoAlert(data, loc);
+        if (loc.isLocalUser) {
+          alert.isLocalUser = true;
+          alert.localBadge = '📍 Your Detected Location';
+        }
+        return alert;
+      })
     )
   );
 
@@ -374,3 +520,4 @@ module.exports = {
   fetchOpenWeatherMap,
   fetchWeatherOpenMeteo
 };
+

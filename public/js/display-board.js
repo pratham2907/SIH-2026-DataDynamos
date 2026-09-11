@@ -2,12 +2,15 @@
 
 let displayBoardInterval = null;
 
-const loadDisplayBoard = async () => {
+const loadDisplayBoard = async (targetCenterId = null) => {
   const container = document.getElementById('app-view-container');
   container.innerHTML = `<div class="skeleton" style="height:100vh; border-radius:0;"></div>`;
 
+  const loc = window.KPMS_USER_LOCATION;
+  const activeCenterId = targetCenterId || (loc && loc.nearestCenter && loc.nearestCenter.centerId) || 'CTR-01';
+
   try {
-    const res = await fetch('/api/queue/display-board?centerId=CTR-01');
+    const res = await fetch(`/api/queue/display-board?centerId=${activeCenterId}`);
     const result = await res.json();
     const { center, currentlyServing, nextInLine, stats, currentTime } = result;
 
@@ -20,13 +23,24 @@ const loadDisplayBoard = async () => {
           <div style="display:flex; align-items:center; gap:16px;">
             <div class="brand-emblem" style="width:60px; height:60px; font-size:2rem;"><i class="fas fa-wheat-awn"></i></div>
             <div>
-              <h1 style="font-size:2.2rem; font-weight:800; color:#FFF; margin:0;">${center.name}</h1>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <h1 style="font-size:2.2rem; font-weight:800; color:#FFF; margin:0;">${center.name}</h1>
+                ${loc && loc.nearestCenter && loc.nearestCenter.centerId === center.centerId ? `<span class="status-pill completed" style="font-size:0.75rem;"><i class="fas fa-location-dot"></i> Nearest To You</span>` : ''}
+              </div>
               <div style="font-size:1.1rem; color:var(--saffron); font-weight:600;">OFFICIAL PUBLIC DIGITAL TOKEN QUEUE BOARD</div>
             </div>
           </div>
-          <div style="text-align:right;">
+          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
             <div id="tv-clock" style="font-size:2rem; font-family:monospace; font-weight:800; color:#FFF;">${currentTime || '09:45 AM'}</div>
-            <button class="btn btn-outline btn-sm" style="color:#FFF; border-color:#FFF; margin-top:6px;" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> Exit Fullscreen</button>
+            <div style="display:flex; gap:8px;">
+              <select onchange="loadDisplayBoard(this.value)" style="background:#1E293B; color:#FFF; border:1px solid rgba(255,255,255,0.3); border-radius:6px; padding:4px 8px; font-size:0.8rem; outline:none; cursor:pointer;">
+                <option value="CTR-01" ${center.centerId === 'CTR-01' ? 'selected' : ''}>APMC Bhopal (MP)</option>
+                <option value="CTR-02" ${center.centerId === 'CTR-02' ? 'selected' : ''}>Karnal Mandi (HR)</option>
+                <option value="CTR-03" ${center.centerId === 'CTR-03' ? 'selected' : ''}>Nashik Bazar (MH)</option>
+                <option value="CTR-04" ${center.centerId === 'CTR-04' ? 'selected' : ''}>Guntur Yard (AP)</option>
+              </select>
+              <button class="btn btn-outline btn-sm" style="color:#FFF; border-color:#FFF;" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> Exit</button>
+            </div>
           </div>
         </div>
 
@@ -98,3 +112,10 @@ const loadDisplayBoard = async () => {
     showToast('Failed to load display board', 'error');
   }
 };
+
+// Re-render display board on location change
+window.addEventListener('kpms:location-changed', () => {
+  if (window.location.hash === '#tv-display') {
+    loadDisplayBoard();
+  }
+});

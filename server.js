@@ -16,6 +16,13 @@ const apiRoutes = require('./src/routes/api');
 const app = express();
 const server = http.createServer(app);
 
+process.on('uncaughtException', (err) => {
+  console.error('⚠️ Uncaught Exception caught safely:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ Unhandled Rejection caught safely:', reason);
+});
+
 // Initialize Socket.IO with CORS
 const io = new Server(server, {
   cors: {

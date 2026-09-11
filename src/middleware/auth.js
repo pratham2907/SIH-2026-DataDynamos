@@ -31,6 +31,23 @@ const verifyToken = async (req, res, next) => {
       });
     }
 
+    // Check if account has been blocked or suspended
+    if (user.isBlocked || user.status === 'Suspended' || user.status === 'Blocked') {
+      return res.status(403).json({
+        success: false,
+        message: 'Account is suspended or blocked. Please contact system administrator.'
+      });
+    }
+
+    // Check account lockout
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      const remainingMinutes = Math.ceil((user.lockUntil - Date.now()) / 60000);
+      return res.status(423).json({
+        success: false,
+        message: `Account is temporarily locked. Please try again in ${remainingMinutes} minute(s).`
+      });
+    }
+
     req.user = {
       id: user._id,
       userId: user._id,
@@ -55,7 +72,14 @@ const verifyToken = async (req, res, next) => {
 
 const requireRole = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!req.user || !allowedRoles.includes(req.user.role)) {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Authentication required.' });
+    }
+
+    const effectiveRole = req.user.role === 'superadmin' ? 'admin' : req.user.role;
+    const normalizedAllowed = allowedRoles.map(r => r === 'superadmin' ? 'admin' : r);
+
+    if (!normalizedAllowed.includes(effectiveRole) && !allowedRoles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: `Access denied. Requires one of [${allowedRoles.join(', ')}] roles.`

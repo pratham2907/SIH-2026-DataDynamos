@@ -30,7 +30,8 @@ const memoryStore = {
   holidays: [],
   systemSettings: [],
   aiInsights: [],
-  backups: []
+  backups: [],
+  temporaryRegistrations: []
 };
 
 // Persistence file for fallback mode

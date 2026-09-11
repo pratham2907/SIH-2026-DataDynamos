@@ -29,7 +29,7 @@ const translations = {
     my_bookings: "My Bookings",
     dbt_tracker: "DBT Payment Tracker",
     my_farms: "My Farms & Crops",
-    kyc_profile: "KYC Profile & Docs",
+    kyc_profile: "Profile & Documents",
 
     // Landing Page Hero
     hero_pill: "Smart India Hackathon Production Edition",
@@ -51,7 +51,7 @@ const translations = {
 
     // How It Works Steps
     how_it_works: "How KPMS Works",
-    step1_title: "1. Register & KYC",
+    step1_title: "1. Register & Verification",
     step1_desc: "Simple Aadhaar & Bank linked registration with automatic Farmer ID.",
     step2_title: "2. Reserve Slot",
     step2_desc: "Pick your preferred Mandi, date & time slot. Get instant QR pass.",
@@ -72,7 +72,7 @@ const translations = {
 
     // Smart Booking UI
     smart_booking_title: "Smart Mandi Recommendation & Slot Optimization",
-    smart_booking_subtitle: "AI Engine analyzing Real-time Weather, Road Transit Delays, Spoilage Rates & Market MSP to maximize Farmer Net Realized Return.",
+    smart_booking_subtitle: "Smart Engine analyzing Real-time Weather, Road Transit Delays, Spoilage Rates & Market MSP to maximize Farmer Net Realized Return.",
     step1_crop_heading: "What crop are you bringing? (Select Crop)",
     step2_qty_heading: "How much produce do you want to sell? (Enter Quantity)",
     tap_to_select: "Tap to select",
@@ -150,8 +150,8 @@ const translations = {
     login_password: "Password *",
     login_role: "Portal Role (Optional)",
     login_btn: "Login to Portal",
-    login_new_farmer: "New farmer? Register Here (5-Step KYC)",
-    register_title: "New Farmer 5-Step KYC Registration",
+    login_new_farmer: "New farmer? Register Here (5-Step Registration)",
+    register_title: "New Farmer 5-Step Registration",
     reg_step1: "Personal",
     reg_step2: "Location",
     reg_step3: "Bank",
@@ -200,7 +200,7 @@ const translations = {
     my_bookings: "मेरी बुकिंग",
     dbt_tracker: "डीबीटी भुगतान ट्रैकर",
     my_farms: "मेरे खेत और फसलें",
-    kyc_profile: "केवाईसी प्रोफाइल एवं दस्तावेज",
+    kyc_profile: "प्रोफाइल एवं दस्तावेज",
 
     // Landing Page Hero
     hero_pill: "स्मार्ट इंडिया हैकथॉन उत्पादन संस्करण",
@@ -222,7 +222,7 @@ const translations = {
 
     // How It Works Steps
     how_it_works: "प्रणाली कैसे काम करती है",
-    step1_title: "१. पंजीकरण एवं ई-केवाईसी",
+    step1_title: "१. पंजीकरण एवं सत्यापन",
     step1_desc: "आधार और बैंक खाते से सुरक्षित पंजीकरण और तत्काल किसान आईडी।",
     step2_title: "२. स्लॉट बुकिंग",
     step2_desc: "मनपसंद मंडी, दिनांक और समय चुनें तथा क्यूआर टोकन प्राप्त करें।",
@@ -321,8 +321,8 @@ const translations = {
     login_password: "पासवर्ड *",
     login_role: "पोर्टल भूमिका (वैकल्पिक)",
     login_btn: "पोर्टल में लॉगिन करें",
-    login_new_farmer: "नए किसान? यहां पंजीकरण करें (5-चरण KYC)",
-    register_title: "नया किसान 5-चरण ई-केवाईसी पंजीकरण",
+    login_new_farmer: "नए किसान? यहां पंजीकरण करें (5-चरण पंजीकरण)",
+    register_title: "नया किसान 5-चरण पंजीकरण",
     reg_step1: "व्यक्तिगत",
     reg_step2: "स्थान",
     reg_step3: "बैंक खाता",
@@ -371,7 +371,7 @@ const translations = {
     my_bookings: "મારા બુકિંગ",
     dbt_tracker: "ડીબીટી પેમેન્ટ ટ્રેકર",
     my_farms: "મારા ખેતરો અને પાક",
-    kyc_profile: "કેવાયસી પ્રોફાઇલ અને દસ્તાવેજો",
+    kyc_profile: "પ્રોફાઇલ અને દસ્તાવેજો",
 
     // Landing Page Hero
     hero_pill: "સ્માર્ટ ઇન્ડિયા હેકાથોન પ્રોડક્શન એડિશન",
@@ -492,8 +492,8 @@ const translations = {
     login_password: "પાસવર્ડ *",
     login_role: "પોર્ટલ ભૂમિકા (વૈકલ્પિક)",
     login_btn: "પોર્ટલમાં પ્રવેશ કરો",
-    login_new_farmer: "નવા ખેડૂત? અહીં નોંધણી કરો (5-પગલાં KYC)",
-    register_title: "નવા ખેડૂત માટે 5-પગલાં KYC નોંધણી",
+    login_new_farmer: "નવા ખેડૂત? અહીં નોંધણી કરો (5-પગલાં નોંધણી)",
+    register_title: "નવા ખેડૂત માટે 5-પગલાં નોંધણી",
     reg_step1: "વ્યક્તિગત",
     reg_step2: "સરનામું",
     reg_step3: "બેંક ખાતું",
@@ -542,7 +542,7 @@ const translations = {
     my_bookings: "माझे बुकिंग",
     dbt_tracker: "डीबीटी पेमेंट ट्रॅकर",
     my_farms: "माझी शेती आणि पिके",
-    kyc_profile: "केवायसी प्रोफाइल",
+    kyc_profile: "प्रोफाइल",
 
     // Landing Page Hero
     hero_pill: "स्मार्ट इंडिया हॅकाथॉन उत्पादन आवृत्ती",
@@ -663,8 +663,8 @@ const translations = {
     login_password: "पासवर्ड *",
     login_role: "भूमिका (पर्यायी)",
     login_btn: "लॉगिन करा",
-    login_new_farmer: "नवीन शेतकरी? येथे नोंदणी करा (5-टप्पे KYC)",
-    register_title: "नवीन शेतकरी 5-टप्पे ई-केवायसी नोंदणी",
+    login_new_farmer: "नवीन शेतकरी? येथे नोंदणी करा (5-टप्पे नोंदणी)",
+    register_title: "नवीन शेतकरी 5-टप्पे नोंदणी",
     reg_step1: "वैयक्तिक",
     reg_step2: "पत्ता",
     reg_step3: "बँक खाते",
@@ -713,7 +713,7 @@ const translations = {
     my_bookings: "আমার বুকিং",
     dbt_tracker: "ডিবিটি পেমেন্ট ট্র্যাকার",
     my_farms: "আমার খামার এবং ফসল",
-    kyc_profile: "কেওয়াইসি প্রোফাইল",
+    kyc_profile: "প্রোফাইল",
 
     // Landing Page Hero
     hero_pill: "স্মার্ট ইন্ডিয়া হ্যাকাথন প্রডাকশন এডিশন",
@@ -834,8 +834,8 @@ const translations = {
     login_password: "পাসওয়ার্ড *",
     login_role: "ভূমিকা (ঐচ্ছিক)",
     login_btn: "লগইন করুন",
-    login_new_farmer: "নতুন কৃষক? এখানে নিবন্ধন করুন (5-ধাপ KYC)",
-    register_title: "নতুন কৃষক 5-ধাপ ই-কেওয়াইসি নিবন্ধন",
+    login_new_farmer: "নতুন কৃষক? এখানে নিবন্ধন করুন (5-ধাপ নিবন্ধন)",
+    register_title: "নতুন কৃষক 5-ধাপ নিবন্ধন",
     reg_step1: "ব্যক্তিগত",
     reg_step2: "ঠিকানা",
     reg_step3: "ব্যাঙ্ক অ্যাকাউন্ট",
@@ -884,7 +884,7 @@ const translations = {
     my_bookings: "ਮੇਰੀਆਂ ਬੁਕਿੰਗਾਂ",
     dbt_tracker: "ਡੀਬੀਟੀ ਭੁਗਤਾਨ ਟਰੈਕਰ",
     my_farms: "ਮੇਰੇ ਖੇਤ ਅਤੇ ਫਸਲਾਂ",
-    kyc_profile: "ਕੇਵਾਈਸੀ ਪ੍ਰੋਫਾਈਲ",
+    kyc_profile: "ਪ੍ਰੋਫਾਈਲ",
 
     // Landing Page Hero
     hero_pill: "ਸਮਾਰਟ ਇੰਡੀਆ ਹੈਕਾਥੌਨ ਪ੍ਰੋਡਕਸ਼ਨ ਐਡੀਸ਼ਨ",
@@ -1005,8 +1005,8 @@ const translations = {
     login_password: "ਪਾਸਵਰਡ *",
     login_role: "ਭੂਮਿਕਾ (ਵਿਕਲਪਿਕ)",
     login_btn: "ਪੋਰਟਲ ਲੌਗਇਨ ਕਰੋ",
-    login_new_farmer: "ਨਵੇਂ ਕਿਸਾਨ? ਇੱਥੇ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਕਰੋ (5-ਪੜਾਅ KYC)",
-    register_title: "ਨਵਾਂ ਕਿਸਾਨ 5-ਪੜਾਅ ਈ-ਕੇਵਾਈਸੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+    login_new_farmer: "ਨਵੇਂ ਕਿਸਾਨ? ਇੱਥੇ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਕਰੋ (5-ਪੜਾਅ ਰਜਿਸਟ੍ਰੇਸ਼ਨ)",
+    register_title: "ਨਵਾਂ ਕਿਸਾਨ 5-ਪੜਾਅ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
     reg_step1: "ਨਿੱਜੀ",
     reg_step2: "ਪਤਾ",
     reg_step3: "ਬੈਂਕ ਖਾਤਾ",
@@ -1052,7 +1052,7 @@ const translations = {
     my_bookings: "எனது முன்பதிவுகள்",
     dbt_tracker: "டிபிடி கட்டண டிராக்கர்",
     my_farms: "எனது பண்ணைகள் மற்றும் பயிர்கள்",
-    kyc_profile: "கேஒய்சி சுயவிவரம்",
+    kyc_profile: "சுயவிவரம்",
     hero_pill: "ஸ்மார்ட் இந்தியா ஹேக்கத்தான் பதிப்பு",
     hero_heading: "ஸ்மார்ட் ஸ்லாட்டுகள் மற்றும் நேரடி வங்கி பரிமாற்றம் மூலம் கொள்முதல் நிலையங்கள் டிஜிட்டல் மயம்",
     hero_desc: "முன்பதிவு ஸ்லாட், டிஜிட்டல் வரிசை டோக்கன் மற்றும் நேரடி வங்கி பணப்பரிமாற்றம்.",
@@ -1126,7 +1126,7 @@ const translations = {
     my_bookings: "నా బుకింగ్‌లు",
     dbt_tracker: "డిబిటి చెల్లింపు ట్రాకర్",
     my_farms: "నా పొలాలు మరియు పంటలు",
-    kyc_profile: "కెవైసి ప్రొఫైల్",
+    kyc_profile: "ప్రొఫైల్",
     hero_pill: "స్మార్ట్ ఇండియా హ్యాకథాన్ ఎడిషన్",
     hero_heading: "స్మార్ట్ స్లాట్లు మరియు ప్రత్యక్ష బ్యాంకు బదిలీ (DBT) తో మార్కెట్ల డిజిటలైజేషన్",
     hero_desc: "ముందస్తు స్లాట్ బుకింగ్, డిజిటల్ టోకెన్ మరియు నేరుగా బ్యాంకు ఖాతాలో MSP జమ.",
@@ -1200,7 +1200,7 @@ const translations = {
     my_bookings: "ನನ್ನ ಬುಕಿಂಗ್‌ಗಳು",
     dbt_tracker: "ಡಿಬಿಟಿ ಪಾವತಿ ಟ್ರ್ಯಾಕರ್",
     my_farms: "ನನ್ನ ಫಾರ್ಮ್‌ಗಳು ಮತ್ತು ಬೆಳೆಗಳು",
-    kyc_profile: "ಕೆವೈಸಿ ಪ್ರೊಫೈಲ್",
+    kyc_profile: "ಪ್ರೊಫೈಲ್",
     hero_pill: "ಸ್ಮಾರ್ಟ್ ಇಂಡಿಯಾ ಹ್ಯಾಕಥಾನ್ ಆವೃತ್ತಿ",
     hero_heading: "ಸ್ಮಾರ್ಟ್ ಸ್ಲಾಟ್‌ಗಳು ಮತ್ತು ನೇರ ಬ್ಯಾಂಕ್ ವರ್ಗಾವಣೆ (DBT) ಮೂಲಕ ಮಂಡಿಗಳ ಡಿಜಿಟಲೀಕರಣ",
     hero_desc: "ಸ್ಲಾಟ್ ಬುಕಿಂಗ್, ಡಿಜಿಟಲ್ ಟೋಕನ್ ಮತ್ತು ನೇರ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಬೆಂಬಲ ಬೆಲೆ ಜಮೆ.",

@@ -220,7 +220,7 @@ const sendOtpEmail = async ({ to, fullName, otp }) => {
       <div style="padding:32px 24px;">
         <p style="font-size:16px; color:#1E293B; margin-top:0;">Namaste <strong>${fullName || 'Farmer'}</strong>,</p>
         <p style="font-size:14px; color:#475569; line-height:1.6;">
-          Thank you for registering on the <strong>KPMS Smart Mandi & Direct DBT Procurement Portal</strong>. Please use the One-Time Password (OTP) below to complete your KYC identity verification and activate your account.
+          Thank you for registering on the <strong>KPMS Smart Mandi & Direct DBT Procurement Portal</strong>. Please use the One-Time Password (OTP) below to complete your identity verification and activate your account.
         </p>
 
         <!-- OTP Highlight Card -->
@@ -355,9 +355,162 @@ const sendSlotBookingEmail = async ({ to, fullName, booking }) => {
   });
 };
 
+/**
+ * Send 2FA Login OTP Email
+ */
+const sendLoginOtpEmail = async ({ to, fullName, role, otp, ip, userAgent }) => {
+  const roleLabel = role === 'admin' || role === 'superadmin' ? 'Super Admin' : (role === 'officer' ? 'Procurement Officer' : 'Farmer');
+  const roleIcon = role === 'admin' || role === 'superadmin' ? '🛡️' : (role === 'officer' ? '👨‍💼' : '🌾');
+
+  const htmlContent = `
+    <div style="max-width:600px; margin:0 auto; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#FFFFFF; border-radius:12px; overflow:hidden; border:1px solid #CBD5E1; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+      <div style="background:linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); padding:26px; text-align:center; color:#FFFFFF; border-bottom:4px solid #E06D14;">
+        <h2 style="margin:0; font-size:22px; font-weight:800; letter-spacing:0.5px;">🌾 Kisan Procurement Management System</h2>
+        <p style="margin:4px 0 0 0; font-size:13px; color:#FCD34D; font-weight:600;">Government of India • Ministry of Agriculture & Farmers Welfare</p>
+      </div>
+      <div style="padding:30px 24px;">
+        <div style="display:inline-block; padding:4px 12px; border-radius:20px; background:#EFF6FF; color:#1E40AF; font-size:12px; font-weight:700; margin-bottom:12px;">
+          ${roleIcon} ${roleLabel} 2FA Authentication
+        </div>
+        <h3 style="color:#0F172A; margin:0 0 10px 0; font-size:18px;">Two-Factor Login Verification</h3>
+        <p style="font-size:14px; color:#334155; line-height:1.6; margin:0 0 20px 0;">
+          Hello <strong>${fullName || 'Authorized User'}</strong>,<br/>
+          A login attempt to your <strong>${roleLabel}</strong> account was detected. Use the secure 6-digit One-Time Password (OTP) below to authorize this session:
+        </p>
+        <div style="background:#FFFBEB; border:2px dashed #D97706; border-radius:10px; padding:20px; text-align:center; margin:20px 0;">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:#92400E; font-weight:700;">6-Digit Login Security Code</div>
+          <div style="font-size:38px; font-weight:900; letter-spacing:10px; color:#B45309; margin:10px 0; font-family:monospace;">
+            ${otp}
+          </div>
+          <div style="font-size:12px; color:#78350F;">Valid for <strong>5 minutes</strong>. Maximum 5 attempts allowed.</div>
+        </div>
+        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:14px; font-size:12px; color:#64748B; margin-top:20px;">
+          <div><strong>Login Details:</strong></div>
+          <div style="margin-top:4px;">• IP Address: <code>${ip || '127.0.0.1'}</code></div>
+          <div style="margin-top:2px;">• Device/Agent: <code>${userAgent || 'Web Browser'}</code></div>
+          <div style="margin-top:2px;">• Timestamp: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</div>
+        </div>
+        <p style="font-size:12px; color:#94A3B8; margin-top:16px; margin-bottom:0;">
+          If you did not initiate this login, someone may be attempting to access your account. Please change your password immediately.
+        </p>
+      </div>
+      <div style="background:#F1F5F9; padding:14px 24px; text-align:center; font-size:12px; color:#64748B; border-top:1px solid #E2E8F0;">
+        KPMS National Procurement Grid • Smart India Hackathon 2026
+      </div>
+    </div>
+  `;
+
+  return sendTransactionalEmail({
+    recipientEmail: to,
+    recipientName: fullName,
+    subject: `🔐 ${otp} is your KPMS ${roleLabel} Login Verification Code`,
+    htmlBody: htmlContent,
+    textBody: `Your KPMS 2FA Login OTP is: ${otp}. Valid for 5 minutes.\nIP: ${ip || '127.0.0.1'}`,
+    tags: ['login-otp', '2fa-auth', role]
+  });
+};
+
+/**
+ * Send Password Reset OTP Email
+ */
+const sendPasswordResetOtpEmail = async ({ to, fullName, role, otp }) => {
+  const htmlContent = `
+    <div style="max-width:600px; margin:0 auto; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#FFFFFF; border-radius:12px; overflow:hidden; border:1px solid #CBD5E1; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+      <div style="background:linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); padding:26px; text-align:center; color:#FFFFFF; border-bottom:4px solid #DC2626;">
+        <h2 style="margin:0; font-size:22px; font-weight:800;">🌾 Kisan Procurement Management System</h2>
+        <p style="margin:4px 0 0 0; font-size:13px; color:#FCA5A5; font-weight:600;">Government of India • Security Advisory</p>
+      </div>
+      <div style="padding:30px 24px;">
+        <h3 style="color:#0F172A; margin:0 0 10px 0; font-size:18px;">Password Reset Request</h3>
+        <p style="font-size:14px; color:#334155; line-height:1.6;">
+          Hello <strong>${fullName || 'User'}</strong>,<br/>
+          A request has been received to reset the password for your KPMS portal account. Use the verification code below to authorize this password reset:
+        </p>
+        <div style="background:#FEF2F2; border:2px dashed #EF4444; border-radius:10px; padding:20px; text-align:center; margin:20px 0;">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:#991B1B; font-weight:700;">Password Reset Code</div>
+          <div style="font-size:38px; font-weight:900; letter-spacing:10px; color:#DC2626; margin:10px 0; font-family:monospace;">
+            ${otp}
+          </div>
+          <div style="font-size:12px; color:#7F1D1D;">Valid for <strong>10 minutes</strong>. Never share this code.</div>
+        </div>
+        <p style="font-size:13px; color:#64748B;">
+          Password Requirements: Minimum 12 characters, at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.
+        </p>
+      </div>
+      <div style="background:#F1F5F9; padding:14px 24px; text-align:center; font-size:12px; color:#64748B; border-top:1px solid #E2E8F0;">
+        If you did not request a password reset, please disregard this email.
+      </div>
+    </div>
+  `;
+
+  return sendTransactionalEmail({
+    recipientEmail: to,
+    recipientName: fullName,
+    subject: `🔑 ${otp} is your KPMS Password Reset Code`,
+    htmlBody: htmlContent,
+    textBody: `Your KPMS Password Reset OTP is: ${otp}. Valid for 10 minutes.`,
+    tags: ['password-reset', 'auth']
+  });
+};
+
+/**
+ * Send Security Alert Email (Successful login, new device, failed logins, lockout, password changed)
+ */
+const sendSecurityAlertEmail = async ({ to, fullName, eventType, details, ip, userAgent }) => {
+  const titles = {
+    LOGIN_SUCCESS: 'Successful Login Notice',
+    NEW_DEVICE_LOGIN: 'Security Alert: New Device Login Detected',
+    ACCOUNT_LOCKED: 'Security Alert: Account Temporarily Locked',
+    PASSWORD_CHANGED: 'Security Notice: Password Updated Successfully',
+    FAILED_ATTEMPTS: 'Security Warning: Multiple Failed Login Attempts'
+  };
+
+  const title = titles[eventType] || 'KPMS Security Alert';
+  const isDanger = eventType === 'ACCOUNT_LOCKED' || eventType === 'FAILED_ATTEMPTS';
+
+  const htmlContent = `
+    <div style="max-width:600px; margin:0 auto; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#FFFFFF; border-radius:12px; overflow:hidden; border:1px solid #CBD5E1; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+      <div style="background:linear-gradient(135deg, #0F172A 0%, ${isDanger ? '#991B1B' : '#1E3A8A'} 100%); padding:24px; text-align:center; color:#FFFFFF; border-bottom:4px solid ${isDanger ? '#EF4444' : '#10B981'};">
+        <h2 style="margin:0; font-size:20px; font-weight:800;">🌾 KPMS Security Notification</h2>
+        <p style="margin:4px 0 0 0; font-size:13px; color:#F8FAFC;">Government of India • Ministry of Agriculture & Farmers Welfare</p>
+      </div>
+      <div style="padding:28px 24px;">
+        <h3 style="color:#0F172A; margin:0 0 12px 0; font-size:17px;">${title}</h3>
+        <p style="font-size:14px; color:#334155; line-height:1.6;">
+          Hello <strong>${fullName || 'User'}</strong>,<br/>
+          ${details || 'An authentication activity occurred on your account.'}
+        </p>
+        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:14px; font-size:12px; color:#64748B; margin:16px 0;">
+          <div>• Event: <strong>${eventType}</strong></div>
+          <div style="margin-top:3px;">• IP Address: <code>${ip || '127.0.0.1'}</code></div>
+          <div style="margin-top:3px;">• Browser/Agent: <code>${userAgent || 'Browser'}</code></div>
+          <div style="margin-top:3px;">• Date & Time: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</div>
+        </div>
+        <p style="font-size:12px; color:#94A3B8; margin:0;">
+          If this activity was not done by you, contact system administration immediately.
+        </p>
+      </div>
+      <div style="background:#F1F5F9; padding:12px 24px; text-align:center; font-size:11px; color:#64748B; border-top:1px solid #E2E8F0;">
+        National Agri-Procurement Security Operations • SIH 2026
+      </div>
+    </div>
+  `;
+
+  return sendTransactionalEmail({
+    recipientEmail: to,
+    recipientName: fullName,
+    subject: `🛡️ KPMS Alert: ${title}`,
+    htmlBody: htmlContent,
+    tags: ['security-alert', eventType.toLowerCase()]
+  });
+};
+
 module.exports = {
   sendTransactionalEmail,
   sendOtpEmail,
+  sendLoginOtpEmail,
+  sendPasswordResetOtpEmail,
+  sendSecurityAlertEmail,
   sendCustomEmail,
   sendSlotBookingEmail,
   createTransporter,

@@ -25,8 +25,15 @@ const getAIDashboard = async (req, res) => {
 
     const highRiskCenters = centerInsights.filter(c => c.congestionLevel === 'High');
 
-    // Fetch LIVE weather alerts from OpenWeatherMap
-    const weatherAlerts = await getLiveWeatherAlerts();
+    // Fetch LIVE weather alerts from OpenWeatherMap (customized to user location if provided)
+    const userLoc = req.query.lat && req.query.lon ? {
+      lat: req.query.lat,
+      lon: req.query.lon,
+      city: req.query.city || 'Your Location',
+      district: req.query.district || req.query.city,
+      state: req.query.state || 'Local Area'
+    } : null;
+    const weatherAlerts = await getLiveWeatherAlerts(userLoc);
 
     const demandForecast = {
       peakArrivalHours: '09:30 AM - 12:30 PM',
@@ -42,7 +49,7 @@ const getAIDashboard = async (req, res) => {
         highRiskCenters,
         weatherAlerts,
         demandForecast,
-        systemHealth: 'Optimal (AI Heuristic Prediction Active)'
+        systemHealth: 'Optimal (Heuristic Prediction Active)'
       }
     });
   } catch (err) {

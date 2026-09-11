@@ -40,9 +40,10 @@ const loadAdminDashboard = async () => {
           <a class="nav-link active" onclick="loadAdminDashboard()"><i class="fas fa-chart-line"></i> National Overview</a>
           <a class="nav-link" onclick="openCenterManagementModal()"><i class="fas fa-building-wheat"></i> Mandi Centers CRUD</a>
           <a class="nav-link" onclick="openOfficerManagementModal()"><i class="fas fa-user-shield"></i> Officer Allocations</a>
+          <a class="nav-link" onclick="openPendingOfficersModal()"><i class="fas fa-user-clock"></i> Pending Officer Approvals</a>
           <a class="nav-link" onclick="openPaymentReleaseModal()"><i class="fas fa-money-bill-transfer"></i> Bulk DBT Treasury Release</a>
           <a class="nav-link" onclick="openDatabaseBackupModal()"><i class="fas fa-database"></i> Database Backup & Restore</a>
-          <a class="nav-link" onclick="routeTo('#ai-insights')"><i class="fas fa-brain"></i> AI & Congestion Predictor</a>
+          <a class="nav-link" onclick="routeTo('#ai-insights')"><i class="fas fa-chart-line"></i> Congestion & Demand Predictor</a>
           <div style="margin-top:auto; padding-top:16px;">
             <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
           </div>
@@ -164,9 +165,16 @@ const initLeafletMap = (markers) => {
     // Default centered around Central India
     adminMapInstance = L.map('national-leaflet-map').setView([23.2599, 77.4126], 5);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors | KPMS Gov India'
+    // Reliable CartoDB Voyager Tile Layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO | KPMS Gov India',
+      subdomains: 'abcd',
+      maxZoom: 19
     }).addTo(adminMapInstance);
+
+    setTimeout(() => {
+      if (adminMapInstance) adminMapInstance.invalidateSize();
+    }, 300);
 
     markers.forEach(m => {
       const circleMarker = L.circleMarker([m.lat, m.lng], {
@@ -257,9 +265,10 @@ const openPaymentReleaseModal = async () => {
                 <div style="font-weight:700;">${p.farmerName} (${p.receiptNumber})</div>
                 <div style="font-size:0.8rem; color:var(--text-muted);">${p.bankName} - A/C ${p.accountNumber}</div>
               </div>
-              <div style="text-align:right;">
-                <div style="font-weight:800; color:var(--green-gov);">₹${p.amount.toLocaleString('en-IN')}</div>
-                <button class="btn btn-success btn-sm" style="margin-top:4px;" onclick="releaseSinglePayment('${p._id}')">Release DBT</button>
+              <div style="text-align:right; display:flex; gap:6px; align-items:center;">
+                <div style="font-weight:800; color:var(--green-gov); margin-right:6px;">₹${p.amount.toLocaleString('en-IN')}</div>
+                <button class="btn btn-primary btn-sm" onclick="initiateRazorpayPayment('${p._id}', ${p.amount}, '${p.receiptNumber}', '${p.farmerName}')" title="Disburse via Razorpay Gateway"><i class="fas fa-credit-card"></i> Razorpay</button>
+                <button class="btn btn-success btn-sm" onclick="releaseSinglePayment('${p._id}')">Direct Release</button>
               </div>
             </div>
           `).join('')}
@@ -929,3 +938,154 @@ const resetDemoDatabaseAction = async () => {
     showToast('Reset error: ' + e.message, 'error');
   }
 };
+
+/**
+ * Pending Officer Registrations Review & Approval Modal
+ */
+const openPendingOfficersModal = async () => {
+  const modal = document.getElementById('auth-modal');
+  const body = document.getElementById('modal-content-slot');
+  document.getElementById('modal-title').textContent = 'Pending Procurement Officer Registrations';
+
+  body.innerHTML = `<div class="skeleton" style="height:250px; border-radius:8px;"></div>`;
+  modal.classList.add('active');
+
+  const token = localStorage.getItem('kpms_token');
+  try {
+    const res = await fetch('/api/registration/officers/pending', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const json = await res.json();
+    const list = json.data || [];
+
+    if (list.length === 0) {
+      body.innerHTML = `
+        <div style="text-align:center; padding:30px 10px;">
+          <div style="width:60px; height:60px; border-radius:50%; background:#ECFDF5; color:#10B981; display:flex; align-items:center; justify-content:center; font-size:2rem; margin:0 auto 14px auto;">
+            <i class="fas fa-circle-check"></i>
+          </div>
+          <h4 style="color:var(--primary-navy); font-weight:800; margin-bottom:6px;">No Pending Officer Applications</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem;">All submitted Procurement Officer applications have been processed.</p>
+        </div>
+      `;
+      return;
+    }
+
+    body.innerHTML = `
+      <div>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;">
+          The following officers have verified their OTP and are awaiting administrative verification and appointment authorization.
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap:14px; max-height:450px; overflow-y:auto; padding-right:4px;">
+          ${list.map(item => {
+            const d = item.data || {};
+            const docs = d.documents || [];
+            return `
+              <div class="glass-card" style="padding:16px; border-left:4px solid #2563EB;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                  <div>
+                    <h4 style="color:var(--primary-navy); font-weight:800; margin:0;">${d.fullName}</h4>
+                    <div style="font-size:0.82rem; color:var(--text-muted);">
+                      EMP ID: <strong>${d.employeeId}</strong> • Designation: <strong>${d.designation}</strong>
+                    </div>
+                  </div>
+                  <span class="status-pill pending"><i class="fas fa-hourglass-half"></i> Pending Review</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.82rem; margin-bottom:12px; background:var(--bg-main); padding:10px; border-radius:6px;">
+                  <div><strong>Official Email:</strong> ${d.officialEmail}</div>
+                  <div><strong>Mobile:</strong> +91 ${d.mobile}</div>
+                  <div><strong>Assigned Mandi:</strong> ${d.procurementCentreName} (${d.procurementCentreCode})</div>
+                  <div><strong>Department:</strong> ${d.department}</div>
+                </div>
+
+                <!-- Verified Documents Badge List -->
+                <div style="margin-bottom:14px;">
+                  <div style="font-size:0.78rem; font-weight:700; color:var(--primary-navy); margin-bottom:6px;">Submitted & OCR-Verified Credentials:</div>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    ${docs.map(doc => `
+                      <a href="${doc.fileUrl}" target="_blank" class="status-pill completed" style="font-size:0.75rem; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                        <i class="fas fa-file-check"></i> ${doc.docType} <i class="fas fa-arrow-up-right-from-square" style="font-size:0.65rem;"></i>
+                      </a>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <!-- Admin Action Buttons -->
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                  <button class="btn btn-outline btn-sm" style="color:#EF4444; border-color:#EF4444;" onclick="rejectOfficerAction('${item._id || item.tempId}', '${d.fullName}')">
+                    <i class="fas fa-times"></i> Reject Application
+                  </button>
+                  <button class="btn btn-primary btn-sm" onclick="approveOfficerAction('${item._id || item.tempId}', '${d.fullName}')">
+                    <i class="fas fa-check-double"></i> Authorize & Issue Officer ID
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    body.innerHTML = `<div style="color:#EF4444; padding:20px;">Failed to load applications: ${err.message}</div>`;
+  }
+};
+
+const approveOfficerAction = async (id, name) => {
+  if (!confirm(`Approve Procurement Officer "${name}"? An official Officer ID will be generated and access credentials sent.`)) return;
+
+  const token = localStorage.getItem('kpms_token');
+  showToast(`Approving and generating credentials for ${name}...`, 'info');
+
+  try {
+    const res = await fetch(`/api/registration/officer/${id}/approve`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const json = await res.json();
+
+    if (json.success) {
+      showToast(json.message, 'success');
+      openPendingOfficersModal();
+    } else {
+      showToast(json.message, 'error');
+    }
+  } catch (err) {
+    showToast('Approval error: ' + err.message, 'error');
+  }
+};
+
+const rejectOfficerAction = async (id, name) => {
+  const remarks = prompt(`Enter rejection remarks for ${name}:`, 'Documents failed administrative verification');
+  if (!remarks) return;
+
+  const token = localStorage.getItem('kpms_token');
+  showToast(`Processing rejection for ${name}...`, 'info');
+
+  try {
+    const res = await fetch(`/api/registration/officer/${id}/reject`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ remarks })
+    });
+    const json = await res.json();
+
+    if (json.success) {
+      showToast(json.message, 'success');
+      openPendingOfficersModal();
+    } else {
+      showToast(json.message, 'error');
+    }
+  } catch (err) {
+    showToast('Rejection error: ' + err.message, 'error');
+  }
+};
+
+window.openPendingOfficersModal = openPendingOfficersModal;
+window.approveOfficerAction = approveOfficerAction;
+window.rejectOfficerAction = rejectOfficerAction;
+

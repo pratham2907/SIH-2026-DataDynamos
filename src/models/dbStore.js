@@ -7,6 +7,12 @@ const generateId = (prefix = '') => {
   return `${prefix}${ts}${rand}`;
 };
 
+const getNestedValue = (obj, path) => {
+  if (!obj || !path) return undefined;
+  if (!path.includes('.')) return obj[path];
+  return path.split('.').reduce((acc, part) => acc && acc[part] !== undefined ? acc[part] : undefined, obj);
+};
+
 // Query matcher helper
 const matchQuery = (item, query) => {
   if (!query || Object.keys(query).length === 0) return true;
@@ -25,7 +31,7 @@ const matchQuery = (item, query) => {
     if (key === '$or' || key === '$and') continue;
 
     const qVal = query[key];
-    const itemVal = item[key];
+    const itemVal = getNestedValue(item, key);
 
     if (qVal && typeof qVal === 'object' && !Array.isArray(qVal)) {
       // Comparison operators
@@ -209,5 +215,24 @@ module.exports = {
   SystemSettings: new Collection('systemSettings'),
   AIInsights: new Collection('aiInsights'),
   Backups: new Collection('backups'),
-  generateId
+  TemporaryRegistrations: new Collection('temporaryRegistrations'),
+  generateId,
+  generateFarmerId: async () => {
+    const list = getMemoryStore().farmers || [];
+    const year = new Date().getFullYear();
+    const count = list.length + 1;
+    return `FRM${year}${String(count).padStart(5, '0')}`;
+  },
+  generateOfficerId: async () => {
+    const list = (getMemoryStore().users || []).filter(u => u.role === 'officer');
+    const year = new Date().getFullYear();
+    const count = list.length + 1;
+    return `OFF${year}${String(count).padStart(5, '0')}`;
+  },
+  generateSuperAdminId: async () => {
+    const list = (getMemoryStore().users || []).filter(u => u.role === 'superadmin' || u.role === 'admin');
+    const year = new Date().getFullYear();
+    const count = list.length + 1;
+    return `SADM${year}${String(count).padStart(5, '0')}`;
+  }
 };

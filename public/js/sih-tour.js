@@ -54,7 +54,7 @@ const triggerSIHSimulation = async () => {
 
 const startJudgeGuidedTour = () => {
   const steps = [
-    { title: "1. Farmer Portal & KYC", text: "Farmers register with Aadhaar & Bank accounts, getting a unique Farmer ID (e.g. FARM000001)." },
+    { title: "1. Farmer Portal & Verification", text: "Farmers register with Aadhaar & Bank accounts, getting a unique Farmer ID (e.g. FARM000001)." },
     { title: "2. Smart Slot Booking", text: "Farmers select Mandi and book guaranteed 30-min time slots to eliminate physical congestion." },
     { title: "3. Gate QR Check-in", text: "At Mandi entrance, Officer scans the QR code to dispense digital tokens (e.g. A001) and assign counters." },
     { title: "4. Digital Weighbridge & Inspection", text: "Quality inspection parameters (moisture %, grade) and digital scale measurements are captured transparently with canvas signatures." },

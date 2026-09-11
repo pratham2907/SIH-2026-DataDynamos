@@ -24,7 +24,9 @@ const loadBookingPortal = async () => {
     window.smartBookingPrefill = null; // consume once
 
     // Ensure prefilled centre is available in list if from smart engine
-    let selectedCenterVal = prefill ? prefill.centerId : 'CTR-01';
+    const loc = window.KPMS_USER_LOCATION;
+    const defaultCenterId = (loc && loc.nearestCenter && loc.nearestCenter.centerId) || 'CTR-01';
+    let selectedCenterVal = prefill ? prefill.centerId : defaultCenterId;
     let matchedCenter = centers.find(c => c.centerId === selectedCenterVal);
     let centerOptionsHtml = centers.map(c => `
       <option value="${c.centerId}" ${c.centerId === selectedCenterVal ? 'selected' : ''}>
@@ -71,7 +73,7 @@ const loadBookingPortal = async () => {
             ` : ''}
 
             <div style="text-align:center; margin-bottom:24px;">
-              <span class="hero-pill"><i class="fas fa-bolt"></i> Smart AI Slot Allocation Engine</span>
+              <span class="hero-pill"><i class="fas fa-bolt"></i> Smart Dynamic Slot Allocation Engine</span>
               <h2 style="font-size:2rem; font-weight:800; color:var(--primary-navy);">${getT('reserve_slot_title')}</h2>
               <p style="color:var(--text-muted); font-size:0.92rem;">
                 ${getT('reserve_slot_sub')}

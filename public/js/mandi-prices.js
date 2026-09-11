@@ -4,15 +4,16 @@
  */
 
 const mandiPriceState = {
-  selectedCategory: 'vegetable', // 'all' | 'vegetable' | 'fruit' | 'grain'
-  selectedCommodity: 'Tomato',
+  selectedCategory: 'all', // 'all' | 'vegetable' | 'fruit' | 'grain'
+  selectedCommodity: 'all', // 'all' displays all crops initially
   searchQuery: '',
   userLocation: {
     lat: 23.2599,
     lng: 77.4126,
-    name: 'Bhopal Central (Default)'
+    name: 'Bhopal Central (Default)',
+    state: 'Madhya Pradesh'
   },
-  radiusKm: 150,
+  radiusKm: 300,
   commodities: [],
   mandis: [],
   mapInstance: null,
@@ -28,6 +29,17 @@ const mandiPriceState = {
 const loadMandiPricesPage = async () => {
   const container = document.getElementById('app-view-container');
   if (!container) return;
+
+  // Seamlessly sync with globally detected user location
+  if (window.KPMS_USER_LOCATION) {
+    const cur = window.KPMS_USER_LOCATION;
+    mandiPriceState.userLocation = {
+      lat: cur.lat || 23.2599,
+      lng: cur.lng || cur.lon || 77.4126,
+      name: cur.city || cur.formattedName || 'Bhopal Central',
+      state: cur.state || 'Madhya Pradesh'
+    };
+  }
 
   const user = getCurrentUser();
   const isFarmer = user && user.role === 'farmer';
@@ -57,7 +69,7 @@ const loadMandiPricesPage = async () => {
           <a class="nav-link active" onclick="loadMandiPricesPage()"><i class="fas fa-carrot" style="color:var(--saffron);"></i> ${getT('nav_mandi_prices')}</a>
           <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> ${getT('btn_smart_mandi_finder')}</a>
           <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> ${getT('nav_display_board')}</a>
-          <a class="nav-link" onclick="routeTo('#ai-insights')"><i class="fas fa-brain"></i> AI Insights</a>
+          <a class="nav-link" onclick="routeTo('#ai-insights')"><i class="fas fa-chart-line"></i> Market Insights</a>
         </aside>
       `}
 
@@ -75,10 +87,10 @@ const loadMandiPricesPage = async () => {
                 <span class="status-pill completed" style="font-size:0.75rem;"><i class="fas fa-bolt"></i> Real-time Rates</span>
               </div>
               <h1 style="font-size:2rem; font-weight:800; color:var(--primary-navy); margin:0;">
-                ${getT('mandi_prices_title')}
+                ${getT('mandi_prices_title', 'Real-time Mandi Prices & Geospatial Yard Intelligence')}
               </h1>
               <p style="color:var(--text-muted); font-size:0.92rem; margin-top:4px; max-width:750px;">
-                ${getT('mandi_prices_subtitle')}
+                ${getT('mandi_prices_subtitle', 'Live daily arrivals, modal wholesale rates, and proximity analytics for all crops across India, powered by official Agmarknet data.')}
               </p>
             </div>
 
@@ -90,17 +102,21 @@ const loadMandiPricesPage = async () => {
               <div style="display:flex; align-items:center; gap:6px; font-size:0.82rem;">
                 <span style="color:var(--text-muted); font-weight:600;">Location:</span>
                 <select id="mandi-location-picker" onchange="onPresetLocationChange(this.value)" style="padding:4px 8px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main); font-size:0.82rem; font-weight:600;">
-                  <option value="23.2599,77.4126,Bhopal Central">Bhopal (MP)</option>
-                  <option value="23.2032,77.0844,Sehore">Sehore (MP)</option>
-                  <option value="23.5251,77.8081,Vidisha">Vidisha (MP)</option>
-                  <option value="22.7196,75.8577,Indore">Indore (MP)</option>
-                  <option value="23.1765,75.7885,Ujjain">Ujjain (MP)</option>
-                  <option value="22.7519,77.7289,Hoshangabad">Hoshangabad (MP)</option>
-                  <option value="28.7041,77.1734,Delhi NCR">Delhi (Azadpur)</option>
-                  <option value="29.6857,76.9905,Karnal">Karnal (Haryana)</option>
-                  <option value="19.9975,73.7898,Nashik">Nashik (MH)</option>
-                  <option value="19.0760,72.9984,Navi Mumbai">Vashi (Mumbai)</option>
-                  <option value="16.3067,80.4365,Guntur">Guntur (AP)</option>
+                  <option value="${mandiPriceState.userLocation.lat},${mandiPriceState.userLocation.lng},${mandiPriceState.userLocation.name},${mandiPriceState.userLocation.state}" selected data-detected="true">
+                    📍 ${mandiPriceState.userLocation.name} (${mandiPriceState.userLocation.state}) [Current]
+                  </option>
+                  <option value="23.2599,77.4126,Bhopal Central,Madhya Pradesh">Bhopal (MP)</option>
+                  <option value="23.2032,77.0844,Sehore,Madhya Pradesh">Sehore (MP)</option>
+                  <option value="23.5251,77.8081,Vidisha,Madhya Pradesh">Vidisha (MP)</option>
+                  <option value="22.7196,75.8577,Indore,Madhya Pradesh">Indore (MP)</option>
+                  <option value="23.1765,75.7885,Ujjain,Madhya Pradesh">Ujjain (MP)</option>
+                  <option value="22.7519,77.7289,Hoshangabad,Madhya Pradesh">Hoshangabad (MP)</option>
+                  <option value="28.7041,77.1734,Delhi NCR,Delhi">Delhi (Azadpur)</option>
+                  <option value="29.6857,76.9905,Karnal,Haryana">Karnal (Haryana)</option>
+                  <option value="19.9975,73.7898,Nashik,Maharashtra">Nashik (MH)</option>
+                  <option value="19.0760,72.9984,Navi Mumbai,Maharashtra">Vashi (Mumbai)</option>
+                  <option value="16.3067,80.4365,Guntur,Andhra Pradesh">Guntur (AP)</option>
+                  <option value="20.5937,78.9629,All India,All India">All India</option>
                 </select>
               </div>
             </div>
@@ -112,17 +128,17 @@ const loadMandiPricesPage = async () => {
           
           <!-- Category Tabs -->
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:16px;">
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-sm ${mandiPriceState.selectedCategory === 'all' ? 'btn-primary' : 'btn-outline'}" onclick="setMandiCategory('all')">
-                <i class="fas fa-basket-shopping"></i> ${getT('filter_all')}
+            <div style="display:flex; gap:8px; flex-wrap:wrap;" id="category-tabs-group">
+              <button class="btn btn-sm category-tab-btn ${mandiPriceState.selectedCategory === 'all' ? 'btn-primary' : 'btn-outline'}" data-cat="all" onclick="setMandiCategory('all')">
+                <i class="fas fa-layer-group"></i> ${getT('filter_all')}
               </button>
-              <button class="btn btn-sm ${mandiPriceState.selectedCategory === 'vegetable' ? 'btn-primary' : 'btn-outline'}" onclick="setMandiCategory('vegetable')">
+              <button class="btn btn-sm category-tab-btn ${mandiPriceState.selectedCategory === 'vegetable' ? 'btn-primary' : 'btn-outline'}" data-cat="vegetable" onclick="setMandiCategory('vegetable')">
                 <i class="fas fa-carrot"></i> ${getT('filter_vegetables')}
               </button>
-              <button class="btn btn-sm ${mandiPriceState.selectedCategory === 'fruit' ? 'btn-primary' : 'btn-outline'}" onclick="setMandiCategory('fruit')">
+              <button class="btn btn-sm category-tab-btn ${mandiPriceState.selectedCategory === 'fruit' ? 'btn-primary' : 'btn-outline'}" data-cat="fruit" onclick="setMandiCategory('fruit')">
                 <i class="fas fa-apple-whole"></i> ${getT('filter_fruits')}
               </button>
-              <button class="btn btn-sm ${mandiPriceState.selectedCategory === 'grain' ? 'btn-primary' : 'btn-outline'}" onclick="setMandiCategory('grain')">
+              <button class="btn btn-sm category-tab-btn ${mandiPriceState.selectedCategory === 'grain' ? 'btn-primary' : 'btn-outline'}" data-cat="grain" onclick="setMandiCategory('grain')">
                 <i class="fas fa-wheat-awn"></i> ${getT('filter_grains')}
               </button>
             </div>
@@ -144,9 +160,10 @@ const loadMandiPricesPage = async () => {
                 <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;"><i class="fas fa-arrows-to-circle"></i> Radius:</span>
                 <select id="mandi-radius-select" onchange="onRadiusFilterChange(this.value)" style="padding:4px 8px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main); font-size:0.82rem;">
                   <option value="50">50 km</option>
-                  <option value="150" selected>150 km</option>
-                  <option value="300">300 km</option>
-                  <option value="600">All India (600 km)</option>
+                  <option value="150">150 km</option>
+                  <option value="300" selected>300 km</option>
+                  <option value="600">600 km</option>
+                  <option value="2000">All India</option>
                 </select>
               </div>
             </div>
@@ -244,6 +261,7 @@ const initCommoditiesAndFetchPrices = async () => {
 
 /**
  * Render Commodity Filter Pills
+ * The first pill is ALWAYS 'All Crops (सभी फसलें)', followed by individual commodities
  */
 const renderCommodityPills = () => {
   const container = document.getElementById('commodity-pills-container');
@@ -251,55 +269,78 @@ const renderCommodityPills = () => {
 
   const { commodities, selectedCategory, selectedCommodity, searchQuery } = mandiPriceState;
 
+  // Check if All Crops is currently active
+  const isAllSelected = selectedCommodity.toLowerCase() === 'all' || selectedCommodity.toLowerCase() === 'all crops';
+
+  // Filter catalog commodities by selected category and search
   const filtered = commodities.filter(c => {
+    if (c.name === 'all') return false; // Handled separately as the primary master pill
     if (selectedCategory !== 'all' && c.category !== selectedCategory) return false;
-    if (searchQuery && !c.name.toLowerCase().includes(searchQuery.toLowerCase()) && !c.hindi.includes(searchQuery)) return false;
+    if (searchQuery && !c.name.toLowerCase().includes(searchQuery.toLowerCase()) && !(c.hindi && c.hindi.includes(searchQuery))) return false;
     return true;
   });
 
-  if (filtered.length === 0) {
-    container.innerHTML = `<span style="font-size:0.85rem; color:var(--text-muted); padding:6px 0;">No items found matching "${searchQuery}".</span>`;
-    return;
+  let pillsHtml = `
+    <button 
+      class="btn btn-sm"
+      style="white-space:nowrap; border-radius:20px; font-size:0.84rem; font-weight:800; display:flex; align-items:center; gap:8px; padding:7px 18px; transition:all 0.2s ease; ${isAllSelected ? 'background:linear-gradient(135deg, #16A34A, #15803D); color:#FFF; border-color:#16A34A; box-shadow:0 4px 14px rgba(22,163,74,0.45); transform:scale(1.05);' : 'background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-color);'}"
+      onclick="selectMandiCommodity('all')"
+    >
+      <i class="fas fa-layer-group"></i>
+      <span>All Crops (सभी फसलें)</span>
+      <span style="font-size:0.72rem; opacity:0.95; background:rgba(0,0,0,0.2); padding:1px 8px; border-radius:10px;">Live Feed</span>
+    </button>
+  `;
+
+  if (filtered.length === 0 && searchQuery) {
+    pillsHtml += `<span style="font-size:0.85rem; color:var(--text-muted); padding:6px 12px; display:inline-flex; align-items:center;">No crops matching "${searchQuery}". Showing all crops.</span>`;
+  } else {
+    pillsHtml += filtered.map(c => {
+      const isSelected = !isAllSelected && c.name.toLowerCase() === selectedCommodity.toLowerCase();
+      return `
+        <button 
+          class="btn btn-sm"
+          style="white-space:nowrap; border-radius:20px; font-size:0.82rem; font-weight:700; display:flex; align-items:center; gap:6px; padding:6px 14px; transition:all 0.2s ease; ${isSelected ? `background:${c.color}; color:#FFF; border-color:${c.color}; box-shadow:0 4px 12px ${c.color}40; transform:scale(1.05);` : 'background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-color);'}"
+          onclick="selectMandiCommodity('${c.name}')"
+        >
+          <i class="fas ${c.icon}"></i>
+          <span>${c.name} (${c.hindi})</span>
+          ${c.kgPrice ? `<span style="font-size:0.72rem; opacity:0.85; background:rgba(0,0,0,0.15); padding:1px 6px; border-radius:10px;">₹${c.kgPrice}/kg</span>` : ''}
+        </button>
+      `;
+    }).join('');
   }
 
-  container.innerHTML = filtered.map(c => {
-    const isSelected = c.name.toLowerCase() === selectedCommodity.toLowerCase();
-    return `
-      <button 
-        class="btn btn-sm"
-        style="white-space:nowrap; border-radius:20px; font-size:0.82rem; font-weight:700; display:flex; align-items:center; gap:6px; padding:6px 14px; transition:all 0.2s ease; ${isSelected ? `background:${c.color}; color:#FFF; border-color:${c.color}; box-shadow:0 4px 12px ${c.color}40; transform:scale(1.04);` : 'background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-color);'}"
-        onclick="selectMandiCommodity('${c.name}')"
-      >
-        <i class="fas ${c.icon}"></i>
-        <span>${c.name} (${c.hindi})</span>
-        <span style="font-size:0.72rem; opacity:0.85; background:rgba(0,0,0,0.15); padding:1px 6px; border-radius:10px;">₹${c.kgPrice}/kg</span>
-      </button>
-    `;
-  }).join('');
+  container.innerHTML = pillsHtml;
 };
 
 /**
  * Handle Category Switch
+ * When switching category (Vegetables, Fruits, Grains, All), keeps 'all' crops in that category
  */
 const setMandiCategory = (cat) => {
   mandiPriceState.selectedCategory = cat;
   
-  // Pick first item in category if current isn't in it
-  const matching = mandiPriceState.commodities.filter(c => cat === 'all' || c.category === cat);
-  if (matching.length > 0 && !matching.some(c => c.name.toLowerCase() === mandiPriceState.selectedCommodity.toLowerCase())) {
-    mandiPriceState.selectedCommodity = matching[0].name;
+  // Update button active states in UI
+  document.querySelectorAll('.category-tab-btn').forEach(btn => {
+    const btnCat = btn.getAttribute('data-cat');
+    if (btnCat === cat) {
+      btn.className = 'btn btn-sm btn-primary category-tab-btn';
+    } else {
+      btn.className = 'btn btn-sm btn-outline category-tab-btn';
+    }
+  });
+
+  // If a specific crop was selected, check if it fits the new category; otherwise revert to all crops
+  if (mandiPriceState.selectedCommodity !== 'all') {
+    const matching = mandiPriceState.commodities.find(c => c.name.toLowerCase() === mandiPriceState.selectedCommodity.toLowerCase());
+    if (matching && cat !== 'all' && matching.category !== cat) {
+      mandiPriceState.selectedCommodity = 'all';
+    }
   }
 
-  renderMandiPricesPageHeader();
   renderCommodityPills();
   fetchMandiPricesForCommodity();
-};
-
-const renderMandiPricesPageHeader = () => {
-  // Re-render category button classes
-  document.querySelectorAll('#mandi-price-stage button').forEach(b => {
-    // refresh dynamic classes if needed
-  });
 };
 
 const onCommoditySearch = (val) => {
@@ -319,13 +360,19 @@ const onRadiusFilterChange = (radius) => {
 };
 
 const onPresetLocationChange = (val) => {
-  const [lat, lng, name] = val.split(',');
+  const parts = val.split(',');
+  const lat = parts[0];
+  const lng = parts[1];
+  const name = parts[2];
+  const state = parts[3] || 'Madhya Pradesh';
+
   mandiPriceState.userLocation = {
     lat: parseFloat(lat),
     lng: parseFloat(lng),
-    name: name
+    name: name,
+    state: state
   };
-  showToast(`Location set to ${name}. Refreshing nearby mandis...`, 'info');
+  showToast(`Location set to ${name}. Loading real mandi rates...`, 'info');
   fetchMandiPricesForCommodity();
 };
 
@@ -333,30 +380,57 @@ const onPresetLocationChange = (val) => {
  * Detect User GPS Coordinates
  */
 const detectUserGPSLocation = () => {
-  if (!navigator.geolocation) {
-    showToast('Geolocation is not supported by your browser.', 'error');
-    return;
-  }
-
-  showToast('Acquiring GPS location...', 'info');
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
+  if (window.KPMS_Location) {
+    window.KPMS_Location.detectGPS();
+  } else if (navigator.geolocation) {
+    showToast('Acquiring GPS location...', 'info');
+    navigator.geolocation.getCurrentPosition((position) => {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
       mandiPriceState.userLocation = {
-        lat: lat,
-        lng: lng,
-        name: `Current Location (${lat.toFixed(2)}°, ${lng.toFixed(2)}°)`
+        lat,
+        lng,
+        name: `Current GPS (${lat.toFixed(2)}°, ${lng.toFixed(2)}°)`,
+        state: 'All India'
       };
       showToast('GPS Location acquired successfully!', 'success');
       fetchMandiPricesForCommodity();
-    },
-    (err) => {
-      showToast('GPS access denied or unavailable. Using default location (Bhopal).', 'error');
-    },
-    { enableHighAccuracy: true, timeout: 6000 }
-  );
+    }, () => {
+      showToast('GPS access unavailable.', 'error');
+    });
+  }
 };
+
+// Listen for global location updates and adapt Mandi Price engine immediately
+window.addEventListener('kpms:location-changed', (e) => {
+  const loc = e.detail;
+  if (!loc) return;
+
+  mandiPriceState.userLocation = {
+    lat: loc.lat,
+    lng: loc.lng || loc.lon,
+    name: loc.city || loc.formattedName || 'Detected Location',
+    state: loc.state || 'Madhya Pradesh'
+  };
+
+  const picker = document.getElementById('mandi-location-picker');
+  if (picker) {
+    let opt = picker.querySelector('option[data-detected="true"]');
+    if (!opt) {
+      opt = document.createElement('option');
+      opt.setAttribute('data-detected', 'true');
+      picker.insertBefore(opt, picker.firstChild);
+    }
+    opt.value = `${loc.lat},${loc.lng || loc.lon},${loc.city || loc.formattedName},${loc.state || ''}`;
+    opt.textContent = `📍 ${loc.city || 'Your Area'}, ${loc.state || ''} (${loc.isLiveGPS ? 'GPS Verified' : 'Selected'})`;
+    picker.value = opt.value;
+  }
+
+  // Only refetch if currently viewing Mandi prices page
+  if (window.location.hash === '#mandi-prices') {
+    fetchMandiPricesForCommodity();
+  }
+});
 
 /**
  * Fetch Mandi Prices for Selected Commodity and Render Leaflet Map + Cards
@@ -366,11 +440,15 @@ const fetchMandiPricesForCommodity = async () => {
 
   const container = document.getElementById('mandi-cards-list-container');
   if (container) {
-    container.innerHTML = `<div class="skeleton" style="height:120px; border-radius:12px; margin-bottom:10px;"></div><div class="skeleton" style="height:120px; border-radius:12px;"></div>`;
+    container.innerHTML = `
+      <div class="skeleton" style="height:120px; border-radius:12px; margin-bottom:10px;"></div>
+      <div class="skeleton" style="height:120px; border-radius:12px; margin-bottom:10px;"></div>
+      <div class="skeleton" style="height:120px; border-radius:12px;"></div>
+    `;
   }
 
   try {
-    const url = `/api/mandi-prices?commodity=${encodeURIComponent(selectedCommodity)}&category=${selectedCategory}&lat=${userLocation.lat}&lng=${userLocation.lng}&radius=${radiusKm}`;
+    const url = `/api/mandi-prices?commodity=${encodeURIComponent(selectedCommodity)}&category=${selectedCategory}&lat=${userLocation.lat}&lng=${userLocation.lng}&radius=${radiusKm}&state=${encodeURIComponent(userLocation.state || '')}`;
     const res = await fetch(url);
     const result = await res.json();
 
@@ -399,21 +477,84 @@ const getPerishabilityBadge = (name) => {
 };
 
 /**
- * Render Spotlight Summary Box for Active Commodity
+ * Render Spotlight Summary Box for Active Commodity or All Crops
  */
 const renderCommoditySpotlight = (cropMeta, datasetInfo) => {
   const container = document.getElementById('commodity-spotlight-card');
   if (!container || !cropMeta) return;
 
   const mandis = mandiPriceState.mandis;
+  const isAll = mandiPriceState.selectedCommodity.toLowerCase() === 'all' || cropMeta.isAll;
   const bestMandi = mandis.length > 0 ? [...mandis].sort((a, b) => b.modalPrice - a.modalPrice)[0] : null;
   const nearestMandi = mandis.length > 0 ? mandis[0] : null;
 
+  if (isAll) {
+    // EXECUTIVE ALL-CROPS OVERVIEW
+    const distinctCropsCount = cropMeta.distinctCropsCount || [...new Set(mandis.map(m => m.commodity))].length;
+
+    container.innerHTML = `
+      <div class="glass-card" style="padding:20px 24px; border-radius:14px; border:2px solid #16A34A; background:linear-gradient(135deg, var(--bg-card) 0%, rgba(22,163,74,0.08) 100%);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, #16A34A, #15803D); color:#FFF; display:flex; align-items:center; justify-content:center; font-size:1.3rem; box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+              <i class="fas fa-layer-group"></i>
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <h4 style="font-size:1.2rem; font-weight:800; color:var(--primary-navy); margin:0;">
+                  All Crops Live Agmarknet Feed (सभी फसलें)
+                </h4>
+                <span class="status-pill completed" style="font-size:0.75rem;"><i class="fas fa-bolt"></i> Real-Time</span>
+              </div>
+              <span style="font-size:0.78rem; color:var(--text-muted);">
+                Source: <strong>${datasetInfo.apiSource}</strong> • Resource: <code>${datasetInfo.datasetId.substring(0, 13)}...</code>
+              </span>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:1.4rem; font-weight:900; color:var(--green-gov);">
+              ${mandis.length} Mandi Quotes
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-muted); font-weight:600;">
+              ${distinctCropsCount} Distinct Crops Active Today
+            </div>
+          </div>
+        </div>
+
+        <!-- Highlights Grid for All Crops -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.82rem; margin-bottom:12px;">
+          ${bestMandi ? `
+            <div style="background:rgba(255,255,255,0.7); padding:10px 14px; border-radius:10px; border-left:4px solid var(--green-gov); box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+              <div style="color:var(--text-muted); font-size:0.72rem; font-weight:700; text-transform:uppercase;">🏆 Highest Rate Crop Today:</div>
+              <strong style="color:var(--primary-navy); font-size:0.95rem;">${bestMandi.commodity} (${bestMandi.market})</strong>
+              <div style="color:var(--green-gov); font-weight:800; margin-top:2px;">₹${bestMandi.modalPrice.toLocaleString('en-IN')}/Q (₹${bestMandi.kgPrice}/kg) • ${bestMandi.distanceKm} km</div>
+            </div>
+          ` : ''}
+
+          ${nearestMandi ? `
+            <div style="background:rgba(255,255,255,0.7); padding:10px 14px; border-radius:10px; border-left:4px solid var(--saffron); box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+              <div style="color:var(--text-muted); font-size:0.72rem; font-weight:700; text-transform:uppercase;">📍 Nearest Mandi Quote:</div>
+              <strong style="color:var(--primary-navy); font-size:0.95rem;">${nearestMandi.market} (${nearestMandi.commodity})</strong>
+              <div style="color:var(--saffron); font-weight:800; margin-top:2px;">₹${nearestMandi.modalPrice.toLocaleString('en-IN')}/Q • ${nearestMandi.distanceKm} km away</div>
+            </div>
+          ` : ''}
+        </div>
+
+        <div style="background:rgba(26,122,68,0.08); border-radius:8px; padding:8px 12px; font-size:0.78rem; color:#166534; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-info-circle"></i>
+          <span>Showing rates for <strong>all crops</strong>. Click any commodity pill above (like Tomato, Wheat, Potato) to filter for a single crop.</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // SINGLE CROP SPOTLIGHT
   container.innerHTML = `
     <div class="glass-card" style="padding:18px 22px; border-radius:14px; border:2px solid ${cropMeta.color}; background:linear-gradient(135deg, var(--bg-card) 0%, ${cropMeta.color}10 100%);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:40px; height:40px; border-radius:50%; background:${cropMeta.color}; color:#FFF; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+          <div style="width:42px; height:42px; border-radius:50%; background:${cropMeta.color}; color:#FFF; display:flex; align-items:center; justify-content:center; font-size:1.25rem;">
             <i class="fas ${cropMeta.icon}"></i>
           </div>
           <div>
@@ -424,7 +565,7 @@ const renderCommoditySpotlight = (cropMeta, datasetInfo) => {
               ${getPerishabilityBadge(cropMeta.name)}
             </div>
             <span style="font-size:0.75rem; color:var(--text-muted);">
-              Category: <strong>${cropMeta.category.toUpperCase()}</strong> • API: ${datasetInfo.apiSource}
+              Category: <strong>${(cropMeta.category || 'vegetable').toUpperCase()}</strong> • Source: ${datasetInfo.apiSource}
             </span>
           </div>
         </div>
@@ -433,18 +574,18 @@ const renderCommoditySpotlight = (cropMeta, datasetInfo) => {
             ₹${cropMeta.defaultModal} <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">/ Quintal</span>
           </div>
           <div style="font-size:0.82rem; font-weight:800; color:var(--green-gov);">
-            ~ ₹${cropMeta.kgPrice} / Kg Wholesale Benchmark
+            ~ ₹${cropMeta.kgPrice} / Kg Benchmark
           </div>
         </div>
       </div>
 
       <!-- Quick Highlights Grid -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.82rem;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.82rem; margin-bottom:10px;">
         ${bestMandi ? `
           <div style="background:rgba(255,255,255,0.7); padding:8px 12px; border-radius:8px; border-left:3px solid var(--green-gov);">
             <div style="color:var(--text-muted); font-size:0.72rem; font-weight:700; text-transform:uppercase;">⭐ Best Selling Price:</div>
             <strong style="color:var(--primary-navy);">${bestMandi.market}</strong>
-            <div style="color:var(--green-gov); font-weight:800;">₹${bestMandi.modalPrice}/Q (₹${bestMandi.kgPrice}/kg) • ${bestMandi.distanceKm} km</div>
+            <div style="color:var(--green-gov); font-weight:800;">₹${bestMandi.modalPrice.toLocaleString('en-IN')}/Q (₹${bestMandi.kgPrice}/kg) • ${bestMandi.distanceKm} km</div>
           </div>
         ` : ''}
 
@@ -452,16 +593,23 @@ const renderCommoditySpotlight = (cropMeta, datasetInfo) => {
           <div style="background:rgba(255,255,255,0.7); padding:8px 12px; border-radius:8px; border-left:3px solid var(--saffron);">
             <div style="color:var(--text-muted); font-size:0.72rem; font-weight:700; text-transform:uppercase;">📍 Nearest Mandi:</div>
             <strong style="color:var(--primary-navy);">${nearestMandi.market}</strong>
-            <div style="color:var(--saffron); font-weight:800;">₹${nearestMandi.modalPrice}/Q • ${nearestMandi.distanceKm} km away</div>
+            <div style="color:var(--saffron); font-weight:800;">₹${nearestMandi.modalPrice.toLocaleString('en-IN')}/Q • ${nearestMandi.distanceKm} km away</div>
           </div>
         ` : ''}
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.78rem; color:var(--text-muted);">Filter Active: <strong>${cropMeta.name}</strong></span>
+        <button class="btn btn-sm btn-outline" onclick="selectMandiCommodity('all')" style="font-size:0.76rem; padding:3px 12px; border-radius:14px;">
+          <i class="fas fa-arrow-rotate-left"></i> Clear Filter (Show All Crops)
+        </button>
       </div>
     </div>
   `;
 };
 
 /**
- * Render List of Mandi Price Cards
+ * Render List of Mandi Price Cards with Crop Names, Live Rates, and Proximity
  */
 const renderMandiCardsList = (mandis) => {
   const container = document.getElementById('mandi-cards-list-container');
@@ -475,8 +623,8 @@ const renderMandiCardsList = (mandis) => {
       <div class="glass-card" style="padding:32px; text-align:center;">
         <i class="fas fa-store-slash" style="font-size:2rem; color:var(--text-muted); margin-bottom:10px;"></i>
         <h4 style="color:var(--primary-navy); margin-bottom:6px;">No Mandis found within ${mandiPriceState.radiusKm} km</h4>
-        <p style="font-size:0.85rem; color:var(--text-muted);">Try increasing the radius to 300 km or All India.</p>
-        <button class="btn btn-outline btn-sm" onclick="onRadiusFilterChange(300)">Expand Radius to 300 km</button>
+        <p style="font-size:0.85rem; color:var(--text-muted);">Try increasing the radius to 600 km or All India.</p>
+        <button class="btn btn-outline btn-sm" onclick="onRadiusFilterChange(600)">Expand Radius to 600 km</button>
       </div>
     `;
     return;
@@ -493,9 +641,13 @@ const renderMandiCardsList = (mandis) => {
       <div class="glass-card mandi-price-item" style="padding:16px 18px; border-radius:12px; border:${isHighestRate ? '2px solid var(--green-gov)' : (isNearest ? '1.5px solid var(--saffron)' : '1px solid var(--border-color)')}; transition:all 0.2s ease;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
           <div>
-            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <!-- Crop Tag + Market Name -->
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+              <span style="background:${m.color || '#16A34A'}18; color:${m.color || '#16A34A'}; border:1px solid ${m.color || '#16A34A'}40; padding:2px 10px; border-radius:12px; font-size:0.78rem; font-weight:800; display:inline-flex; align-items:center; gap:5px;">
+                <i class="fas ${m.icon || 'fa-seedling'}"></i> ${m.commodity} ${m.hindiName && m.hindiName !== m.commodity ? `(${m.hindiName})` : ''}
+              </span>
               <strong style="color:var(--primary-navy); font-size:1.02rem;">${m.market}</strong>
-              ${isHighestRate ? `<span class="status-pill completed" style="font-size:0.7rem; padding:2px 8px;"><i class="fas fa-crown"></i> Highest Rate</span>` : ''}
+              ${isHighestRate ? `<span class="status-pill completed" style="font-size:0.7rem; padding:2px 8px;"><i class="fas fa-crown"></i> Top Rate</span>` : ''}
               ${isNearest ? `<span class="status-pill waiting" style="font-size:0.7rem; padding:2px 8px;"><i class="fas fa-route"></i> Nearest</span>` : ''}
             </div>
             <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
@@ -512,15 +664,19 @@ const renderMandiCardsList = (mandis) => {
           </div>
         </div>
 
-        <!-- Range & Arrival Stats -->
-        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); padding:8px 12px; border-radius:8px; font-size:0.78rem; margin-bottom:12px;">
+        <!-- Range, Grade & Arrival Stats -->
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); padding:8px 12px; border-radius:8px; font-size:0.78rem; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+          <div>
+            <span style="color:var(--text-muted);">Grade: </span>
+            <strong>${m.grade || 'FAQ'} (${m.variety || 'Standard'})</strong>
+          </div>
           <div>
             <span style="color:var(--text-muted);">Range: </span>
             <strong>₹${m.minPrice} - ₹${m.maxPrice}</strong>
           </div>
           <div>
-            <span style="color:var(--text-muted);">Daily Arrival: </span>
-            <strong>${m.arrivalQty} Quintals</strong>
+            <span style="color:var(--text-muted);">Arrival Date: </span>
+            <strong style="color:var(--primary-navy);"><i class="fas fa-calendar-day" style="color:var(--saffron);"></i> ${m.arrivalDate}</strong>
           </div>
           <div>
             <span style="color:var(--text-muted);">Trend: </span>
@@ -532,12 +688,17 @@ const renderMandiCardsList = (mandis) => {
 
         <!-- Action Row -->
         <div style="display:flex; justify-content:space-between; align-items:center; padding-top:4px;">
-          <button class="btn btn-outline btn-sm" onclick="focusMandiOnMap(${m.latitude}, ${m.longitude}, '${m.market}')" style="font-size:0.78rem; padding:4px 10px;">
-            <i class="fas fa-crosshairs"></i> View on Map
-          </button>
-          <button class="btn btn-primary btn-sm" onclick="routeToSmartBookingForCrop('${m.commodity}')" style="font-size:0.78rem; padding:4px 12px;">
-            <i class="fas fa-wand-magic-sparkles"></i> Smart Book Produce
-          </button>
+          <div style="font-size:0.72rem; color:var(--green-gov); font-weight:700; display:flex; align-items:center; gap:4px;">
+            <i class="fas fa-circle-check"></i> ${m.source}
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="focusMandiOnMap(${m.latitude}, ${m.longitude}, '${m.market}')" style="font-size:0.78rem; padding:4px 10px;">
+              <i class="fas fa-crosshairs"></i> View on Map
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="routeToSmartBookingForCrop('${m.commodity}')" style="font-size:0.78rem; padding:4px 12px;">
+              <i class="fas fa-wand-magic-sparkles"></i> Smart Book
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -560,7 +721,6 @@ const renderLeafletMandiMap = (mandis, userLoc, radiusKm, cropMeta) => {
     mandiPriceState.mapInstance = null;
   }
 
-  // Initialize Leaflet Map
   const map = L.map('mandi-price-map', {
     center: [userLoc.lat, userLoc.lng],
     zoom: 8,
@@ -568,11 +728,16 @@ const renderLeafletMandiMap = (mandis, userLoc, radiusKm, cropMeta) => {
   });
   mandiPriceState.mapInstance = map;
 
-  // OpenStreetMap Tile Layer
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors | Agmarknet India',
-    maxZoom: 18
+  // Reliable CartoDB Voyager Tile Layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO | Agmarknet India',
+    subdomains: 'abcd',
+    maxZoom: 19
   }).addTo(map);
+
+  setTimeout(() => {
+    if (mandiPriceState.mapInstance) mandiPriceState.mapInstance.invalidateSize();
+  }, 300);
 
   // User Location Marker (Custom Blue Icon)
   const userIcon = L.divIcon({
@@ -611,13 +776,13 @@ const renderLeafletMandiMap = (mandis, userLoc, radiusKm, cropMeta) => {
     const mandiIcon = L.divIcon({
       className: 'custom-mandi-marker',
       html: `
-        <div style="background:var(--primary-navy,#0E2A47); color:#FFF; padding:3px 8px; border-radius:14px; border:2px solid #FFF; font-weight:800; font-size:0.75rem; display:flex; align-items:center; gap:4px; box-shadow:0 4px 10px rgba(0,0,0,0.3); white-space:nowrap;">
+        <div style="background:var(--primary-navy,#0E2A47); color:#FFF; padding:4px 10px; border-radius:14px; border:2px solid #FFF; font-weight:800; font-size:0.75rem; display:flex; align-items:center; gap:5px; box-shadow:0 4px 10px rgba(0,0,0,0.3); white-space:nowrap;">
+          <span style="color:#FCD34D; font-size:0.72rem;"><i class="fas ${m.icon || 'fa-seedling'}"></i> ${m.commodity}:</span>
           <span style="color:#10B981;">₹${m.modalPrice}</span>
-          <span style="font-size:0.65rem; opacity:0.8;">(${m.distanceKm}km)</span>
         </div>
       `,
-      iconSize: [90, 26],
-      iconAnchor: [45, 13]
+      iconSize: [120, 28],
+      iconAnchor: [60, 14]
     });
 
     const marker = L.marker([m.latitude, m.longitude], { icon: mandiIcon }).addTo(map);

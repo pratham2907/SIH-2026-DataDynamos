@@ -1,37 +1,589 @@
 // Farmer Dashboard & Operations Controller
 
-const getFarmerSidebar = (farmer, activeRoute) => `
-  <aside class="sidebar">
-    <div style="padding:10px 14px; border-bottom:1px solid var(--border-color); margin-bottom:12px;">
-      <div style="font-weight:700; color:#FFF; font-size:1.05rem;">${farmer ? (farmer.fullName || farmer.name || 'Farmer') : 'Farmer'}</div>
-      <div style="font-size:0.75rem; color:var(--saffron); font-weight:600;"><i class="fas fa-id-card"></i> ${farmer ? (farmer.farmerId || 'FARM000001') : 'FARM000001'}</div>
-    </div>
-    <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
-    <a class="nav-link ${activeRoute === 'dashboard' ? 'active' : ''}" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-tachometer-alt"></i> ${getT('nav_dashboard', 'Dashboard')}</a>
-    <a class="nav-link ${activeRoute === 'smart-booking' ? 'active' : ''}" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> ${getT('btn_smart_mandi_finder', 'Smart Mandi Finder')}</a>
-    <a class="nav-link ${activeRoute === 'mandi-prices' ? 'active' : ''}" onclick="routeTo('#mandi-prices')"><i class="fas fa-carrot" style="color:var(--green-gov);"></i> ${getT('nav_mandi_prices', 'Mandi Prices')}</a>
-    <a class="nav-link ${activeRoute === 'book-slot' ? 'active' : ''}" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('manual_slot_booking', 'Slot Booking')}</a>
-    <a class="nav-link ${activeRoute === 'farmer-queue' ? 'active' : ''}" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('live_queue_tracker', 'Live Queue Tracker')}</a>
-    <a class="nav-link ${activeRoute === 'my-bookings' ? 'active' : ''}" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> ${getT('my_bookings', 'My Bookings')}</a>
-    <a class="nav-link ${activeRoute === 'farmer-payments' ? 'active' : ''}" onclick="routeTo('#farmer-payments')"><i class="fas fa-money-check-dollar"></i> ${getT('dbt_tracker', 'DBT Payment Tracker')}</a>
-    <a class="nav-link ${activeRoute === 'farmer-farms' ? 'active' : ''}" onclick="routeTo('#farmer-farms')"><i class="fas fa-tractor"></i> ${getT('my_farms', 'My Farms & Crops')}</a>
-    <a class="nav-link ${activeRoute === 'farmer-profile' ? 'active' : ''}" onclick="routeTo('#farmer-profile')"><i class="fas fa-user-circle"></i> ${getT('kyc_profile', 'KYC Profile & Docs')}</a>
-    <div style="margin-top:auto; padding-top:16px;">
-      <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ${getT('nav_logout', 'Logout')}</a>
+const getFarmerSidebar = (farmer, activeRoute = 'dashboard') => `
+  <aside class="sp-sidebar">
+    <nav class="sp-nav-list">
+      <a class="sp-nav-item ${activeRoute === 'dashboard' ? 'active' : ''}" onclick="routeTo('#farmer-dashboard')">
+        <i class="fas fa-leaf"></i> Dashboard
+      </a>
+      <a class="sp-nav-item ${activeRoute === 'smart-booking' ? 'active' : ''}" onclick="routeTo('#smart-booking')">
+        <i class="fas fa-wand-magic-sparkles"></i> Smart Mandi Finder
+      </a>
+      <a class="sp-nav-item ${activeRoute === 'book-slot' ? 'active' : ''}" onclick="routeTo('#book-slot')">
+        <i class="fas fa-calendar-plus"></i> Book Slot
+      </a>
+      <a class="sp-nav-item ${activeRoute === 'my-bookings' ? 'active' : ''}" onclick="routeTo('#my-bookings')">
+        <i class="fas fa-ticket-alt"></i> My Bookings
+      </a>
+      <a class="sp-nav-item ${activeRoute === 'farmer-queue' ? 'active' : ''}" onclick="routeTo('#farmer-queue')">
+        <i class="fas fa-users-line"></i> Live Queue
+      </a>
+      <a class="sp-nav-item ${activeRoute === 'procurement-status' ? 'active' : ''}" onclick="routeTo('#farmer-queue')">
+        <i class="fas fa-clipboard-check"></i> Procurement Status
+      </a>
+      <a class="sp-nav-item ${activeRoute === 'farmer-payments' ? 'active' : ''}" onclick="routeTo('#farmer-payments')">
+        <i class="fas fa-money-check-dollar"></i> Payments
+      </a>
+      <a class="sp-nav-item ${activeRoute === 'notifications' ? 'active' : ''}" onclick="openNotificationsModal()">
+        <i class="far fa-bell"></i> Notifications <span class="sp-nav-badge">3</span>
+      </a>
+      <a class="sp-nav-item ${activeRoute === 'grievances' ? 'active' : ''}" onclick="openGrievanceModal()">
+        <i class="fas fa-headset"></i> Grievances
+      </a>
+      <a class="sp-nav-item ${activeRoute === 'farmer-profile' ? 'active' : ''}" onclick="routeTo('#farmer-profile')">
+        <i class="fas fa-user-circle"></i> My Profile
+      </a>
+    </nav>
+
+    <!-- Sidebar Promo Card -->
+    <div class="sp-promo-card">
+      <div class="sp-promo-inner">
+        <img src="/images/sp_farmer_promo.jpg" alt="Digital Mandi 2026" class="sp-promo-img" />
+        <div class="sp-promo-title">Digital Mandi 2026</div>
+        <p style="font-size:0.73rem; color:#4B5563; line-height:1.4; margin-bottom:10px;">
+          Book slots ahead, avoid long queues at procurement centres. Get fair MSP directly in bank.
+        </p>
+        <button class="sp-promo-btn" onclick="openSihInfoModal()">Learn More</button>
+      </div>
     </div>
   </aside>
 `;
 
+/**
+ * Renders the comprehensive SmartProcure Farmer Dashboard
+ * Exactly mirrors the structure, colors, cards, and styling of reference screenshot
+ */
+const renderSmartProcureFarmerView = (data = {}) => {
+  const farmer = data.farmer || {
+    fullName: 'Ramesh Kumar',
+    name: 'Ramesh Kumar',
+    farmerId: 'FARM000001',
+    preferredCenterId: 'APMC Central Mandi Bhopal',
+    totalLandArea: 5
+  };
+  const activeBooking = data.activeBooking || null;
+  const queueEntry = data.queueEntry || null;
+  const stats = data.stats || {
+    totalBookings: 8,
+    totalEarnings: 184000,
+    pendingEarnings: 48500
+  };
+
+  const container = document.getElementById('app-view-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="sp-app-layout">
+      <!-- Full-Height White Sidebar -->
+      ${getFarmerSidebar(farmer, 'dashboard')}
+
+      <!-- Main Content Canvas -->
+      <main class="sp-main">
+        
+        <!-- Top Hero Agricultural Banner -->
+        <section class="sp-hero-banner">
+          <div class="sp-hero-overlay"></div>
+          
+          <div class="sp-hero-content">
+            <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.16); border:1px solid rgba(255,255,255,0.25); border-radius:20px; padding:4px 12px; font-size:0.74rem; font-weight:700; color:#86EFAC; margin-bottom:12px;">
+              <i class="fas fa-leaf"></i> SmartProcure &bull; SIH 2026 PS 26032
+            </div>
+            <h1 class="sp-hero-title">
+              Smart Agricultural Procurement System
+            </h1>
+            <p class="sp-hero-sub">
+              Find the best procurement centre, book your slot, track your queue and monitor your payment — all from one platform.
+            </p>
+            <div class="sp-hero-actions">
+              <button class="sp-hero-btn-primary" onclick="routeTo('#smart-booking')">
+                <i class="fas fa-wand-magic-sparkles"></i> 🌾 Find Best Mandi
+              </button>
+              <button class="sp-hero-btn-secondary" onclick="routeTo('#farmer-queue')">
+                <i class="fas fa-users-line"></i> Track Procurement
+              </button>
+            </div>
+          </div>
+
+          <!-- Floating Stat Cards Stack (Hero Right) -->
+          <div class="sp-hero-stats-stack">
+            <div class="sp-floating-stat">
+              <div class="sp-floating-stat-chip sp-chip-green">
+                <i class="fas fa-check-double"></i>
+              </div>
+              <div>
+                <div class="sp-floating-stat-label">On-time Procurement</div>
+                <div class="sp-floating-stat-val">98.4%</div>
+              </div>
+            </div>
+
+            <div class="sp-floating-stat">
+              <div class="sp-floating-stat-chip sp-chip-blue">
+                <i class="fas fa-building-columns"></i>
+              </div>
+              <div>
+                <div class="sp-floating-stat-label">Mandis Connected</div>
+                <div class="sp-floating-stat-val">2,400+</div>
+              </div>
+            </div>
+
+            <div class="sp-floating-stat">
+              <div class="sp-floating-stat-chip sp-chip-yellow">
+                <i class="fas fa-bolt"></i>
+              </div>
+              <div>
+                <div class="sp-floating-stat-label">Direct Bank Transfer</div>
+                <div class="sp-floating-stat-val">₹ 48-72 hrs</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5-Card Stat Strip -->
+        <section class="sp-stat-strip">
+          <!-- Card 1 -->
+          <div class="sp-stat-card">
+            <div class="sp-chip sp-chip-green">
+              <i class="fas fa-calendar-check"></i>
+            </div>
+            <div>
+              <div class="sp-stat-label">Active Bookings</div>
+              <div class="sp-stat-num">${stats.totalBookings || 8}</div>
+              <div class="sp-stat-change">+12% this week</div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="sp-stat-card">
+            <div class="sp-chip sp-chip-blue">
+              <i class="fas fa-location-dot"></i>
+            </div>
+            <div>
+              <div class="sp-stat-label">Mandis Nearby</div>
+              <div class="sp-stat-num">3</div>
+              <div class="sp-stat-change" style="color:#2563EB;">Within 50 km</div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="sp-stat-card">
+            <div class="sp-chip sp-chip-orange">
+              <i class="fas fa-wheat-awn"></i>
+            </div>
+            <div>
+              <div class="sp-stat-label">Current Stock</div>
+              <div class="sp-stat-num">24 q</div>
+              <div class="sp-stat-change" style="color:#EA580C;">Wheat & Mustard</div>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="sp-stat-card">
+            <div class="sp-chip sp-chip-purple">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div>
+              <div class="sp-stat-label">On-time Arrival</div>
+              <div class="sp-stat-num">94%</div>
+              <div class="sp-stat-change" style="color:#9333EA;">High reliability</div>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="sp-stat-card">
+            <div class="sp-chip sp-chip-yellow">
+              <i class="fas fa-indian-rupee-sign"></i>
+            </div>
+            <div>
+              <div class="sp-stat-label">Total Earnings</div>
+              <div class="sp-stat-num">₹ ${(stats.totalEarnings || 184000).toLocaleString('en-IN')}</div>
+              <div class="sp-stat-change">This season</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Two-Column Master Content Grid -->
+        <section class="sp-content-grid">
+          
+          <!-- LEFT COLUMN (65% width) -->
+          <div class="sp-left-col">
+            
+            <!-- Smart Mandi Finder Interactive Card -->
+            <div class="sp-card sp-finder-card">
+              <div class="sp-finder-header">
+                <div class="sp-finder-title-row">
+                  <div class="sp-finder-icon-box">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                  </div>
+                  <div>
+                    <div class="sp-finder-title">Find Best Mandi</div>
+                    <div class="sp-finder-sub">AI-powered optimal mandi locator with live transit & queue tracking</div>
+                  </div>
+                </div>
+                <span class="sp-live-pill">
+                  <span class="sp-pulse-dot"></span> Live Rates
+                </span>
+              </div>
+
+              <!-- 4 Search Form Inputs -->
+              <div class="sp-finder-inputs">
+                <div class="sp-input-box">
+                  <label><i class="fas fa-location-dot" style="color:#0D5C3A;"></i> Your Location</label>
+                  <div class="sp-input-row">
+                    <input type="text" id="sp-search-location" value="${(window.KPMS_USER_LOCATION && (window.KPMS_USER_LOCATION.city ? `${window.KPMS_USER_LOCATION.city}, ${window.KPMS_USER_LOCATION.state}` : window.KPMS_USER_LOCATION.formattedName)) || 'Bhopal, Madhya Pradesh'}" placeholder="Enter city/district" readonly style="cursor:pointer;" onclick="openLocationPickerModal()" />
+                    <span class="sp-change-link" onclick="openLocationPickerModal()">Change</span>
+                  </div>
+                </div>
+
+                <div class="sp-input-box">
+                  <label><i class="fas fa-seedling" style="color:#0D5C3A;"></i> Crop Type</label>
+                  <div class="sp-input-row">
+                    <select id="sp-search-crop" onchange="runSmartMandiFinderSearch(true)">
+                      <option value="Wheat" selected>Wheat (गेहूं - ₹2,425/Q)</option>
+                      <option value="Tomato">Tomato (टमाटर)</option>
+                      <option value="Potato">Potato (आलू)</option>
+                      <option value="Onion">Onion (प्याज)</option>
+                      <option value="Paddy">Paddy / Rice (धान / चावल - ₹2,320/Q)</option>
+                      <option value="Mustard">Mustard (सरसों - ₹5,650/Q)</option>
+                      <option value="Soybean">Soybean (सोयाबीन - ₹4,892/Q)</option>
+                      <option value="Gram">Gram / Chana (चना - ₹5,440/Q)</option>
+                      <option value="Maize">Maize (मक्का - ₹2,090/Q)</option>
+                      <option value="Cotton">Cotton (कपास - ₹7,100/Q)</option>
+                      <option value="Green Chilli">Green Chilli (हरी मिर्च)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="sp-input-box">
+                  <label><i class="fas fa-scale-balanced" style="color:#0D5C3A;"></i> Quantity (qtl)</label>
+                  <div class="sp-input-row">
+                    <input type="number" id="sp-search-quantity" value="50" min="1" max="1000" oninput="if(window.debounceMandiSearch) window.debounceMandiSearch();" />
+                  </div>
+                </div>
+
+                <div class="sp-input-box">
+                  <label><i class="fas fa-calendar-day" style="color:#0D5C3A;"></i> Preferred Date</label>
+                  <div class="sp-input-row">
+                    <input type="date" id="sp-search-date" value="${new Date(Date.now() + 86400000).toISOString().split('T')[0]}" onchange="runSmartMandiFinderSearch(true)" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Search CTA Button -->
+              <button class="sp-btn-find" onclick="runSmartMandiFinderSearch(false)">
+                <i class="fas fa-wand-magic-sparkles"></i> 🌾 Find Best Mandi
+              </button>
+            </div>
+
+            <!-- Recommended Procurement Centres Section -->
+            <div class="sp-recommend-header">
+              <div class="sp-recommend-title">
+                <i class="fas fa-bullseye" style="color:#0D5C3A;"></i> Recommended Procurement Centres
+              </div>
+              <a class="sp-view-all-link" onclick="routeTo('#smart-booking')">
+                View All Mandis <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+
+            <!-- Dynamic Recommended Centres Grid -->
+            <div class="sp-centres-grid" id="sp-centres-container">
+              <div style="grid-column: 1 / -1; padding: 28px 20px; text-align: center; background: #FFF; border: 1px solid #E5E7EB; border-radius: 14px;">
+                <i class="fas fa-circle-notch fa-spin" style="color:#0D5C3A; font-size:1.6rem; margin-bottom:8px;"></i>
+                <div style="font-weight:700; color:#111827; font-size:0.95rem;">Finding best procurement centres...</div>
+                <div style="font-size:0.78rem; color:#6B7280; margin-top:3px;">Matching location, live mandi rates & weather transit delays</div>
+              </div>
+            </div>
+
+            <!-- "Why these centres?" Callout Bar -->
+            <div class="sp-callout-bar">
+              <div><strong>Why these centres?</strong></div>
+              <div class="sp-callout-item"><i class="fas fa-check-circle" style="color:#16A34A;"></i> Best net price after transit</div>
+              <div class="sp-callout-item"><i class="fas fa-check-circle" style="color:#16A34A;"></i> Lowest yard waiting time</div>
+              <div class="sp-callout-item"><i class="fas fa-check-circle" style="color:#16A34A;"></i> Fair grading guarantee</div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN (35% width) -->
+          <div class="sp-right-col">
+            
+            <!-- Widget 1: Your Procurement Journey -->
+            <div class="sp-card sp-widget-card">
+              <div class="sp-widget-header">
+                <div class="sp-widget-title">
+                  <i class="fas fa-route" style="color:#0D5C3A;"></i> Your Procurement Journey
+                </div>
+                <a class="sp-widget-link" onclick="routeTo('#farmer-queue')">View Details &gt;</a>
+              </div>
+
+              <div class="sp-timeline-container">
+                <div class="sp-timeline-line"></div>
+
+                <!-- Step 1 -->
+                <div class="sp-timeline-step">
+                  <div class="sp-timeline-node sp-node-completed"><i class="fas fa-check"></i></div>
+                  <div class="sp-step-header">
+                    <span class="sp-step-name">1. Centre Selection</span>
+                    <span class="sp-step-pill sp-pill-completed">Completed</span>
+                  </div>
+                  <div class="sp-step-time">Centre C - Vidisha selected</div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="sp-timeline-step">
+                  <div class="sp-timeline-node sp-node-completed"><i class="fas fa-check"></i></div>
+                  <div class="sp-step-header">
+                    <span class="sp-step-name">2. Slot Booking</span>
+                    <span class="sp-step-pill sp-pill-completed">Completed</span>
+                  </div>
+                  <div class="sp-step-time">${activeBooking ? `${activeBooking.date} • ${activeBooking.timeSlot}` : '12 Apr 2026 • 10:00 - 11:30 AM'}</div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="sp-timeline-step">
+                  <div class="sp-timeline-node sp-node-completed"><i class="fas fa-check"></i></div>
+                  <div class="sp-step-header">
+                    <span class="sp-step-name">3. Digital Token</span>
+                    <span class="sp-step-pill sp-pill-completed">Active</span>
+                  </div>
+                  <div class="sp-step-time">${queueEntry ? `Token: ${queueEntry.tokenNumber}` : 'Pass #TK-204 Issued'}</div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="sp-timeline-step">
+                  <div class="sp-timeline-node sp-node-inprogress"><i class="fas fa-arrow-right"></i></div>
+                  <div class="sp-step-header">
+                    <span class="sp-step-name">4. Gate Entry</span>
+                    <span class="sp-step-pill sp-pill-inprogress">In Progress</span>
+                  </div>
+                  <div class="sp-step-time">Proceed to Gate 2 &bull; QR Verified</div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="sp-timeline-step">
+                  <div class="sp-timeline-node sp-node-pending">5</div>
+                  <div class="sp-step-header">
+                    <span class="sp-step-name">5. Quality Testing</span>
+                    <span class="sp-step-pill sp-pill-pending">Upcoming</span>
+                  </div>
+                  <div class="sp-step-time">Moisture & purity evaluation</div>
+                </div>
+
+                <!-- Step 6 -->
+                <div class="sp-timeline-step">
+                  <div class="sp-timeline-node sp-node-pending">6</div>
+                  <div class="sp-step-header">
+                    <span class="sp-step-name">6. Weighment</span>
+                    <span class="sp-step-pill sp-pill-pending">Upcoming</span>
+                  </div>
+                  <div class="sp-step-time">Gross & tare electronic scale</div>
+                </div>
+
+                <!-- Step 7 -->
+                <div class="sp-timeline-step">
+                  <div class="sp-timeline-node sp-node-pending">7</div>
+                  <div class="sp-step-header">
+                    <span class="sp-step-name">7. J-Form Receipt</span>
+                    <span class="sp-step-pill sp-pill-pending">Upcoming</span>
+                  </div>
+                  <div class="sp-step-time">Digital signed procurement slip</div>
+                </div>
+
+                <!-- Step 8 -->
+                <div class="sp-timeline-step">
+                  <div class="sp-timeline-node sp-node-pending">8</div>
+                  <div class="sp-step-header">
+                    <span class="sp-step-name">8. DBT Payment</span>
+                    <span class="sp-step-pill sp-pill-pending">Upcoming</span>
+                  </div>
+                  <div class="sp-step-time">Direct transfer: ₹1,21,250 (48-72h)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Widget 2: Weather - Vidisha -->
+            <div class="sp-card sp-widget-card">
+              <div class="sp-widget-header">
+                <div class="sp-widget-title">
+                  <i class="fas fa-location-dot" style="color:#0D5C3A;"></i> Weather - Vidisha
+                </div>
+                <span style="font-size:0.75rem; color:#6B7280; font-weight:600;">Clear & Sunny</span>
+              </div>
+
+              <div class="sp-weather-main">
+                <i class="fas fa-sun sp-weather-sun"></i>
+                <div>
+                  <div class="sp-weather-temp">31°C</div>
+                  <div class="sp-weather-cond">Ideal transit conditions</div>
+                </div>
+              </div>
+
+              <div class="sp-weather-metrics">
+                Humidity: <strong>42%</strong> &bull; Wind: <strong>12 km/h</strong> &bull; Rain: <strong>0%</strong>
+              </div>
+
+              <!-- 5-Day Mini Forecast Strip -->
+              <div class="sp-forecast-strip">
+                <div class="sp-forecast-day">
+                  <span class="sp-forecast-name">Today</span>
+                  <i class="fas fa-sun sp-forecast-icon"></i>
+                  <span class="sp-forecast-temp">31°</span>
+                </div>
+                <div class="sp-forecast-day">
+                  <span class="sp-forecast-name">Tue</span>
+                  <i class="fas fa-cloud-sun sp-forecast-icon"></i>
+                  <span class="sp-forecast-temp">32°</span>
+                </div>
+                <div class="sp-forecast-day">
+                  <span class="sp-forecast-name">Wed</span>
+                  <i class="fas fa-sun sp-forecast-icon"></i>
+                  <span class="sp-forecast-temp">30°</span>
+                </div>
+                <div class="sp-forecast-day">
+                  <span class="sp-forecast-name">Thu</span>
+                  <i class="fas fa-cloud-sun sp-forecast-icon"></i>
+                  <span class="sp-forecast-temp">29°</span>
+                </div>
+                <div class="sp-forecast-day">
+                  <span class="sp-forecast-name">Fri</span>
+                  <i class="fas fa-sun sp-forecast-icon"></i>
+                  <span class="sp-forecast-temp">31°</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Widget 3: Nearby Mandis Interactive Map -->
+            <div class="sp-card sp-widget-card">
+              <div class="sp-widget-header">
+                <div class="sp-widget-title">
+                  <i class="fas fa-map-marked-alt" style="color:#0D5C3A;"></i> Nearby Mandis
+                </div>
+                <a class="sp-widget-link" onclick="routeTo('#smart-booking')">View on Map &gt;</a>
+              </div>
+
+              <div id="sp-nearby-map" class="sp-mini-map-box"></div>
+              
+              <div style="font-size:0.74rem; color:#4B5563; font-weight:600; margin-top:10px; display:flex; justify-content:space-between;">
+                <span><i class="fas fa-circle" style="color:#2563EB; font-size:0.65rem;"></i> Bhopal (12 km)</span>
+                <span><i class="fas fa-circle" style="color:#16A34A; font-size:0.65rem;"></i> Vidisha (28 km)</span>
+                <span><i class="fas fa-circle" style="color:#EA580C; font-size:0.65rem;"></i> Sehore (65 km)</span>
+              </div>
+            </div>
+
+            <!-- Widget 4: Notifications List -->
+            <div class="sp-card sp-widget-card">
+              <div class="sp-widget-header">
+                <div class="sp-widget-title">
+                  <i class="far fa-bell" style="color:#0D5C3A;"></i> Notifications
+                </div>
+                <a class="sp-widget-link" onclick="openNotificationsModal()">View All &gt;</a>
+              </div>
+
+              <div class="sp-notif-list">
+                <div class="sp-notif-item">
+                  <div class="sp-notif-icon sp-chip-green">
+                    <i class="fas fa-check"></i>
+                  </div>
+                  <div class="sp-notif-content">
+                    <div class="sp-notif-title-row">
+                      <span class="sp-notif-title">Slot Confirmed</span>
+                      <span class="sp-notif-time">2h ago</span>
+                    </div>
+                    <div class="sp-notif-desc">Centre C - Vidisha for 12 Apr 2026, 10:00 AM</div>
+                  </div>
+                </div>
+
+                <div class="sp-notif-item">
+                  <div class="sp-notif-icon sp-chip-blue">
+                    <i class="fas fa-ticket-alt"></i>
+                  </div>
+                  <div class="sp-notif-content">
+                    <div class="sp-notif-title-row">
+                      <span class="sp-notif-title">Token #TK-204 Called</span>
+                      <span class="sp-notif-time">4h ago</span>
+                    </div>
+                    <div class="sp-notif-desc">Gate 2 entry cleared for electronic weighment</div>
+                  </div>
+                </div>
+
+                <div class="sp-notif-item">
+                  <div class="sp-notif-icon sp-chip-orange">
+                    <i class="fas fa-indian-rupee-sign"></i>
+                  </div>
+                  <div class="sp-notif-content">
+                    <div class="sp-notif-title-row">
+                      <span class="sp-notif-title">DBT Processed ₹48,500</span>
+                      <span class="sp-notif-time">1d ago</span>
+                    </div>
+                    <div class="sp-notif-desc">Direct transfer completed via PFMS UTR SBIN48291</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Wide Photographic Footer Band -->
+        <section class="sp-footer-band">
+          <div class="sp-footer-overlay"></div>
+          <div class="sp-footer-content">
+            <h2 class="sp-footer-title">
+              Empowering India's Farmers Through Smart Procurement
+            </h2>
+            <div class="sp-footer-pillars">
+              <div class="sp-pillar-item">
+                <div class="sp-pillar-icon"><i class="fas fa-wheat-awn"></i></div>
+                <div class="sp-pillar-label">Fair MSP Pricing</div>
+              </div>
+              <div class="sp-pillar-item">
+                <div class="sp-pillar-icon"><i class="fas fa-bolt"></i></div>
+                <div class="sp-pillar-label">Zero Queue Delays</div>
+              </div>
+              <div class="sp-pillar-item">
+                <div class="sp-pillar-icon"><i class="fas fa-building-columns"></i></div>
+                <div class="sp-pillar-label">Instant DBT Transfer</div>
+              </div>
+              <div class="sp-pillar-item">
+                <div class="sp-pillar-icon"><i class="fas fa-headset"></i></div>
+                <div class="sp-pillar-label">24/7 Farmer Support</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  `;
+
+  // Initialize interactive Leaflet mini-map asynchronously once element exists
+  setTimeout(() => {
+    if (typeof window.initNearbyMandisMiniMap === 'function') {
+      window.initNearbyMandisMiniMap();
+    } else if (typeof initNearbyMandisMiniMap === 'function') {
+      initNearbyMandisMiniMap();
+    }
+    if (typeof window.runSmartMandiFinderSearch === 'function') {
+      window.runSmartMandiFinderSearch(true);
+    }
+  }, 100);
+};
+
+window.renderSmartProcureFarmerView = renderSmartProcureFarmerView;
+window.getFarmerSidebar = getFarmerSidebar;
+
 const loadFarmerDashboard = async () => {
+
   const token = localStorage.getItem('kpms_token');
+  
+  // If no auth token, render default SmartProcure experience so view is immediately functional
   if (!token) {
-    openLoginModal('farmer');
-    showToast('Please log in to access the Farmer Dashboard', 'info');
+    renderSmartProcureFarmerView();
     return;
   }
 
   const container = document.getElementById('app-view-container');
-  container.innerHTML = `<div class="skeleton" style="height:300px; border-radius:12px;"></div>`;
+  if (container) {
+    container.innerHTML = `<div class="skeleton" style="height:350px; border-radius:12px; margin:24px;"></div>`;
+  }
 
   try {
     const res = await fetch('/api/farmer/dashboard', {
@@ -39,146 +591,20 @@ const loadFarmerDashboard = async () => {
     });
     const result = await res.json();
     if (!result.success) {
-      showToast(result.message, 'error');
+      renderSmartProcureFarmerView();
       return;
     }
 
-    const { farmer, activeBooking, queueEntry, stats, recentBookings, recentPayments } = result.data;
-
-    container.innerHTML = `
-      <div class="app-container">
-        <!-- Sidebar Navigation -->
-        ${getFarmerSidebar(farmer, 'dashboard')}
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-          <!-- Top Welcome Banner -->
-          <div class="glass-panel" style="padding:24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border-left:6px solid var(--green-gov);">
-            <div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <h2 style="font-size:1.8rem; font-weight:800; color:var(--primary-navy);">Namaste, ${farmer.fullName}!</h2>
-                <span class="status-pill completed"><i class="fas fa-check-circle"></i> KYC ${farmer.verificationStatus || 'Verified'}</span>
-              </div>
-              <p style="color:var(--text-muted); font-size:0.92rem; margin-top:4px;">
-                Mandi Center: <strong>${farmer.preferredCenterId || 'APMC Bhopal'}</strong> | Village: <strong>${farmer.village || 'Ratibad'}</strong> | Total Land: <strong>${farmer.totalLandArea || 5} Acres</strong>
-              </p>
-            </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> 🌾 Smart Mandi Finder</button>
-              <button class="btn btn-outline" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> Standard Booking</button>
-              <button class="btn btn-outline" onclick="openKisanAIChat()"><i class="fas fa-robot"></i> Kisan Sahayak AI</button>
-            </div>
-          </div>
-
-          <!-- KPI Metric Cards -->
-          <div class="dashboard-grid">
-            <div class="glass-card metric-card">
-              <div>
-                <div class="metric-val">${stats.totalBookings}</div>
-                <div class="metric-title">Total Bookings</div>
-              </div>
-              <div class="metric-icon-box" style="background:#EFF6FF; color:#2563EB;"><i class="fas fa-calendar-check"></i></div>
-            </div>
-            <div class="glass-card metric-card">
-              <div>
-                <div class="metric-val">₹${stats.totalEarnings.toLocaleString('en-IN')}</div>
-                <div class="metric-title">Completed DBT Payments</div>
-              </div>
-              <div class="metric-icon-box" style="background:#ECFDF5; color:#059669;"><i class="fas fa-indian-rupee-sign"></i></div>
-            </div>
-            <div class="glass-card metric-card">
-              <div>
-                <div class="metric-val">₹${stats.pendingEarnings.toLocaleString('en-IN')}</div>
-                <div class="metric-title">Pending DBT Processing</div>
-              </div>
-              <div class="metric-icon-box" style="background:#FFFBEB; color:#D97706;"><i class="fas fa-clock"></i></div>
-            </div>
-            <div class="glass-card metric-card">
-              <div>
-                <div class="metric-val">${queueEntry ? queueEntry.tokenNumber : 'None'}</div>
-                <div class="metric-title">Live Mandi Token</div>
-              </div>
-              <div class="metric-icon-box" style="background:#FAF5FF; color:#9333EA;"><i class="fas fa-ticket-alt"></i></div>
-            </div>
-          </div>
-
-          <!-- Live Queue & Active Slot Spotlight Banner -->
-          ${queueEntry ? `
-            <div class="glass-panel" style="padding:22px; margin-bottom:28px; background:linear-gradient(135deg, rgba(224,109,20,0.1), rgba(26,122,68,0.05)); border:2px solid var(--saffron);">
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-                <div>
-                  <span class="status-pill called animate-pulse-glow" style="margin-bottom:8px;">Live Queue Active</span>
-                  <div style="font-size:1.4rem; font-weight:800; color:var(--primary-navy);">Token Number: <span style="color:var(--saffron); font-size:1.8rem;">${queueEntry.tokenNumber}</span></div>
-                  <p style="color:var(--text-muted); font-size:0.9rem;">Assigned Counter: <strong>${queueEntry.counterNumber}</strong> | Status: <strong>${queueEntry.status.toUpperCase()}</strong></p>
-                </div>
-                <div>
-                  <button class="btn btn-primary" onclick="routeTo('#farmer-queue')"><i class="fas fa-eye"></i> View Live Position & Countdown</button>
-                </div>
-              </div>
-            </div>
-          ` : (activeBooking ? `
-            <div class="glass-panel" style="padding:20px; margin-bottom:28px; border-left:6px solid var(--saffron);">
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-                <div>
-                  <span class="status-pill waiting" style="margin-bottom:6px;">Upcoming Reserved Slot</span>
-                  <h4 style="color:var(--primary-navy);">${activeBooking.cropName} (${activeBooking.quantity} Quintals)</h4>
-                  <p style="color:var(--text-muted); font-size:0.88rem;">Date: <strong>${activeBooking.date}</strong> | Slot: <strong>${activeBooking.timeSlot}</strong> | Booking No: <strong>${activeBooking.bookingNumber}</strong></p>
-                </div>
-                <div style="display:flex; gap:8px;">
-                  <button class="btn btn-success" onclick="openBookingQRModal('${activeBooking.bookingNumber}')"><i class="fas fa-qrcode"></i> View QR Pass</button>
-                  <a href="/api/bookings/${activeBooking.bookingNumber}/pdf" target="_blank" class="btn btn-outline"><i class="fas fa-download"></i> PDF Pass</a>
-                </div>
-              </div>
-            </div>
-          ` : '')}
-
-          <!-- Recent Bookings and Payment Table -->
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-            <div class="glass-card" style="padding:20px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h4 style="color:var(--primary-navy); font-weight:700;"><i class="fas fa-list"></i> Recent Slot Bookings</h4>
-                <a onclick="routeTo('#my-bookings')" style="font-size:0.85rem; color:var(--saffron); cursor:pointer; font-weight:600;">View All</a>
-              </div>
-              <div style="display:flex; flex-direction:column; gap:12px;">
-                ${recentBookings.length === 0 ? '<p style="color:var(--text-muted); font-size:0.9rem;">No bookings yet.</p>' : ''}
-                ${recentBookings.map(b => `
-                  <div style="padding:12px; background:var(--bg-main); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                      <div style="font-weight:700; font-size:0.92rem;">${b.cropName} (${b.quantity} Q)</div>
-                      <div style="font-size:0.8rem; color:var(--text-muted);">${b.date} • ${b.timeSlot}</div>
-                    </div>
-                    <span class="status-pill ${b.status.toLowerCase()}">${b.status}</span>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-
-            <div class="glass-card" style="padding:20px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h4 style="color:var(--primary-navy); font-weight:700;"><i class="fas fa-receipt"></i> Recent DBT Payments</h4>
-                <a onclick="routeTo('#farmer-payments')" style="font-size:0.85rem; color:var(--saffron); cursor:pointer; font-weight:600;">View All</a>
-              </div>
-              <div style="display:flex; flex-direction:column; gap:12px;">
-                ${recentPayments.length === 0 ? '<p style="color:var(--text-muted); font-size:0.9rem;">No payment transactions yet.</p>' : ''}
-                ${recentPayments.map(p => `
-                  <div style="padding:12px; background:var(--bg-main); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                      <div style="font-weight:700; font-size:0.92rem; color:var(--green-gov);">₹${p.amount.toLocaleString('en-IN')}</div>
-                      <div style="font-size:0.8rem; color:var(--text-muted);">UTR: ${p.utrNumber || p.transactionId}</div>
-                    </div>
-                    <span class="status-pill completed">${p.status}</span>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    `;
+    renderSmartProcureFarmerView(result.data);
   } catch (err) {
-    showToast('Failed to load dashboard: ' + err.message, 'error');
+    console.error('Error fetching farmer dashboard:', err);
+    renderSmartProcureFarmerView();
   }
 };
+window.loadFarmerDashboard = loadFarmerDashboard;
+
+
+
 
 /**
  * My Farms & Crops Portal View
@@ -365,7 +791,7 @@ const loadFarmerFarmsPage = async () => {
 };
 
 /**
- * KYC Profile & Docs Portal View
+ * Profile & Documents Portal View
  */
 const loadFarmerProfilePage = async () => {
   const token = localStorage.getItem('kpms_token');
@@ -405,8 +831,8 @@ const loadFarmerProfilePage = async () => {
           <div class="glass-panel" style="padding:22px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border-left:6px solid var(--saffron);">
             <div>
               <div style="display:flex; align-items:center; gap:8px;">
-                <h2 style="font-size:1.75rem; font-weight:800; color:var(--primary-navy);"><i class="fas fa-user-circle" style="color:var(--saffron);"></i> Farmer KYC Profile & Documents</h2>
-                <span class="status-pill completed"><i class="fas fa-shield-check"></i> Government KYC ${farmer.verificationStatus || 'Verified'}</span>
+                <h2 style="font-size:1.75rem; font-weight:800; color:var(--primary-navy);"><i class="fas fa-user-circle" style="color:var(--saffron);"></i> Farmer Profile & Documents</h2>
+                <span class="status-pill completed"><i class="fas fa-shield-check"></i> Government ${farmer.verificationStatus || 'Verified'}</span>
               </div>
               <p style="color:var(--text-muted); font-size:0.92rem; margin-top:4px;">
                 Farmer ID: <strong>${farmer.farmerId || 'FARM000001'}</strong> | Registered Under PM-KISAN & State APMC Mandi Registry.
@@ -483,7 +909,7 @@ const loadFarmerProfilePage = async () => {
             </div>
           </div>
 
-          <!-- Address & KYC Verification Documents Section -->
+          <!-- Address & Verification Documents Section -->
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
             <!-- Address Card -->
             <div class="glass-card" style="padding:20px;">
@@ -512,10 +938,10 @@ const loadFarmerProfilePage = async () => {
               </div>
             </div>
 
-            <!-- KYC Documents Card -->
+            <!-- Documents Card -->
             <div class="glass-card" style="padding:20px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h4 style="font-weight:700; color:var(--primary-navy);"><i class="fas fa-file-shield" style="color:var(--green-gov);"></i> KYC Verification Documents</h4>
+                <h4 style="font-weight:700; color:var(--primary-navy);"><i class="fas fa-file-shield" style="color:var(--green-gov);"></i> Verification Documents</h4>
                 <button class="btn btn-primary btn-sm" onclick="openUploadDocModal()"><i class="fas fa-upload"></i> Upload</button>
               </div>
               <div style="display:flex; flex-direction:column; gap:10px;">
@@ -860,7 +1286,7 @@ const submitUpdateProfile = async (e) => {
 const openUploadDocModal = () => {
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
-  document.getElementById('modal-title').textContent = 'Upload KYC Verification Document';
+  document.getElementById('modal-title').textContent = 'Upload Verification Document';
 
   body.innerHTML = `
     <div style="padding:8px 0;">

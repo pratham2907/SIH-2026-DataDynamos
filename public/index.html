@@ -19,56 +19,80 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 
 
-  <!-- Government Official Top Flag Strip -->
-  <div class="gov-top-bar">
-    <div class="gov-flag-strip">
-      <span class="flag-colors"></span>
-      <span data-i18n="gov_badge">Government of India | Ministry of Agriculture & Farmers Welfare</span>
-    </div>
-    <div style="display:flex; align-items:center; gap:18px;">
-      <!-- Multi-Language Switcher (9 Languages) -->
-      <div style="display:flex; align-items:center; gap:6px;">
-        <i class="fas fa-language" style="color:var(--saffron);"></i>
-        <select id="lang-selector" onchange="setLanguage(this.value)" style="background:transparent; color:#E2E8F0; border:1px solid rgba(255,255,255,0.3); border-radius:4px; padding:2px 6px; font-size:0.8rem; outline:none; cursor:pointer;">
-          <option value="en" style="color:#000;">English</option>
-          <option value="hi" style="color:#000;">हिन्दी (Hindi)</option>
-          <option value="gu" style="color:#000;">ગુજરાતી (Gujarati)</option>
-          <option value="mr" style="color:#000;">मराठी (Marathi)</option>
-          <option value="pa" style="color:#000;">ਪੰਜਾਬੀ (Punjabi)</option>
-          <option value="ta" style="color:#000;">தமிழ் (Tamil)</option>
-          <option value="te" style="color:#000;">తెలుగు (Telugu)</option>
-          <option value="kn" style="color:#000;">ಕನ್ನಡ (Kannada)</option>
-          <option value="bn" style="color:#000;">বাংলা (Bengali)</option>
-        </select>
-      </div>
-      <!-- Dark / Light Mode Toggle -->
-      <button class="btn-icon" style="width:28px; height:28px; font-size:0.8rem; background:transparent; border-color:rgba(255,255,255,0.3); color:#FFF;" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
-        <i id="theme-icon" class="fas fa-moon"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- Main Navigation Header -->
-  <header class="main-header">
-    <a class="brand-logo" onclick="routeTo('#landing')">
-      <div class="brand-emblem"><i class="fas fa-wheat-awn"></i></div>
-      <div class="brand-title">
-        <span>KPMS AGRI-PORTAL</span>
-        <span class="brand-subtitle">Kisan Procurement Management System</span>
+  <!-- SmartProcure Fixed Top Navigation Bar (Matches Reference Screenshot) -->
+  <header class="sp-topbar">
+    <a class="sp-brand" onclick="routeTo('#farmer-dashboard')">
+      <div class="sp-brand-icon"><i class="fas fa-leaf"></i></div>
+      <div>
+        <div class="sp-brand-title">SmartProcure</div>
+        <div class="sp-brand-subtitle">Digital India &bull; Smart Agriculture</div>
       </div>
     </a>
 
-    <div class="nav-actions">
-      <button id="nav-btn-smart-booking" class="btn btn-primary btn-sm" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> 🌾 Smart Booking</button>
-      <button id="nav-btn-mandi-prices" class="btn btn-outline btn-sm" onclick="routeTo('#mandi-prices')"><i class="fas fa-carrot"></i> 🥕 Mandi Prices</button>
-      <button id="nav-btn-display-board" class="btn btn-outline btn-sm" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> Mandi Display Board</button>
-      <button id="nav-btn-kisan-sahayak" class="btn btn-outline btn-sm" onclick="openKisanFAQ()"><i class="fas fa-circle-question"></i> Kisan Sahayak</button>
-      <div id="nav-auth-actions" style="display:flex; align-items:center; gap:8px;">
-        <!-- Dynamically rendered based on session -->
+    <nav class="sp-nav-links">
+      <a class="sp-nav-link active" onclick="routeTo('#farmer-dashboard')">Home</a>
+      <a class="sp-nav-link" onclick="openAboutModal()">About</a>
+      <a class="sp-nav-link" onclick="openHowItWorksModal()">How It Works</a>
+      <a class="sp-nav-link" onclick="openFaqModal()">FAQs</a>
+      <a class="sp-nav-link" onclick="openContactModal()">Contact</a>
+    </nav>
+
+    <div class="sp-top-actions">
+      <!-- Notification Bell with Unread Badge -->
+      <button class="sp-bell-btn" onclick="openNotificationsModal()" title="View Notifications">
+        <i class="far fa-bell"></i>
+        <span class="sp-badge-count" id="top-notif-count">3</span>
+      </button>
+
+      <!-- Language Selector Pill -->
+      <div class="sp-lang-pill" title="Select Language">
+        <i class="fas fa-globe" style="color:#0D5C3A;"></i>
+        <select id="lang-selector" onchange="setLanguage(this.value)">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="gu">ગુજરાતી (Gujarati)</option>
+          <option value="mr">मराठी (Marathi)</option>
+          <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+          <option value="ta">தமிழ் (Tamil)</option>
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="kn">ಕನ್ನಡ (Kannada)</option>
+          <option value="bn">বাংলা (Bengali)</option>
+        </select>
+        <i class="fas fa-chevron-down" style="font-size:0.65rem; color:#9CA3AF;"></i>
+      </div>
+
+      <!-- User Profile Chip with Dropdown -->
+      <div class="sp-profile-chip" id="sp-user-chip" onclick="toggleProfileDropdown(event)">
+        <div class="sp-profile-avatar" id="sp-avatar-el">
+          <i class="fas fa-user"></i>
+        </div>
+        <div>
+          <div class="sp-profile-name" id="sp-profile-name">Ramesh Kumar</div>
+          <div class="sp-profile-role" id="sp-profile-role">Farmer</div>
+        </div>
+        <i class="fas fa-chevron-down" style="font-size:0.7rem; color:#9CA3AF;"></i>
+
+        <!-- Profile Dropdown Menu -->
+        <div class="sp-dropdown-menu" id="sp-profile-menu">
+          <div class="sp-dropdown-item" onclick="routeTo('#farmer-profile')">
+            <i class="fas fa-user-circle" style="color:#0D5C3A;"></i> My Profile
+          </div>
+          <div class="sp-dropdown-item" onclick="routeTo('#my-bookings')">
+            <i class="fas fa-ticket-alt" style="color:#0D5C3A;"></i> My Bookings
+          </div>
+          <div class="sp-dropdown-item" onclick="routeTo('#farmer-payments')">
+            <i class="fas fa-money-bill-wave" style="color:#0D5C3A;"></i> DBT Payments
+          </div>
+          <div style="height:1px; background:#E5E7EB; margin:4px 0;"></div>
+          <div class="sp-dropdown-item" style="color:#EF4444;" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -90,24 +114,80 @@
   <!-- Global Toast Alerts Container -->
   <div id="toast-container"></div>
 
-  <!-- Application Scripts -->
-  <script src="/js/i18n.js?v=1.0.8"></script>
-  <script src="/js/socket-client.js?v=1.0.8"></script>
-  <script src="/js/auth.js?v=1.0.8"></script>
-  <script src="/js/smart-booking-engine.js?v=1.0.8"></script>
-  <script src="/js/smart-booking.js?v=1.0.8"></script>
-  <script src="/js/mandi-prices.js?v=1.0.8"></script>
-  <script src="/js/farmer-portal.js?v=1.0.8"></script>
-  <script src="/js/booking-portal.js?v=1.0.8"></script>
-  <script src="/js/queue-portal.js?v=1.0.8"></script>
-  <script src="/js/officer-portal.js?v=1.0.8"></script>
-  <script src="/js/procurement-workflow.js?v=1.0.8"></script>
-  <script src="/js/payment-portal.js?v=1.0.8"></script>
-  <script src="/js/admin-portal.js?v=1.0.8"></script>
-  <script src="/js/display-board.js?v=1.0.8"></script>
-  <script src="/js/ai-assistant.js?v=1.0.8"></script>
-  <script src="/js/sih-tour.js?v=1.0.8"></script>
-  <script src="/js/app.js?v=1.0.8"></script>
+  <!-- MSG91 Official OTP Widget Configuration & Loader -->
+  <script type="text/javascript">
+  var configuration = {
+    widgetId: "3669676d316f323335383235",
+    tokenAuth: "568684TJ6Q4Cu9Q6a9ec1f4P1",
+    identifier: "",
+    exposeMethods: true,
+    success: (data) => {
+        // get verified token in response
+        console.log('success response', data);
+        if (typeof window.onMsg91Success === 'function') {
+          window.onMsg91Success(data);
+        }
+    },
+    failure: (error) => {
+        // handle error
+        console.log('failure reason', error);
+        if (typeof window.onMsg91Failure === 'function') {
+          window.onMsg91Failure(error);
+        }
+    }
+  };
+  </script>
+  <script type="text/javascript">
+  (function loadOtpScript(urls) {
+      let i = 0;
+      function attempt() {
+          const s = document.createElement('script');
+          s.src = urls[i];
+          s.async = true;
+          s.onload = () => {
+              if (typeof window.initSendOTP === 'function') {
+                  try {
+                    window.initSendOTP(configuration);
+                  } catch (e) {
+                    console.warn('initSendOTP status:', e);
+                  }
+              }
+          };
+          s.onerror = () => {
+              i++;
+              if (i < urls.length) {
+                  attempt();
+              }
+          };
+          document.head.appendChild(s);
+      }
+      attempt();
+  })([
+      'https://verify.msg91.com/otp-provider.js',
+      'https://verify.phone91.com/otp-provider.js'
+  ]);
+  </script>
+
+  <script src="/js/i18n.js?v=1.1.0"></script>
+  <script src="/js/location-service.js?v=1.1.0"></script>
+  <script src="/js/msg91-service.js?v=1.1.0"></script>
+  <script src="/js/socket-client.js?v=1.1.0"></script>
+  <script src="/js/auth.js?v=1.1.0"></script>
+  <script src="/js/smart-booking-engine.js?v=1.1.0"></script>
+  <script src="/js/smart-booking.js?v=1.1.0"></script>
+  <script src="/js/mandi-prices.js?v=1.1.0"></script>
+  <script src="/js/farmer-portal.js?v=1.1.0"></script>
+  <script src="/js/booking-portal.js?v=1.1.0"></script>
+  <script src="/js/queue-portal.js?v=1.1.0"></script>
+  <script src="/js/officer-portal.js?v=1.1.0"></script>
+  <script src="/js/procurement-workflow.js?v=1.1.0"></script>
+  <script src="/js/payment-portal.js?v=1.1.0"></script>
+  <script src="/js/admin-portal.js?v=1.1.0"></script>
+  <script src="/js/display-board.js?v=1.1.0"></script>
+  <script src="/js/ai-assistant.js?v=1.1.0"></script>
+  <script src="/js/sih-tour.js?v=1.1.0"></script>
+  <script src="/js/registration.js?v=1.1.0"></script>
+  <script src="/js/app.js?v=1.1.0"></script>
 
   <!-- Service Worker Registration for PWA -->
   <script>

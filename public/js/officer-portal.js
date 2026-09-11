@@ -768,7 +768,7 @@ const recallTokenAction = async (tokenId) => {
 const openFarmerSearchModal = () => {
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
-  document.getElementById('modal-title').textContent = 'Universal Farmer & KYC Lookup';
+  document.getElementById('modal-title').textContent = 'Universal Farmer Lookup';
 
   body.innerHTML = `
     <div>

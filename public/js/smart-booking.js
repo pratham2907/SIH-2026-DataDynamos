@@ -7,6 +7,7 @@
 const smartBookingState = {
   selectedCrop: 'Wheat',
   quantity: 100,
+  searchRadius: 150,
   step: 1,
   results: null,
   activeExplanationTab: null,
@@ -48,14 +49,14 @@ const loadSmartBookingPage = async () => {
           <a class="nav-link" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> ${getT('nav_home', 'Home')}</a>
           <a class="nav-link active" onclick="loadSmartBookingPage()"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> ${getT('btn_smart_mandi_finder', 'Smart Mandi Finder')}</a>
           <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> ${getT('nav_display_board', 'Mandi Display Board')}</a>
-          <a class="nav-link" onclick="routeTo('#ai-insights')"><i class="fas fa-brain"></i> AI Insights</a>
+          <a class="nav-link" onclick="routeTo('#ai-insights')"><i class="fas fa-chart-line"></i> Market Insights</a>
         </aside>
       `}
 
       <main class="main-content" style="max-width:1100px; margin:0 auto; padding-bottom:60px;">
         
         <!-- Header Banner -->
-        <div class="glass-panel" style="padding:28px 32px; margin-bottom:28px; background:linear-gradient(135deg, rgba(14,42,71,0.04), rgba(224,109,20,0.06)); border-left:6px solid var(--saffron);">
+        <div class="glass-panel" style="padding:28px 32px; margin-bottom:20px; background:linear-gradient(135deg, rgba(14,42,71,0.04), rgba(224,109,20,0.06)); border-left:6px solid var(--saffron);">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
             <div>
               <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
@@ -77,6 +78,25 @@ const loadSmartBookingPage = async () => {
               </button>
             </div>
           </div>
+        </div>
+
+        <!-- Location Optimization Indicator Banner -->
+        <div style="margin-bottom:24px; display:flex; align-items:center; justify-content:space-between; background:var(--bg-main); border:1px solid var(--border-color); border-radius:12px; padding:12px 18px; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-location-dot" style="color:var(--saffron); font-size:1.2rem;"></i>
+            <div>
+              <span style="font-size:0.88rem; color:var(--text-main);">
+                Calculating transit & profit optimization from: 
+                <strong style="color:var(--primary-navy);">${(window.KPMS_USER_LOCATION && (window.KPMS_USER_LOCATION.city || window.KPMS_USER_LOCATION.formattedName)) || 'Bhopal, MP'}</strong>
+              </span>
+              <span class="status-pill ${window.KPMS_USER_LOCATION && window.KPMS_USER_LOCATION.isLiveGPS ? 'completed' : 'waiting'}" style="font-size:0.7rem; margin-left:6px;">
+                ${window.KPMS_USER_LOCATION && window.KPMS_USER_LOCATION.isLiveGPS ? 'Live GPS' : 'Detected Hub'}
+              </span>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="openLocationPickerModal()" style="font-size:0.78rem; padding:5px 12px;">
+            <i class="fas fa-location-crosshairs"></i> Change Location
+          </button>
         </div>
 
         <!-- Stage Container -->
@@ -214,6 +234,16 @@ const renderSmartBookingForm = () => {
             <button type="button" class="btn btn-outline btn-sm" onclick="setQuickQuantity(500)">500 Q</button>
           </div>
 
+          <!-- Search Radius Filter -->
+          <div style="margin-top:16px; padding-top:12px; border-top:1px dashed var(--border-color); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted);"><i class="fas fa-compass" style="color:var(--saffron);"></i> Search Radius:</span>
+            ${[30, 60, 100, 150, 250].map(r => `
+              <button type="button" class="btn btn-sm ${smartBookingState.searchRadius === r ? 'btn-primary' : 'btn-outline'}" onclick="setSearchRadius(${r})" style="font-size:0.75rem; padding:3px 10px; border-radius:14px; font-weight:700;">
+                ${r} km
+              </button>
+            `).join('')}
+          </div>
+
           <div id="quantity-error-msg" style="color:#EF4444; font-size:0.88rem; font-weight:600; margin-top:8px; display:none;">
             <i class="fas fa-circle-exclamation"></i> Please enter a valid quantity greater than 0.
           </div>
@@ -264,6 +294,11 @@ const setQuickQuantity = (qty) => {
   onSmartQuantityChange(qty);
 };
 
+const setSearchRadius = (radius) => {
+  smartBookingState.searchRadius = radius;
+  renderSmartBookingForm();
+};
+
 /**
  * Animated Loading Simulation with 3-Stage Progress
  */
@@ -304,47 +339,32 @@ const handleFindBestOptionClick = () => {
     </div>
   `;
 
-  // Fetch live centre weather from server
-  fetchLiveCentresWeather().then(weatherMap => {
-    smartBookingState.centreWeatherMap = weatherMap;
-  }).catch(() => {});
-
-  setTimeout(() => {
-    const text = document.getElementById('loading-stage-text');
-    const bar = document.getElementById('loading-progress-bar');
-    const step2 = document.getElementById('load-step-2');
-    if (text) text.textContent = "Calculating crop perishability risk & transit time ranges...";
-    if (bar) bar.style.width = "70%";
-    if (step2) { step2.style.opacity = "1"; step2.style.color = "var(--saffron)"; }
-  }, 600);
-
-  setTimeout(() => {
-    const text = document.getElementById('loading-stage-text');
-    const bar = document.getElementById('loading-progress-bar');
-    const step3 = document.getElementById('load-step-3');
-    if (text) text.textContent = "Computing final Net Economic Value across eligible mandis...";
-    if (bar) bar.style.width = "100%";
-    if (step3) { step3.style.opacity = "1"; step3.style.color = "var(--green-gov)"; }
-  }, 1100);
-
-  setTimeout(() => {
-    executeSmartBookingAlgorithm();
+  // Fetch candidate centres and live weather asynchronously
+  setTimeout(async () => {
+    await executeSmartBookingAlgorithm();
   }, 1400);
 };
 
 /**
- * Fetch live weather from backend for default centres
+ * Fetch live weather from backend for candidate centres
  */
-const fetchLiveCentresWeather = async () => {
+const fetchLiveCentresWeather = async (centresList) => {
   try {
-    const centres = window.SmartBookingEngine.DEFAULT_PROCUREMENT_CENTRES;
+    const centres = (centresList && centresList.length > 0) 
+      ? centresList 
+      : ((window.SmartBookingEngine && window.SmartBookingEngine.DEFAULT_PROCUREMENT_CENTRES) || []);
     const map = {};
     await Promise.all(centres.map(async (c) => {
       try {
-        const res = await fetch(`/api/weather/centre?lat=${c.latitude}&lon=${c.longitude}&city=${encodeURIComponent(c.district || c.name)}`);
-        const json = await res.json();
-        if (json.success && json.data) {
-          map[c.id || c.code] = json.data;
+        const lat = c.latitude || (c.coordinates && c.coordinates[1]);
+        const lon = c.longitude || (c.coordinates && c.coordinates[0]);
+        const cid = c.centerId || c.id || c.code;
+        if (lat && lon && cid) {
+          const res = await fetch(`/api/weather/centre?lat=${lat}&lon=${lon}&city=${encodeURIComponent(c.district || c.name)}`);
+          const json = await res.json();
+          if (json.success && json.data) {
+            map[cid] = json.data;
+          }
         }
       } catch (e) {}
     }));
@@ -357,99 +377,334 @@ const fetchLiveCentresWeather = async () => {
 /**
  * Execute Optimization Algorithm and Render Recommendations
  */
-const executeSmartBookingAlgorithm = () => {
-  const { selectedCrop, quantity, centreWeatherMap } = smartBookingState;
-  const result = window.SmartBookingEngine.runSmartProcurementAlgorithm(
-    selectedCrop,
-    quantity,
-    null,
-    null,
-    centreWeatherMap
-  );
-  smartBookingState.results = result;
+const executeSmartBookingAlgorithm = async () => {
+  try {
+    const userLoc = window.KPMS_USER_LOCATION || {};
+    const farmerOrigin = {
+      location: userLoc.city || userLoc.formattedName || 'Bhopal',
+      lat: userLoc.lat || 23.2599,
+      lng: userLoc.lng || userLoc.lon || 77.4126,
+      district: userLoc.district || userLoc.city || 'Bhopal'
+    };
 
-  const container = document.getElementById('smart-booking-stage-container');
-  if (!container) return;
+    const { selectedCrop, quantity, searchRadius } = smartBookingState;
 
-  if (!result.success || !result.scenarios.hasResults) {
-    renderNoCentresAvailableView(result.message || 'No suitable procurement centres found.');
-    return;
-  }
+    if (!window.SmartBookingEngine || typeof window.SmartBookingEngine.runSmartProcurementAlgorithm !== 'function') {
+      console.warn('SmartBookingEngine is not initialized');
+      renderNoCentresAvailableView('Procurement calculation engine is initializing. Please try again in a moment.');
+      return;
+    }
 
-  const { scenarios, capacityWarning, maxAvailableCapacity, cropProfile } = result;
-  const { recommended, alternative, singleOptionOnly } = scenarios;
+    // Fetch dynamic centres from backend
+    let candidateCentres = [];
+    try {
+      const radiusParam = searchRadius || 300;
+      const res = await fetch(`/api/bookings/centers?lat=${farmerOrigin.lat}&lon=${farmerOrigin.lng}&radius=${radiusParam}`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        candidateCentres = json.data;
+      }
+    } catch (e) {
+      console.warn('Failed to fetch centers from API, using defaults', e);
+    }
 
-  container.innerHTML = `
-    <div>
-      <!-- Top Summary Bar -->
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <button class="btn btn-outline btn-sm" onclick="renderSmartBookingForm()">
-            <i class="fas fa-arrow-left"></i> Change Crop or Quantity
-          </button>
-          <span style="font-size:0.92rem; font-weight:700; color:var(--primary-navy);">
-            Producing: <strong style="color:var(--saffron);">${selectedCrop}</strong> (${quantity} Quintals) &bull; ${cropProfile.badge}
-          </span>
-        </div>
-        ${scenarios.otherCentres && scenarios.otherCentres.length > 0 ? `
-          <button class="btn btn-outline btn-sm" onclick="openOtherCentresModal()">
-            <i class="fas fa-layer-group"></i> View All (${result.rankedResults.length}) Mandis
-          </button>
-        ` : ''}
-      </div>
+    if (!candidateCentres || candidateCentres.length === 0) {
+      candidateCentres = (window.SmartBookingEngine && window.SmartBookingEngine.DEFAULT_PROCUREMENT_CENTRES) || [];
+    }
 
-      <!-- Capacity Exceeded Advisory -->
-      ${capacityWarning ? `
-        <div class="glass-panel" style="padding:16px 20px; margin-bottom:22px; background:#FFFBEB; border:1px solid #F59E0B; border-radius:12px; display:flex; align-items:center; gap:14px;">
-          <div style="width:38px; height:38px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">
-            <i class="fas fa-triangle-exclamation"></i>
+    // Fetch live weather for candidates
+    let weatherMap = {};
+    try {
+      weatherMap = await fetchLiveCentresWeather(candidateCentres);
+      smartBookingState.centreWeatherMap = weatherMap;
+    } catch (e) {}
+
+    const result = window.SmartBookingEngine.runSmartProcurementAlgorithm(
+      selectedCrop,
+      quantity,
+      candidateCentres,
+      farmerOrigin,
+      weatherMap
+    );
+    smartBookingState.results = result;
+
+    const container = document.getElementById('smart-booking-stage-container');
+    if (!container) return;
+
+    if (!result || !result.success || !result.scenarios || !result.scenarios.hasResults) {
+      renderNoCentresAvailableView((result && (result.message || result.error)) || 'No suitable procurement centres found within the search radius.');
+      return;
+    }
+
+    const { scenarios, capacityWarning, maxAvailableCapacity, cropProfile } = result;
+    const { recommended, alternative, singleOptionOnly } = scenarios;
+
+    container.innerHTML = `
+      <div>
+        <!-- Top Summary Bar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <button class="btn btn-outline btn-sm" onclick="renderSmartBookingForm()">
+              <i class="fas fa-arrow-left"></i> Change Crop or Quantity
+            </button>
+            <span style="font-size:0.92rem; font-weight:700; color:var(--primary-navy);">
+              Producing: <strong style="color:var(--saffron);">${selectedCrop}</strong> (${quantity} Quintals) &bull; ${cropProfile.badge}
+            </span>
           </div>
-          <div style="font-size:0.9rem; color:#92400E;">
-            <strong>High Volume Advisory:</strong> Your quantity (${quantity} Q) exceeds single-day available quota (${maxAvailableCapacity} Q). Calculations reflect maximum accepted volume for immediate procurement.
-          </div>
+          ${scenarios.otherCentres && scenarios.otherCentres.length > 0 ? `
+            <button class="btn btn-outline btn-sm" onclick="openOtherCentresModal()">
+              <i class="fas fa-layer-group"></i> View All (${result.rankedResults.length}) Mandis
+            </button>
+          ` : ''}
         </div>
-      ` : ''}
 
-      <!-- MAIN TWO SCENARIOS GRID (Section 26 & 27) -->
-      <div style="display:grid; grid-template-columns:${singleOptionOnly ? '1fr' : 'repeat(auto-fit, minmax(340px, 1fr))'}; gap:24px; margin-bottom:30px;">
-        
-        <!-- SCENARIO 1: RECOMMENDED BEST OPTION -->
-        ${renderScenarioCard(recommended, 'recommended')}
-
-        <!-- SCENARIO 2: ALTERNATIVE OPTION -->
-        ${alternative ? renderScenarioCard(alternative, 'alternative') : ''}
-
-      </div>
-
-      <!-- Transparent Calculation Breakdown Accordion -->
-      <div class="glass-panel" style="border-radius:16px; margin-bottom:30px; overflow:hidden;">
-        <div 
-          style="padding:18px 24px; background:var(--bg-card); cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
-          onclick="toggleBreakdownAccordion()"
-        >
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:34px; height:34px; border-radius:50%; background:rgba(224,109,20,0.12); color:var(--saffron); display:flex; align-items:center; justify-content:center; font-size:1rem;">
-              <i class="fas fa-chart-pie"></i>
+        <!-- Capacity Exceeded Advisory -->
+        ${capacityWarning ? `
+          <div class="glass-panel" style="padding:20px 24px; margin-bottom:24px; background:#FFFBEB; border:1.5px solid #F59E0B; border-radius:14px; box-shadow:0 4px 16px rgba(245,158,11,0.1);">
+            <div style="display:flex; align-items:flex-start; gap:16px;">
+              <div style="width:42px; height:42px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;">
+                <i class="fas fa-triangle-exclamation"></i>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:1rem; font-weight:800; color:#92400E; display:flex; align-items:center; gap:8px;">
+                  High Volume Quota Advisory
+                  <span class="badge" style="background:#FEF3C7; color:#B45309; font-size:0.75rem; padding:2px 8px; border-radius:10px;">Recommended Action Needed</span>
+                </div>
+                <p style="font-size:0.88rem; color:#78350F; margin:6px 0 14px; line-height:1.5;">
+                  Your quantity (<strong>${quantity} Quintals</strong>) exceeds the single-day handling quota (<strong>${maxAvailableCapacity} Q</strong>) for immediate delivery. To ensure zero waiting and preserve crop grade quality, choose from the smart distribution options below:
+                </p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <button class="btn btn-outline btn-sm" onclick="splitBookingAcrossTwoDates(${quantity})" style="background:#FFF; color:#92400E; border-color:#F59E0B; font-weight:700; padding:6px 14px; border-radius:8px;">
+                    <i class="fas fa-calendar-days"></i> Split Across 2 Dates (${Math.ceil(quantity/2)} Q + ${Math.floor(quantity/2)} Q)
+                  </button>
+                  <button class="btn btn-outline btn-sm" onclick="openOtherCentresModal()" style="background:#FFF; color:#92400E; border-color:#F59E0B; font-weight:700; padding:6px 14px; border-radius:8px;">
+                    <i class="fas fa-warehouse"></i> Find Alternate Centre
+                  </button>
+                  <button class="btn btn-primary btn-sm" onclick="routeTo('#book-slot')" style="background:#D97706; border-color:#D97706; font-weight:700; padding:6px 14px; border-radius:8px;">
+                    <i class="fas fa-calendar-check"></i> View Slot Availability
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
+        ` : ''}
+
+        <!-- MAIN TWO SCENARIOS GRID (Section 26 & 27) -->
+        <div style="display:grid; grid-template-columns:${singleOptionOnly ? '1fr' : 'repeat(auto-fit, minmax(340px, 1fr))'}; gap:24px; margin-bottom:30px;">
+          
+          <!-- SCENARIO 1: RECOMMENDED BEST OPTION -->
+          ${renderScenarioCard(recommended, 'recommended')}
+
+          <!-- SCENARIO 2: ALTERNATIVE OPTION -->
+          ${alternative ? renderScenarioCard(alternative, 'alternative') : ''}
+
+        </div>
+
+        <!-- Transparent Calculation Breakdown Accordion -->
+        <div class="glass-panel" style="border-radius:16px; margin-bottom:30px; overflow:hidden;">
+          <div 
+            style="padding:18px 24px; background:var(--bg-card); cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+            onclick="toggleBreakdownAccordion()"
+          >
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="width:34px; height:34px; border-radius:50%; background:rgba(224,109,20,0.12); color:var(--saffron); display:flex; align-items:center; justify-content:center; font-size:1rem;">
+                <i class="fas fa-chart-pie"></i>
+              </div>
+              <div>
+                <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:var(--primary-navy);">
+                  Transparent Economic & Weather Breakdown (गणना का विवरण)
+                </h4>
+                <p style="margin:2px 0 0; font-size:0.8rem; color:var(--text-muted);">
+                  See how OpenWeather feeds, travel transit, crop perishability, and yard delays combine into your Net Outcome.
+                </p>
+              </div>
+            </div>
+            <i id="breakdown-chevron" class="fas fa-chevron-down" style="color:var(--text-muted); transition:transform 0.2s;"></i>
+          </div>
+
+          <div id="breakdown-accordion-body" style="display:none; padding:24px; border-top:1px solid var(--border-color); background:rgba(14,42,71,0.02);">
+            ${renderBreakdownTable(recommended, alternative)}
+          </div>
+        </div>
+
+        <!-- Interactive Route & Mandi Transit Map -->
+        <div class="glass-panel" style="border-radius:16px; margin-bottom:30px; padding:22px; border:1px solid var(--border-color);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
             <div>
-              <h4 style="margin:0; font-size:1.05rem; font-weight:800; color:var(--primary-navy);">
-                Transparent Economic & Weather Breakdown (गणना का विवरण)
+              <h4 style="margin:0; font-size:1.08rem; font-weight:800; color:var(--primary-navy); display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-map-location-dot" style="color:var(--saffron);"></i>
+                Optimal Transit & Mandi Route Map (सड़क मार्ग और दूरी नक्शा)
               </h4>
               <p style="margin:2px 0 0; font-size:0.8rem; color:var(--text-muted);">
-                See how OpenWeather feeds, travel transit, crop perishability, and yard delays combine into your Net Outcome.
+                Visualizing direct road path connecting your farm to eligible mandis with distance and toll estimates.
               </p>
             </div>
+            <div style="display:flex; gap:14px; font-size:0.78rem; font-weight:700;">
+              <span style="display:inline-flex; align-items:center; gap:5px; color:#15803D;"><i class="fas fa-tractor"></i> Your Farm</span>
+              <span style="display:inline-flex; align-items:center; gap:5px; color:#E06D14;"><i class="fas fa-warehouse"></i> Recommended Mandi</span>
+              ${alternative ? `<span style="display:inline-flex; align-items:center; gap:5px; color:#0E2A47;"><i class="fas fa-building"></i> Alternative Mandi</span>` : ''}
+            </div>
           </div>
-          <i id="breakdown-chevron" class="fas fa-chevron-down" style="color:var(--text-muted); transition:transform 0.2s;"></i>
+          <div id="mandi-route-map" style="height:340px; border-radius:12px; border:1px solid var(--border-color); z-index:1; overflow:hidden;"></div>
         </div>
 
-        <div id="breakdown-accordion-body" style="display:none; padding:24px; border-top:1px solid var(--border-color); background:rgba(14,42,71,0.02);">
-          ${renderBreakdownTable(recommended, alternative)}
-        </div>
       </div>
+    `;
 
-    </div>
-  `;
+    // Initialize interactive Leaflet route map
+    initSmartMandiRouteMap(farmerOrigin, recommended, alternative);
+  } catch (err) {
+    console.error('Error in executeSmartBookingAlgorithm:', err);
+    renderNoCentresAvailableView('Error calculating mandi recommendations: ' + (err.message || ''));
+  }
+};
+
+/**
+ * Split large volume booking across 2 optimal dates
+ */
+const splitBookingAcrossTwoDates = (qty) => {
+  const batch1 = Math.ceil(qty / 2);
+  const batch2 = Math.floor(qty / 2);
+  smartBookingState.quantity = batch1;
+  showToast(`High volume split: Proceeding with Batch 1 (${batch1} Q). Batch 2 (${batch2} Q) scheduled for follow-up.`, 'info');
+  executeSmartBookingAlgorithm();
+};
+
+/**
+ * Interactive Leaflet Route Map Visualizer
+ */
+let mandiRouteMapInstance = null;
+const initSmartMandiRouteMap = (origin, recommended, alternative) => {
+  setTimeout(() => {
+    const mapEl = document.getElementById('mandi-route-map');
+    if (!mapEl || typeof L === 'undefined') return;
+
+    if (mandiRouteMapInstance) {
+      try {
+        mandiRouteMapInstance.remove();
+      } catch (e) {}
+      mandiRouteMapInstance = null;
+    }
+
+    const originLat = origin.lat || 23.2599;
+    const originLng = origin.lng || 77.4126;
+    const originCity = origin.location || origin.district || 'Farmer Hub';
+
+    const map = L.map('mandi-route-map').setView([originLat, originLng], 9);
+    mandiRouteMapInstance = map;
+
+    // Use CartoDB Voyager tile layer (reliable Fastly CDN, crystal-clear road details, zero 403 blocks)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+
+    const farmerIcon = L.divIcon({
+      html: '<div style="background:#15803D; color:#FFF; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 12px rgba(21,128,61,0.45); border:2.5px solid #FFF;"><i class="fas fa-tractor" style="font-size:16px;"></i></div>',
+      className: '',
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
+    });
+
+    const recIcon = L.divIcon({
+      html: '<div style="background:#E06D14; color:#FFF; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 12px rgba(224,109,20,0.55); border:2.5px solid #FFF;"><i class="fas fa-warehouse" style="font-size:16px;"></i></div>',
+      className: '',
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
+    });
+
+    const altIcon = L.divIcon({
+      html: '<div style="background:#0E2A47; color:#FFF; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 12px rgba(14,42,71,0.45); border:2.5px solid #FFF;"><i class="fas fa-building" style="font-size:14px;"></i></div>',
+      className: '',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+
+    const bounds = L.latLngBounds([[originLat, originLng]]);
+
+    // Farmer Origin Marker
+    L.marker([originLat, originLng], { icon: farmerIcon })
+      .addTo(map)
+      .bindPopup(`
+        <div style="font-family:sans-serif; font-size:0.85rem; padding:4px;">
+          <strong style="color:#15803D;"><i class="fas fa-tractor"></i> Your Farm Origin</strong><br>
+          <span style="font-size:0.82rem; color:#4B5563;">${originCity}</span>
+        </div>
+      `)
+      .openPopup();
+
+    // Recommended Mandi Marker & Route Path
+    if (recommended) {
+      const recLat = (recommended.centre && recommended.centre.latitude) || recommended.latitude || (recommended.coordinates && recommended.coordinates[1]) || 23.2032;
+      const recLng = (recommended.centre && recommended.centre.longitude) || recommended.longitude || (recommended.coordinates && recommended.coordinates[0]) || 77.0844;
+      const recLatLng = [recLat, recLng];
+      bounds.extend(recLatLng);
+
+      const recDist = recommended.distance || 15;
+      const recTime = recommended.travelTimeDisplay || `${Math.round((recDist / 35) * 60)} min`;
+      const recNev = recommended.formattedNev || `₹${(recommended.nev || 0).toLocaleString('en-IN')}`;
+
+      L.marker(recLatLng, { icon: recIcon })
+        .addTo(map)
+        .bindPopup(`
+          <div style="font-family:sans-serif; font-size:0.85rem; padding:4px;">
+            <strong style="color:#E06D14;"><i class="fas fa-star"></i> Recommended Mandi</strong><br>
+            <span style="font-weight:700; color:#111827;">${recommended.shortName || recommended.centerName}</span><br>
+            <span style="color:#4B5563;">Distance: <strong>${recDist} km</strong> &bull; ~${recTime}</span><br>
+            <span style="color:#047857; font-weight:800;">Net Return: ${recNev}</span>
+          </div>
+        `);
+
+      // Draw direct transit corridor polyline
+      L.polyline([[originLat, originLng], recLatLng], {
+        color: '#E06D14',
+        weight: 5,
+        opacity: 0.88,
+        dashArray: '8, 10'
+      }).addTo(map);
+    }
+
+    // Alternative Mandi Marker & Route Path
+    if (alternative) {
+      const altLat = (alternative.centre && alternative.centre.latitude) || alternative.latitude || (alternative.coordinates && alternative.coordinates[1]) || 23.5251;
+      const altLng = (alternative.centre && alternative.centre.longitude) || alternative.longitude || (alternative.coordinates && alternative.coordinates[0]) || 77.8081;
+      const altLatLng = [altLat, altLng];
+      bounds.extend(altLatLng);
+
+      const altDist = alternative.distance || 30;
+      const altNev = alternative.formattedNev || `₹${(alternative.nev || 0).toLocaleString('en-IN')}`;
+
+      L.marker(altLatLng, { icon: altIcon })
+        .addTo(map)
+        .bindPopup(`
+          <div style="font-family:sans-serif; font-size:0.85rem; padding:4px;">
+            <strong style="color:#0E2A47;"><i class="fas fa-building"></i> Alternative Mandi</strong><br>
+            <span style="font-weight:700; color:#111827;">${alternative.shortName || alternative.centerName}</span><br>
+            <span style="color:#4B5563;">Distance: <strong>${altDist} km</strong></span><br>
+            <span style="color:#047857; font-weight:800;">Net Return: ${altNev}</span>
+          </div>
+        `);
+
+      L.polyline([[originLat, originLng], altLatLng], {
+        color: '#0E2A47',
+        weight: 3.5,
+        opacity: 0.65,
+        dashArray: '5, 8'
+      }).addTo(map);
+    }
+
+    try {
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 300);
+    } catch (e) {}
+
+    try {
+      map.fitBounds(bounds, { padding: [40, 40] });
+    } catch (e) {}
+  }, 250);
 };
 
 /**
@@ -464,11 +719,11 @@ const renderScenarioCard = (data, type) => {
     <div class="glass-card" style="border:2px solid ${isRec ? 'var(--saffron)' : 'var(--border-color)'}; border-radius:18px; padding:28px; position:relative; box-shadow:${isRec ? '0 12px 32px rgba(224,109,20,0.15)' : 'none'}; background:${isRec ? 'linear-gradient(180deg, var(--bg-card) 0%, rgba(255,247,237,0.4) 100%)' : 'var(--bg-card)'};">
       
       <!-- Top Tag Badge -->
-      <div style="position:absolute; top:-14px; left:24px; background:${isRec ? 'linear-gradient(135deg, #E06D14, #EA580C)' : 'var(--navy-light)'}; color:#FFF; padding:4px 16px; border-radius:20px; font-weight:800; font-size:0.8rem; letter-spacing:0.5px; box-shadow:${isRec ? '0 4px 12px rgba(224,109,20,0.4)' : 'none'};">
-        ${isRec ? `⭐ ${getT('recommended_option')}` : `🚜 ${getT('scenario2_name')}`}
+      <div style="position:absolute; top:-14px; left:24px; background:${isRec ? 'linear-gradient(135deg, #E06D14, #EA580C)' : 'linear-gradient(135deg, #0E2A47, #1E3A8A)'}; color:#FFF; padding:5px 18px; border-radius:20px; font-weight:800; font-size:0.82rem; letter-spacing:0.5px; box-shadow:${isRec ? '0 4px 14px rgba(224,109,20,0.45)' : '0 4px 14px rgba(14,42,71,0.3)'};">
+        ${data.tag || (isRec ? '⭐ Maximum Profit Option' : '⚖️ Secondary Profit Option')}
       </div>
 
-      <!-- Centre Header -->
+      <!-- Centre Header & Match Score -->
       <div style="margin-top:10px; margin-bottom:16px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
           <div>
@@ -479,9 +734,25 @@ const renderScenarioCard = (data, type) => {
               <i class="fas fa-location-dot" style="color:var(--saffron);"></i> ${data.district}, ${data.state} &bull; <strong>${data.distance} km away</strong>
             </div>
           </div>
-          <span class="status-pill ${isRec ? 'completed' : 'waiting'}" style="font-size:0.78rem; flex-shrink:0;">
-            <i class="fas fa-tag"></i> ₹${data.pricePerQuintal}/Q
-          </span>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+            <span style="background:rgba(21,128,61,0.12); color:#15803D; font-weight:800; font-size:0.82rem; padding:4px 10px; border-radius:12px; border:1px solid rgba(21,128,61,0.3); display:inline-flex; align-items:center; gap:5px;">
+              <i class="fas fa-star" style="color:#EAB308;"></i> ${data.matchScore || (isRec ? 95 : 84)}% Match
+            </span>
+            <span class="status-pill ${isRec ? 'completed' : 'waiting'}" style="font-size:0.78rem; flex-shrink:0;">
+              <i class="fas fa-tag"></i> ₹${data.pricePerQuintal}/Q
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Handling Capacity Meter -->
+      <div style="margin-bottom:16px; padding:10px 14px; background:var(--bg-main); border-radius:10px; border:1px solid var(--border-color);">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; margin-bottom:4px;">
+          <span style="color:var(--text-muted); font-weight:600;"><i class="fas fa-chart-simple"></i> Daily Handling Capacity:</span>
+          <strong style="color:var(--primary-navy);">${data.availableCapacity || 120} Q available / ${data.maxDailyCapacity || 450} Q</strong>
+        </div>
+        <div style="height:6px; background:rgba(0,0,0,0.06); border-radius:3px; overflow:hidden;">
+          <div style="width:${Math.min(100, Math.max(15, Math.round(((data.maxDailyCapacity - (data.availableCapacity || 100)) / (data.maxDailyCapacity || 300)) * 100)))}%; height:100%; background:${isRec ? '#15803D' : '#D97706'};"></div>
         </div>
       </div>
 
@@ -545,7 +816,7 @@ const renderScenarioCard = (data, type) => {
       <!-- Why Recommended (Section 28) -->
       <div style="background:${isRec ? 'rgba(224,109,20,0.08)' : 'rgba(14,42,71,0.04)'}; padding:14px; border-radius:10px; margin-bottom:20px; border-left:4px solid ${isRec ? 'var(--saffron)' : 'var(--navy-light)'};">
         <div style="font-size:0.78rem; font-weight:800; color:${isRec ? 'var(--saffron)' : 'var(--primary-navy)'}; text-transform:uppercase; margin-bottom:3px;">
-          ${isRec ? 'Why was this centre recommended?' : 'Trade-Off Explanation:'}
+          ${isRec ? '⭐ Maximum Profit Analysis (अधिकतम लाभ विश्लेषण):' : '⚖️ Comparative Profit Trade-Off (तुलनात्मक लाभ विश्लेषण):'}
         </div>
         <p style="font-size:0.86rem; color:var(--primary-navy); margin:0; line-height:1.45; font-weight:600;">
           "${data.whyRecommended || data.whyTradeOff}"
@@ -569,46 +840,52 @@ const renderScenarioCard = (data, type) => {
  * Transparent Economic Calculation Table
  */
 const renderBreakdownTable = (rec, alt) => {
+  if (!rec) return '';
+  const recWeather = rec.weatherClassification || {};
+  const recDelay = rec.weatherDelay || {};
+  const altWeather = alt ? (alt.weatherClassification || {}) : {};
+  const altDelay = alt ? (alt.weatherDelay || {}) : {};
+
   return `
     <div style="overflow-x:auto;">
       <table style="width:100%; border-collapse:collapse; font-size:0.88rem; text-align:left;">
         <thead>
           <tr style="border-bottom:2px solid var(--border-color); color:var(--primary-navy);">
             <th style="padding:10px 14px;">Factor</th>
-            <th style="padding:10px 14px;">⭐ ${rec.shortName}</th>
-            ${alt ? `<th style="padding:10px 14px;">🚜 ${alt.shortName}</th>` : ''}
+            <th style="padding:10px 14px;">⭐ ${rec.shortName || 'Recommended'}</th>
+            ${alt ? `<th style="padding:10px 14px;">🚜 ${alt.shortName || 'Alternative'}</th>` : ''}
           </tr>
         </thead>
         <tbody>
           <tr style="border-bottom:1px solid var(--border-color);">
             <td style="padding:10px 14px; font-weight:600;">Destination Weather Condition</td>
-            <td style="padding:10px 14px;"><i class="fas ${rec.weatherClassification.icon}"></i> ${rec.weatherClassification.label}</td>
-            ${alt ? `<td style="padding:10px 14px;"><i class="fas ${alt.weatherClassification.icon}"></i> ${alt.weatherClassification.label}</td>` : ''}
+            <td style="padding:10px 14px;"><i class="fas ${recWeather.icon || 'fa-sun'}"></i> ${recWeather.label || 'Clear'}</td>
+            ${alt ? `<td style="padding:10px 14px;"><i class="fas ${altWeather.icon || 'fa-sun'}"></i> ${altWeather.label || 'Clear'}</td>` : ''}
           </tr>
           <tr style="border-bottom:1px solid var(--border-color);">
             <td style="padding:10px 14px; font-weight:600;">${getT('weather_arrival_window')}</td>
-            <td style="padding:10px 14px;">${rec.weatherDelay.arrivalDisplay}</td>
-            ${alt ? `<td style="padding:10px 14px;">${alt.weatherDelay.arrivalDisplay}</td>` : ''}
+            <td style="padding:10px 14px;">${recDelay.arrivalDisplay || 'N/A'}</td>
+            ${alt ? `<td style="padding:10px 14px;">${altDelay.arrivalDisplay || 'N/A'}</td>` : ''}
           </tr>
           <tr style="border-bottom:1px solid var(--border-color);">
             <td style="padding:10px 14px; font-weight:600;">${getT('gross_msp_value')}</td>
-            <td style="padding:10px 14px; font-weight:700;">${rec.formattedRevenue}</td>
-            ${alt ? `<td style="padding:10px 14px; font-weight:700;">${alt.formattedRevenue}</td>` : ''}
+            <td style="padding:10px 14px; font-weight:700;">${rec.formattedRevenue || ''}</td>
+            ${alt ? `<td style="padding:10px 14px; font-weight:700;">${alt.formattedRevenue || ''}</td>` : ''}
           </tr>
           <tr style="border-bottom:1px solid var(--border-color);">
             <td style="padding:10px 14px; font-weight:600;">${getT('transport_cost')} (−)</td>
-            <td style="padding:10px 14px; color:#EF4444;">− ${rec.formattedTransport}</td>
-            ${alt ? `<td style="padding:10px 14px; color:#EF4444;">− ${alt.formattedTransport}</td>` : ''}
+            <td style="padding:10px 14px; color:#EF4444;">− ${rec.formattedTransport || ''}</td>
+            ${alt ? `<td style="padding:10px 14px; color:#EF4444;">− ${alt.formattedTransport || ''}</td>` : ''}
           </tr>
           <tr style="border-bottom:1px solid var(--border-color);">
             <td style="padding:10px 14px; font-weight:600;">${getT('delay_cost')} (−)</td>
-            <td style="padding:10px 14px; color:#D97706;">− ${rec.formattedDelay}</td>
-            ${alt ? `<td style="padding:10px 14px; color:#D97706;">− ${alt.formattedDelay}</td>` : ''}
+            <td style="padding:10px 14px; color:#D97706;">− ${rec.formattedDelay || ''}</td>
+            ${alt ? `<td style="padding:10px 14px; color:#D97706;">− ${alt.formattedDelay || ''}</td>` : ''}
           </tr>
           <tr style="border-bottom:2px solid var(--border-color); background:rgba(16,185,129,0.06);">
             <td style="padding:12px 14px; font-weight:800; color:var(--primary-navy);">${getT('net_realized_return')}</td>
-            <td style="padding:12px 14px; font-weight:900; color:#047857; font-size:1.1rem;">${rec.formattedNev}</td>
-            ${alt ? `<td style="padding:12px 14px; font-weight:900; color:#047857; font-size:1.1rem;">${alt.formattedNev}</td>` : ''}
+            <td style="padding:12px 14px; font-weight:900; color:#047857; font-size:1.1rem;">${rec.formattedNev || ''}</td>
+            ${alt ? `<td style="padding:12px 14px; font-weight:900; color:#047857; font-size:1.1rem;">${alt.formattedNev || ''}</td>` : ''}
           </tr>
         </tbody>
       </table>
@@ -626,12 +903,17 @@ const toggleBreakdownAccordion = () => {
 };
 
 const selectAndProceedToBooking = (centreId, cropName, quantity) => {
-  showToast('Booking slot with selected centre recommendations...', 'success');
+  window.smartBookingPrefill = {
+    centerId: centreId,
+    crop: cropName,
+    quantity: quantity
+  };
+  showToast('Connecting to Smart Slot Allocation with recommended parameters...', 'success');
   routeTo('#book-slot');
   setTimeout(() => {
-    const cropSelect = document.getElementById('booking-crop');
-    const qtyInput = document.getElementById('booking-quantity');
-    const centreSelect = document.getElementById('booking-center');
+    const cropSelect = document.getElementById('booking-crop-select') || document.getElementById('booking-crop');
+    const qtyInput = document.getElementById('booking-quantity-input') || document.getElementById('booking-quantity');
+    const centreSelect = document.getElementById('booking-center-select') || document.getElementById('booking-center');
     if (cropSelect) cropSelect.value = cropName;
     if (qtyInput) qtyInput.value = quantity;
     if (centreSelect) centreSelect.value = centreId;
@@ -665,7 +947,7 @@ const openOtherCentresModal = () => {
             <div>
               <div style="font-weight:700; color:var(--primary-navy);">#${idx + 1} ${r.shortName}</div>
               <div style="font-size:0.8rem; color:var(--text-muted);">
-                ${r.distance} km away &bull; ~${r.waitingDays} day wait &bull; ${r.weatherClassification.label}
+                ${r.distance} km away &bull; ~${r.waitingDays} day wait &bull; ${(r.weatherClassification && r.weatherClassification.label) || 'Clear'}
               </div>
             </div>
             <div style="text-align:right;">
@@ -679,3 +961,10 @@ const openOtherCentresModal = () => {
   `;
   modal.classList.add('active');
 };
+
+// Re-render Smart Booking on location changes
+window.addEventListener('kpms:location-changed', () => {
+  if (window.location.hash === '#smart-booking') {
+    loadSmartBookingPage();
+  }
+});

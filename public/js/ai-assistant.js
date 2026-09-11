@@ -5,23 +5,28 @@ const loadAIInsightsDashboard = async () => {
   container.innerHTML = `<div class="skeleton" style="height:400px; border-radius:12px;"></div>`;
 
   try {
-    const res = await fetch('/api/ai/dashboard');
+    const loc = window.KPMS_USER_LOCATION || {};
+    let dashUrl = '/api/ai/dashboard';
+    if (loc.lat && (loc.lng || loc.lon)) {
+      dashUrl += `?lat=${loc.lat}&lon=${loc.lng || loc.lon}&city=${encodeURIComponent(loc.city || '')}&state=${encodeURIComponent(loc.state || '')}`;
+    }
+    const res = await fetch(dashUrl);
     const result = await res.json();
     const { centerInsights, weatherAlerts, demandForecast } = result.data;
 
     container.innerHTML = `
       <div class="app-container">
         <aside class="sidebar">
-          <div class="sidebar-heading">AI & Forecasting</div>
+          <div class="sidebar-heading">Forecasting & Analytics</div>
           <a class="nav-link" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> Main Portal</a>
-          <a class="nav-link active" onclick="loadAIInsightsDashboard()"><i class="fas fa-brain"></i> Mandi Insights</a>
+          <a class="nav-link active" onclick="loadAIInsightsDashboard()"><i class="fas fa-chart-line"></i> Mandi Insights</a>
           <a class="nav-link" onclick="openKisanFAQ()"><i class="fas fa-circle-question"></i> Kisan Sahayak FAQ</a>
         </aside>
 
         <main class="main-content">
           <div style="margin-bottom:24px;">
-            <span class="hero-pill"><i class="fas fa-wand-magic-sparkles"></i> Heuristic & Machine Learning Intelligence</span>
-            <h2 style="color:var(--primary-navy); font-weight:800;">AI Congestion & Mandi Demand Forecast</h2>
+            <span class="hero-pill"><i class="fas fa-wand-magic-sparkles"></i> Heuristic & Predictive Intelligence</span>
+            <h2 style="color:var(--primary-navy); font-weight:800;">Congestion & Mandi Demand Forecast</h2>
             <p style="color:var(--text-muted); font-size:0.9rem;">Predictive queue lengths, weather advisory alerts, and storage capacity optimization.</p>
           </div>
 
@@ -31,7 +36,7 @@ const loadAIInsightsDashboard = async () => {
               <h4 style="color:var(--primary-navy); font-weight:700; margin-bottom:4px;"><i class="fas fa-cloud-sun-rain"></i> Agro-Meteorological Weather Warnings</h4>
               <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:14px;">
                 ${weatherAlerts[0] && weatherAlerts[0].liveData
-                  ? `<span style="color:#10B981; font-weight:600;"><i class="fas fa-circle" style="font-size:0.6rem;"></i> LIVE via OpenWeatherMap API &bull; Updated just now</span>`
+                  ? `<span style="color:#10B981; font-weight:600;"><i class="fas fa-circle" style="font-size:0.6rem;"></i> LIVE via OpenWeatherMap API &bull; Prioritizing your detected location</span>`
                   : weatherAlerts[0] && weatherAlerts[0].apiStatus === 'KEY_ACTIVATING'
                     ? `<span style="color:#F59E0B; font-weight:600;"><i class="fas fa-clock"></i> API key activating (takes up to 2hrs) &bull; Showing advisory data</span>`
                     : `<span style="color:var(--text-muted);"><i class="fas fa-database"></i> Advisory data &bull; Live feed connecting...</span>`
@@ -40,10 +45,13 @@ const loadAIInsightsDashboard = async () => {
               <div style="display:flex; flex-direction:column; gap:10px;">
 
                 ${weatherAlerts.map(w => `
-                  <div style="background:var(--bg-main); padding:12px 14px; border-radius:10px; border:1px solid var(--border-color);">
+                  <div style="background:${w.isLocalUser ? 'rgba(16,185,129,0.06)' : 'var(--bg-main)'}; padding:12px 14px; border-radius:10px; border:1px solid ${w.isLocalUser ? 'var(--green-gov)' : 'var(--border-color)'};">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
                       <div>
-                        <div style="font-weight:700; font-size:0.92rem; color:var(--primary-navy);">${w.type}</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                          <div style="font-weight:700; font-size:0.92rem; color:var(--primary-navy);">${w.type}</div>
+                          ${w.isLocalUser ? `<span class="status-pill completed" style="font-size:0.7rem;"><i class="fas fa-location-dot"></i> Your Location</span>` : ''}
+                        </div>
                         <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
                           <i class="fas fa-map-marker-alt"></i> ${w.affectedDistricts.join(', ')}, ${w.state}
                         </div>
@@ -135,7 +143,7 @@ const loadAIInsightsDashboard = async () => {
       </div>
     `;
   } catch (err) {
-    showToast('Failed to load AI dashboard: ' + err.message, 'error');
+    showToast('Failed to load dashboard: ' + err.message, 'error');
   }
 };
 
@@ -342,6 +350,13 @@ const toggleFaqItem = (ci, qi) => {
 
 // Alias openKisanAIChat to openKisanFAQ so all buttons open the clean FAQ helpdesk
 const openKisanAIChat = openKisanFAQ;
+
+// Re-render market insights when location changes
+window.addEventListener('kpms:location-changed', () => {
+  if (window.location.hash === '#ai-insights') {
+    loadAIInsightsDashboard();
+  }
+});
 
 
 
