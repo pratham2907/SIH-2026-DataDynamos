@@ -216,6 +216,7 @@ module.exports = {
   AIInsights: new Collection('aiInsights'),
   Backups: new Collection('backups'),
   TemporaryRegistrations: new Collection('temporaryRegistrations'),
+  CropForecasts: new Collection('cropForecasts'),
   generateId,
   generateFarmerId: async () => {
     const list = getMemoryStore().farmers || [];

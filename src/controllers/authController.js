@@ -303,12 +303,13 @@ const login = async (req, res) => {
       const isMobile = /^[6-9]\d{9}$/.test(cleanId);
       const isFarmerId = /^(FRM\d{5,11}|FARM\d{5,11})$/i.test(cleanId);
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanId);
+      const isAadhaar = /^\d{12}$/.test(cleanId);
 
-      if (!isMobile && !isFarmerId && !isEmail) {
+      if (!isMobile && !isFarmerId && !isEmail && !isAadhaar) {
         return res.status(400).json({
           success: false,
           field: 'identifier',
-          message: 'Farmer ID must be in format FRM202600001 or a valid 10-digit mobile number.'
+          message: 'Farmer ID must be in format FRM202600001, 10-digit mobile, 12-digit Aadhaar, or registered email.'
         });
       }
     } else if (targetRole === 'officer') {
@@ -384,6 +385,13 @@ const login = async (req, res) => {
           $or: [{ mobile: cleanId }, { email: cleanIdLower }]
         });
       }
+      // 2.5 Aadhaar number lookup
+      if (!user && /^\d{12}$/.test(cleanId)) {
+        const farmerDoc = await Farmers.findOne({ aadhaarNumber: cleanId });
+        if (farmerDoc) {
+          user = await Users.findById(farmerDoc.userId || farmerDoc._id);
+        }
+      }
       // 3. Demo shortcut
       if (!user && (cleanIdLower === 'farmer' || cleanIdLower === 'kisan')) {
         user = await Users.findOne({ role: 'farmer' });
@@ -431,6 +439,30 @@ const login = async (req, res) => {
         if (farmerDoc) {
           user = await Users.findById(farmerDoc.userId || farmerDoc._id);
         }
+      }
+      if (!user && /^\d{12}$/.test(cleanId)) {
+        const farmerDoc = await Farmers.findOne({ aadhaarNumber: cleanId });
+        if (farmerDoc) {
+          user = await Users.findById(farmerDoc.userId || farmerDoc._id);
+        }
+      }
+    }
+
+    // If not found in targetRole, check if identifier exists in another role to guide the user
+    if (!user && (targetRole === 'admin' || targetRole === 'superadmin' || targetRole === 'officer' || targetRole === 'farmer')) {
+      const otherRoleUser = await Users.findOne({
+        $or: [
+          { email: cleanIdLower },
+          { mobile: cleanId }
+        ]
+      });
+      if (otherRoleUser && otherRoleUser.role && otherRoleUser.role !== targetRole) {
+        const correctRoleName = otherRoleUser.role === 'admin' ? 'Super Admin' : (otherRoleUser.role === 'officer' ? 'Officer' : 'Farmer');
+        return res.status(400).json({
+          success: false,
+          correctRole: otherRoleUser.role,
+          message: `This account is registered as a ${correctRoleName}. Please switch to the ${correctRoleName} portal to sign in.`
+        });
       }
     }
 
@@ -662,6 +694,7 @@ const login = async (req, res) => {
       tempSessionId,
       maskedTarget,
       role: user.role,
+      mobile: user.mobile,
       expiresInSeconds: 300,
       resendCooldownSeconds: 60,
       message: `A secure 6-digit verification code has been dispatched to ${maskedTarget}. Please verify to complete sign-in.`

@@ -505,6 +505,51 @@ const sendSecurityAlertEmail = async ({ to, fullName, eventType, details, ip, us
   });
 };
 
+/**
+ * Send Near-Harvest Advisory Email (Demo & Planning)
+ * Explains crop may be near expected harvest period without declaring it definitely ready
+ */
+const sendNearHarvestEmail = async ({ to, fullName, crop, harvestPeriod }) => {
+  const htmlContent = `
+    <div style="max-width:600px; margin:0 auto; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#FFFFFF; border-radius:12px; overflow:hidden; border:1px solid #CBD5E1; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+      <div style="background:linear-gradient(135deg, #0F172A 0%, #166534 100%); padding:26px; text-align:center; color:#FFFFFF; border-bottom:4px solid #E06D14;">
+        <h2 style="margin:0; font-size:22px; font-weight:800;">🌾 KPMS Crop Advisory & Harvest Alert</h2>
+        <p style="margin:4px 0 0 0; font-size:13px; color:#BBF7D0; font-weight:600;">Government of India • Ministry of Agriculture & Farmers Welfare</p>
+      </div>
+      <div style="padding:28px 24px;">
+        <p style="font-size:15px; color:#1E293B; margin-top:0;">Namaste <strong>${fullName || 'Farmer'}</strong>,</p>
+        <p style="font-size:14px; color:#334155; line-height:1.6;">
+          Based on your seasonal crop planning record for <strong>${crop || 'your crop'}</strong>, the estimated harvest window (<strong>${harvestPeriod || 'Current Period'}</strong>) is approaching.
+        </p>
+        <div style="background:#F0FDF4; border:1px solid #86EFAC; border-radius:10px; padding:18px; margin:20px 0;">
+          <div style="font-size:12px; color:#166534; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Harvest Timeline Status</div>
+          <div style="font-size:18px; font-weight:800; color:#14532D; margin-top:4px;">
+            🌾 Expected Harvest Window Reached
+          </div>
+          <p style="font-size:13px; color:#166534; margin:8px 0 0; line-height:1.5;">
+            Please note: This notification is an advisory based on average growth duration. Actual crop maturity depends on field conditions, weather, and variety. <strong>Your crop may or may not be completely ready for harvest.</strong>
+          </p>
+        </div>
+        <p style="font-size:14px; color:#334155; line-height:1.6;">
+          When your produce is harvested, cleaned, and ready for procurement, please open the <strong>Smart Mandi Finder</strong> on your KPMS dashboard to evaluate live mandi conditions and book your delivery token.
+        </p>
+      </div>
+      <div style="background:#F8FAFC; padding:14px 24px; text-align:center; font-size:12px; color:#64748B; border-top:1px solid #E2E8F0;">
+        National Agri-Procurement Demand Intelligence • SIH 2026
+      </div>
+    </div>
+  `;
+
+  return sendTransactionalEmail({
+    recipientEmail: to,
+    recipientName: fullName,
+    subject: `🌾 KPMS Harvest Window Advisory: ${crop || 'Crop'} (${harvestPeriod || 'Upcoming'})`,
+    htmlBody: htmlContent,
+    textBody: `Namaste ${fullName || 'Farmer'},\nYour crop ${crop || ''} has entered its expected harvest window (${harvestPeriod || ''}). This is an advisory. When your crop is ready, visit your KPMS portal to book a mandi slot.`,
+    tags: ['harvest-advisory', 'crop-planning']
+  });
+};
+
 module.exports = {
   sendTransactionalEmail,
   sendOtpEmail,
@@ -513,6 +558,7 @@ module.exports = {
   sendSecurityAlertEmail,
   sendCustomEmail,
   sendSlotBookingEmail,
+  sendNearHarvestEmail,
   createTransporter,
   getBrevoConfig
 };

@@ -1,5 +1,5 @@
 const {
-  Farmers, Farms, Crops, Bookings, Queues, Payments, Notifications, generateId
+  Farmers, Farms, Crops, Bookings, Queues, Payments, Notifications, CropForecasts, generateId
 } = require('../models/dbStore');
 
 const getFarmerRecord = async (user) => {
@@ -56,6 +56,15 @@ const getDashboardSummary = async (req, res) => {
     const farmsCount = await Farms.countDocuments({ farmerId });
     const cropsList = await Crops.find({ farmerId });
 
+    // Active Future Crop Plan (for Readiness Verification)
+    const activeForecasts = await CropForecasts.find({
+      farmerId,
+      status: { $in: ['Planned', 'Near Harvest', 'Ready'] }
+    });
+    activeForecasts.sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+    const futureCropPlan = activeForecasts[0] || null;
+    const hasFutureCropPlan = !!(futureCropPlan && farmer.futureCropState === 'ACTUAL_CROP');
+
     // Unread notifications count
     const unreadNotifs = await Notifications.countDocuments({ userId, isRead: false });
 
@@ -65,6 +74,8 @@ const getDashboardSummary = async (req, res) => {
         farmer,
         activeBooking,
         queueEntry,
+        futureCropPlan: hasFutureCropPlan ? futureCropPlan : null,
+        hasFutureCropPlan,
         stats: {
           totalBookings: bookings.length,
           totalEarnings,

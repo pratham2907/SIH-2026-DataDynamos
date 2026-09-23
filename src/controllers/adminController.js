@@ -21,6 +21,8 @@ const getGovernmentDashboard = async (req, res) => {
     const pendingDisbursements = payments.filter(p => p.status !== 'Completed').reduce((sum, p) => sum + (p.amount || 0), 0);
 
     const activeQueues = await Queues.find({ status: { $in: ['waiting', 'called', 'processing'] } });
+    const assistedBookings = bookings.filter(b => b.bookingSource === 'OFFICER_ASSISTED' || b.assistedByOfficerId);
+    const selfBookings = bookings.filter(b => b.bookingSource !== 'OFFICER_ASSISTED' && !b.assistedByOfficerId);
 
     return res.json({
       success: true,
@@ -31,6 +33,8 @@ const getGovernmentDashboard = async (req, res) => {
         totalCenters: centers.length,
         activeCenters: centers.filter(c => c.isActive).length,
         todayBookings: bookings.length,
+        totalAssistedBookings: assistedBookings.length,
+        totalSelfBookings: selfBookings.length,
         liveQueueWaiting: activeQueues.length,
         totalProcuredQuintals,
         totalExpenditure,
@@ -277,11 +281,15 @@ const getSystemAnalytics = async (req, res) => {
     const procurements = await Procurements.find({});
     const payments = await Payments.find({});
     const centers = await Centers.find({});
+    const bookings = await Bookings.find({});
 
     const cropBreakdown = {};
     procurements.forEach(p => {
       cropBreakdown[p.cropName] = (cropBreakdown[p.cropName] || 0) + (p.acceptedQuantity || 0);
     });
+
+    const assistedCount = bookings.filter(b => b.bookingSource === 'OFFICER_ASSISTED' || b.assistedByOfficerId).length;
+    const selfCount = bookings.length - assistedCount;
 
     const monthlyTrends = {
       labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
@@ -294,7 +302,12 @@ const getSystemAnalytics = async (req, res) => {
       data: {
         cropBreakdown,
         monthlyTrends,
-        centerCounts: centers.length
+        centerCounts: centers.length,
+        bookingSources: {
+          farmerSelf: selfCount,
+          officerAssisted: assistedCount,
+          total: bookings.length
+        }
       }
     });
   } catch (err) {

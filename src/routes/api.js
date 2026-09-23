@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { verifyToken, requireRole } = require('../middleware/auth');
+const { verifyToken, optionalAuth, requireRole } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 // Controllers
@@ -19,6 +19,7 @@ const mandiPriceCtrl = require('../controllers/mandiPriceController');
 const emailCtrl = require('../controllers/emailController');
 const regCtrl = require('../controllers/registrationController');
 const msg91Ctrl = require('../controllers/msg91Controller');
+const smartMandiCtrl = require('../controllers/smartMandiController');
 
 // ----------------------------------------------------
 // PRODUCTION-READY REGISTRATION & VERIFICATION ROUTES
@@ -114,6 +115,23 @@ router.delete('/bookings/:id/cancel', verifyToken, bookingCtrl.cancelBooking);
 router.get('/bookings/:id/pdf', bookingCtrl.downloadBookingPDF);
 
 // ----------------------------------------------------
+// 3B. SMART MANDI FINDER & SEASONAL FORECASTING ROUTES
+// ----------------------------------------------------
+router.get('/smart-mandi/validate-quantity', optionalAuth, smartMandiCtrl.validateQuantity);
+router.post('/smart-mandi/validate-quantity', optionalAuth, smartMandiCtrl.validateQuantity);
+router.get('/smart-mandi/recommended-slot', optionalAuth, smartMandiCtrl.getRecommendedSlot);
+router.get('/smart-mandi/available-dates', optionalAuth, smartMandiCtrl.getAvailableDates);
+router.post('/smart-mandi/book', verifyToken, smartMandiCtrl.bookSmartSlot);
+router.post('/smart-mandi/book-slot', verifyToken, smartMandiCtrl.bookSmartSlot);
+router.post('/smart-mandi/next-crop-plan', verifyToken, smartMandiCtrl.saveNextCropPlan);
+router.get('/smart-mandi/forecasts', verifyToken, smartMandiCtrl.getDemandForecasts);
+router.post('/smart-mandi/travel-to-future', verifyToken, smartMandiCtrl.travelToFutureDemo);
+router.post('/smart-mandi/crop-readiness', verifyToken, smartMandiCtrl.submitCropReadiness);
+router.get('/smart-mandi/active-forecast', verifyToken, smartMandiCtrl.getFarmerActiveForecast);
+router.get('/smart-mandi/farmer-active-forecast', verifyToken, smartMandiCtrl.getFarmerActiveForecast);
+router.get('/smart-mandi/future-crop-state', verifyToken, smartMandiCtrl.getFutureCropState);
+
+// ----------------------------------------------------
 // 4. REAL-TIME QUEUE & QR CHECK-IN ROUTES
 // ----------------------------------------------------
 router.post('/queue/check-in', verifyToken, queueCtrl.checkIn);
@@ -155,6 +173,10 @@ router.post('/payments/razorpay/verify-payment', paymentCtrl.verifyRazorpayPayme
 router.get('/officer/dashboard', verifyToken, requireRole('officer', 'admin'), officerCtrl.getOfficerDashboard);
 router.get('/officer/bookings/pending', verifyToken, requireRole('officer', 'admin'), officerCtrl.getPendingBookings);
 router.get('/officer/farmers/search', verifyToken, requireRole('officer', 'admin'), officerCtrl.searchFarmers);
+router.post('/officer/farmers/register-assisted', verifyToken, requireRole('officer', 'admin'), officerCtrl.createAssistedFarmerRegistration);
+router.post('/officer/bookings/assisted', verifyToken, requireRole('officer', 'admin'), officerCtrl.createAssistedBooking);
+router.get('/officer/assisted-bookings', verifyToken, requireRole('officer', 'admin'), officerCtrl.getAssistedBookings);
+router.post('/officer/assisted-bookings/:id/cancel', verifyToken, requireRole('officer', 'admin'), officerCtrl.cancelAssistedBooking);
 router.post('/officer/announcements', verifyToken, requireRole('officer', 'admin'), officerCtrl.postAnnouncement);
 router.get('/officer/inventory', verifyToken, requireRole('officer', 'admin'), officerCtrl.getInventory);
 

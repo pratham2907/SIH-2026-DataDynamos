@@ -515,7 +515,17 @@ const getAvailableSlots = async (req, res) => {
       return res.status(400).json({ success: false, message: 'centerId and date are required' });
     }
 
-    const center = await Centers.findOne({ centerId });
+    let center = null;
+    if (centerId) {
+      center = await Centers.findOne({ centerId }) 
+        || await Centers.findOne({ code: centerId }) 
+        || await Centers.findOne({ _id: centerId }) 
+        || await Centers.findOne({ name: centerId })
+        || await Centers.findOne({ name: new RegExp(centerId, 'i') });
+    }
+    if (!center) {
+      center = await Centers.findOne({});
+    }
     if (!center) {
       return res.status(404).json({ success: false, message: 'Procurement Center not found' });
     }

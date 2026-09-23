@@ -31,7 +31,8 @@ const memoryStore = {
   systemSettings: [],
   aiInsights: [],
   backups: [],
-  temporaryRegistrations: []
+  temporaryRegistrations: [],
+  cropForecasts: []
 };
 
 // Persistence file for fallback mode

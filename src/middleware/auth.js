@@ -89,8 +89,45 @@ const requireRole = (...allowedRoles) => {
   };
 };
 
+const optionalAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization || req.headers['x-access-token'];
+    let token = null;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    } else if (req.query && req.query.token) {
+      token = req.query.token;
+    }
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await Users.findById(decoded.id);
+        if (user && !user.isBlocked && user.status !== 'Suspended' && user.status !== 'Blocked') {
+          req.user = {
+            id: user._id,
+            userId: user._id,
+            name: user.name,
+            email: user.email,
+            mobile: user.mobile,
+            role: user.role,
+            officerId: user.officerId,
+            assignedCenterId: user.assignedCenterId,
+            assignedCounter: user.assignedCounter
+          };
+        }
+      } catch (e) {}
+    }
+    next();
+  } catch (err) {
+    next();
+  }
+};
+
 module.exports = {
   verifyToken,
+  optionalAuth,
   requireRole,
   JWT_SECRET
 };
