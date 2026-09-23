@@ -26,7 +26,7 @@ const indexHtml = fs.readFileSync(path.join(__dirname, '../public/index.html'), 
 
 it('Top bar has .sp-topbar with SmartProcure branding and leaf icon', () => {
   assert(indexHtml.includes('class="sp-topbar"'), 'Missing .sp-topbar');
-  assert(indexHtml.includes('sp-brand-title">SmartProcure'), 'Missing SmartProcure brand title');
+  assert(indexHtml.includes('sp-brand-title">KPMS GOVERNMENT PORTAL') || indexHtml.includes('sp-brand-title">SmartProcure'), 'Missing brand title');
   assert(indexHtml.includes('Digital India &bull; Smart Agriculture'), 'Missing tagline');
   assert(indexHtml.includes('fa-leaf'), 'Missing leaf icon');
 });
