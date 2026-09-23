@@ -11,6 +11,23 @@ let otpSecondsRemaining = 60;
 let inactivityTimer = null;
 let currentInactivityLimitMinutes = 30;
 
+// Restore active 2FA login session from sessionStorage if present
+try {
+  const cachedSess = sessionStorage.getItem('kpms_login_session');
+  if (cachedSess) {
+    currentLoginSession = JSON.parse(cachedSess);
+    window.currentLoginSession = currentLoginSession;
+  }
+} catch (e) {}
+
+window.setLoginSession = function(sess) {
+  currentLoginSession = sess;
+  window.currentLoginSession = sess;
+  try {
+    sessionStorage.setItem('kpms_login_session', JSON.stringify(sess));
+  } catch (e) {}
+};
+
 // ------------------------------------------------------------------------------
 // 1. INACTIVITY AUTO-LOGOUT SESSION MANAGER
 // Farmer: 30 mins, Officer: 20 mins, Super Admin: 15 mins
@@ -340,21 +357,33 @@ const renderRoleLoginForm = (body, modalTitle, role) => {
 // ------------------------------------------------------------------------------
 const fetchCaptcha = async () => {
   const slot = document.getElementById('captcha-question-slot');
+  const heroSlot = document.getElementById('hero-captcha-question-slot');
   if (slot) slot.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  if (heroSlot) heroSlot.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
   try {
     const res = await fetch('/api/auth/captcha');
     const data = await res.json();
     if (data.success) {
       currentCaptchaToken = data.captchaToken;
+      window.currentCaptchaToken = data.captchaToken;
       if (slot) slot.textContent = data.question;
+      if (heroSlot) heroSlot.textContent = data.question;
       const input = document.getElementById('auth-captcha');
       if (input) input.value = '';
+      const heroInput = document.getElementById('hero-auth-captcha');
+      if (heroInput) heroInput.value = '';
     }
   } catch (err) {
     if (slot) slot.textContent = '8 + 4 = ?';
+    if (heroSlot) heroSlot.textContent = '8 + 4 = ?';
   }
 };
+
+window.fetchCaptcha = fetchCaptcha;
+window.fetchHeroCaptcha = fetchCaptcha;
+window.getCurrentCaptchaToken = () => currentCaptchaToken || window.currentCaptchaToken || '';
+window.setCurrentCaptchaToken = (t) => { currentCaptchaToken = t; window.currentCaptchaToken = t; };
 
 // ------------------------------------------------------------------------------
 // 4. REAL-TIME CLIENT-SIDE VALIDATION
@@ -500,8 +529,23 @@ const handleRoleLoginSubmit = async (e, role) => {
     }
 
     if (!data.success) {
-      showToast(data.message || 'Invalid credentials or account unavailable.', 'error');
       if (role === 'admin') fetchCaptcha();
+
+      if (data.correctRole) {
+        showToast(data.message, 'warning');
+        const modalTitle = document.getElementById('modal-title');
+        const body = document.getElementById('modal-content-slot');
+        if (typeof renderRoleLoginForm === 'function' && body) {
+          renderRoleLoginForm(body, modalTitle, data.correctRole);
+          const idInput = document.getElementById('auth-identifier');
+          if (idInput) idInput.value = identifier;
+          const passInput = document.getElementById('auth-password');
+          if (passInput) passInput.value = password;
+        }
+        return;
+      }
+
+      showToast(data.message || 'Invalid credentials or account unavailable.', 'error');
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Proceed to 2FA Verification';
@@ -598,6 +642,30 @@ const renderLockoutNotice = (data) => {
 // Auto-focus, Backspace navigation, and Clipboard Paste Support
 // ------------------------------------------------------------------------------
 const openLoginOtpScreen = (session) => {
+  if (session) {
+    currentLoginSession = session;
+    window.currentLoginSession = session;
+    try {
+      sessionStorage.setItem('kpms_login_session', JSON.stringify(session));
+    } catch (e) {}
+  } else if (!currentLoginSession) {
+    if (window.currentLoginSession) {
+      currentLoginSession = window.currentLoginSession;
+    } else {
+      try {
+        const saved = sessionStorage.getItem('kpms_login_session');
+        if (saved) {
+          currentLoginSession = JSON.parse(saved);
+          window.currentLoginSession = currentLoginSession;
+        }
+      } catch (e) {}
+    }
+  }
+
+  const activeSess = session || currentLoginSession || {};
+  const maskedTarget = activeSess.maskedTarget || 'registered mobile/email';
+  const tempSessionId = activeSess.tempSessionId || '';
+
   const modal = document.getElementById('auth-modal');
   const title = document.getElementById('modal-title');
   const body = document.getElementById('modal-content-slot');
@@ -613,11 +681,12 @@ const openLoginOtpScreen = (session) => {
         Enter 6-Digit Security Code
       </h3>
       <p style="font-size:0.88rem; color:var(--text-muted); max-width:420px; margin:0 auto 20px; line-height:1.5;">
-        A high-security verification code has been dispatched to <strong>${session.maskedTarget}</strong> via Brevo Gateway.
+        A high-security verification code has been dispatched to <strong>${maskedTarget}</strong> via Brevo Gateway.
       </p>
 
       <!-- 6 Separate OTP Boxes -->
       <form id="otp-form" onsubmit="handleOtpSubmit(event)">
+        <input type="hidden" id="otp-temp-session-id" value="${tempSessionId}" />
         <div style="display:flex; justify-content:center; gap:8px; margin-bottom:18px;" onpaste="handleOtpPaste(event)">
           <input type="text" class="otp-box" id="otp-1" maxlength="1" pattern="[0-9]" inputmode="numeric" autofocus oninput="onOtpBoxInput(1)" onkeydown="onOtpBoxKeydown(1, event)" autocomplete="off" />
           <input type="text" class="otp-box" id="otp-2" maxlength="1" pattern="[0-9]" inputmode="numeric" oninput="onOtpBoxInput(2)" onkeydown="onOtpBoxKeydown(2, event)" autocomplete="off" />
@@ -712,6 +781,9 @@ const onOtpBoxKeydown = (index, event) => {
         prev.value = '';
       }
     }
+  } else if (event.key === 'Enter') {
+    event.preventDefault();
+    handleOtpSubmit(event);
   }
 };
 
@@ -757,6 +829,7 @@ const startOtpCountdown = (seconds = 60) => {
   const btn = document.getElementById('resend-otp-btn');
   const span = document.getElementById('resend-timer-sec');
 
+  if (span) span.textContent = otpSecondsRemaining;
   if (btn) btn.disabled = true;
 
   otpCountdownTimer = setInterval(() => {
@@ -773,8 +846,38 @@ const startOtpCountdown = (seconds = 60) => {
   }, 1000);
 };
 
+const getActiveLoginSessionId = () => {
+  if (currentLoginSession && currentLoginSession.tempSessionId) {
+    return currentLoginSession.tempSessionId;
+  }
+  if (window.currentLoginSession && window.currentLoginSession.tempSessionId) {
+    currentLoginSession = window.currentLoginSession;
+    return currentLoginSession.tempSessionId;
+  }
+  try {
+    const saved = sessionStorage.getItem('kpms_login_session');
+    if (saved) {
+      currentLoginSession = JSON.parse(saved);
+      window.currentLoginSession = currentLoginSession;
+      if (currentLoginSession && currentLoginSession.tempSessionId) {
+        return currentLoginSession.tempSessionId;
+      }
+    }
+  } catch (e) {}
+
+  const hidden = document.getElementById('otp-temp-session-id');
+  if (hidden && hidden.value) {
+    return hidden.value;
+  }
+  return null;
+};
+
 const resendLoginCode = async () => {
-  if (!currentLoginSession || !currentLoginSession.tempSessionId) return;
+  const tempSessionId = getActiveLoginSessionId();
+  if (!tempSessionId) {
+    showToast('Cannot resend: Verification session expired. Please sign in again.', 'warning');
+    return;
+  }
 
   const btn = document.getElementById('resend-otp-btn');
   if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dispatching...';
@@ -783,7 +886,7 @@ const resendLoginCode = async () => {
     const res = await fetch('/api/auth/resend-login-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tempSessionId: currentLoginSession.tempSessionId })
+      body: JSON.stringify({ tempSessionId })
     });
 
     const data = await res.json();
@@ -802,15 +905,22 @@ const resendLoginCode = async () => {
     }
   } catch (err) {
     showToast('Failed to resend code: ' + err.message, 'error');
+    if (btn) btn.disabled = false;
   }
 };
 
 const handleOtpSubmit = async (e) => {
-  e.preventDefault();
+  if (e && typeof e.preventDefault === 'function') e.preventDefault();
   const otp = getEnteredOtp();
 
   if (otp.length !== 6) {
     showToast('Please enter all 6 digits of the verification code.', 'error');
+    return;
+  }
+
+  const tempSessionId = getActiveLoginSessionId();
+  if (!tempSessionId) {
+    showToast('Verification session expired or unavailable. Please initiate sign-in again.', 'error');
     return;
   }
 
@@ -827,7 +937,7 @@ const handleOtpSubmit = async (e) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        tempSessionId: currentLoginSession.tempSessionId,
+        tempSessionId,
         otp
       })
     });
@@ -847,6 +957,11 @@ const handleOtpSubmit = async (e) => {
       return;
     }
 
+    // Success! Clear temporary login session cache
+    try { sessionStorage.removeItem('kpms_login_session'); } catch (e) {}
+    currentLoginSession = null;
+    window.currentLoginSession = null;
+
     // Success! Complete sign-in
     showToast(data.message, 'success');
     completeSessionLogin(data);
@@ -863,16 +978,18 @@ const handleOtpSubmit = async (e) => {
  * Trigger MSG91 Real OTP for 2FA Login
  */
 window.triggerLoginMsg91Otp = function() {
-  if (!currentLoginSession) {
+  const tempSessionId = getActiveLoginSessionId();
+  if (!tempSessionId) {
     showToast('No active login session found. Please sign in again.', 'warning');
     return;
   }
-  const target = currentLoginSession.mobile || currentLoginSession.maskedTarget || '';
+
+  const target = (currentLoginSession && (currentLoginSession.mobile || currentLoginSession.maskedTarget)) || '';
   if (typeof window.triggerMsg91OTP === 'function') {
     window.triggerMsg91OTP({
       identifier: target,
       context: 'login_2fa',
-      tempSessionId: currentLoginSession.tempSessionId,
+      tempSessionId,
       onSuccess: (res) => {
         if (res && res.isLoginComplete) {
           showToast(res.message || 'Login verified via MSG91 Real OTP!', 'success');
@@ -909,6 +1026,12 @@ const completeSessionLogin = (data) => {
   const targetHash = data.redirectUrl || (data.user.role === 'farmer' ? '#farmer-dashboard' : (data.user.role === 'officer' ? '#officer-dashboard' : '#admin-dashboard'));
   routeTo(targetHash);
 };
+
+// Expose core auth methods to window for landing page & modal bridges
+window.openLoginOtpScreen = openLoginOtpScreen;
+window.handleOtpSubmit = handleOtpSubmit;
+window.resendLoginCode = resendLoginCode;
+window.completeSessionLogin = completeSessionLogin;
 
 // ------------------------------------------------------------------------------
 // 7. FORGOT PASSWORD WORKFLOW (ALL ROLES)

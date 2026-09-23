@@ -33,14 +33,13 @@ const loadFarmerPaymentsPage = async () => {
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
             <div>
               <div style="display:flex; align-items:center; gap:8px;">
-                <h2 style="color:var(--primary-navy); font-weight:800; margin:0;">Direct Benefit Transfer (DBT) Payouts</h2>
+                <h2 style="color:var(--primary-navy); font-weight:800; margin:0;">${getT('dbt_payouts_title', 'Direct Benefit Transfer (DBT) Payouts')}</h2>
                 <span class="status-pill completed" style="font-size:0.75rem;"><i class="fas fa-shield-halved"></i> Razorpay Test Gateway</span>
               </div>
-              <p style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">Track real-time treasury disbursements, test gateway settlements, and download digital tax-exempt vouchers.</p>
+              <p style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">${getT('dbt_payouts_sub', 'Track real-time treasury disbursements, test gateway settlements, and download digital tax-exempt vouchers.')}</p>
             </div>
-            <div style="display:flex; gap:10px;">
-              <button class="btn btn-primary" onclick="initiateRazorpayPayment(null, 500, 'TEST_SETTLEMENT', 'Demo Farmer')"><i class="fas fa-credit-card"></i> ⚡ Test Razorpay Checkout</button>
-              <button class="btn btn-outline" onclick="openGrievanceModal()"><i class="fas fa-circle-exclamation"></i> Raise Payment Grievance</button>
+            <div>
+              <button class="btn btn-outline" onclick="openGrievanceModal()"><i class="fas fa-circle-exclamation"></i> ${getT('btn_raise_grievance', 'Raise Payment Grievance')}</button>
             </div>
           </div>
 
@@ -49,21 +48,21 @@ const loadFarmerPaymentsPage = async () => {
             <div class="glass-card metric-card">
               <div>
                 <div class="metric-val" style="color:var(--green-gov);">₹${stats.totalEarned.toLocaleString('en-IN')}</div>
-                <div class="metric-title">Total Disbursed (Completed)</div>
+                <div class="metric-title">${getT('total_disbursed_completed', 'Total Disbursed (Completed)')}</div>
               </div>
               <div class="metric-icon-box" style="background:#ECFDF5; color:#059669;"><i class="fas fa-vault"></i></div>
             </div>
             <div class="glass-card metric-card">
               <div>
                 <div class="metric-val" style="color:var(--gold);">₹${stats.pendingAmount.toLocaleString('en-IN')}</div>
-                <div class="metric-title">In-Treasury Processing</div>
+                <div class="metric-title">${getT('in_treasury_processing', 'In-Treasury Processing')}</div>
               </div>
               <div class="metric-icon-box" style="background:#FFFBEB; color:#D97706;"><i class="fas fa-hourglass-start"></i></div>
             </div>
             <div class="glass-card metric-card">
               <div>
                 <div class="metric-val">${stats.completedCount}</div>
-                <div class="metric-title">Completed Vouchers</div>
+                <div class="metric-title">${getT('completed_vouchers', 'Completed Vouchers')}</div>
               </div>
               <div class="metric-icon-box" style="background:#EFF6FF; color:#2563EB;"><i class="fas fa-file-circle-check"></i></div>
             </div>
@@ -71,18 +70,18 @@ const loadFarmerPaymentsPage = async () => {
 
           <!-- Transaction List -->
           <div class="glass-card" style="padding:24px;">
-            <h3 style="color:var(--primary-navy); font-weight:700; margin-bottom:16px;"><i class="fas fa-receipt"></i> Official Payment Transactions</h3>
+            <h3 style="color:var(--primary-navy); font-weight:700; margin-bottom:16px;"><i class="fas fa-receipt"></i> ${getT('official_payment_transactions', 'Official Payment Transactions')}</h3>
 
             <div style="overflow-x:auto;">
               <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
                 <thead>
                   <tr style="background:var(--bg-main); border-bottom:2px solid var(--border-color); color:var(--text-muted);">
-                    <th style="padding:12px 14px;">Voucher No</th>
-                    <th style="padding:12px 14px;">Bank & A/C</th>
-                    <th style="padding:12px 14px;">UTR Number</th>
-                    <th style="padding:12px 14px;">Amount (₹)</th>
-                    <th style="padding:12px 14px;">Status</th>
-                    <th style="padding:12px 14px; text-align:right;">Receipt PDF</th>
+                    <th style="padding:12px 14px;">${getT('col_voucher_no', 'Voucher No')}</th>
+                    <th style="padding:12px 14px;">${getT('col_bank_ac', 'Bank & A/C')}</th>
+                    <th style="padding:12px 14px;">${getT('col_utr_no', 'UTR Number')}</th>
+                    <th style="padding:12px 14px;">${getT('col_amount_inr', 'Amount (₹)')}</th>
+                    <th style="padding:12px 14px;">${getT('col_status', 'Status')}</th>
+                    <th style="padding:12px 14px; text-align:right;">${getT('col_receipt_pdf', 'Receipt PDF')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -181,7 +180,7 @@ const handleGrievanceSubmit = async (e) => {
  */
 const initiateRazorpayPayment = async (paymentId = null, amount = 500, receiptNumber = 'TEST_VOUCHER', farmerName = 'Demo Farmer') => {
   try {
-    showToast('Connecting to Razorpay Test Gateway...', 'info');
+    showToast('Connecting to Razorpay Gateway...', 'info');
 
     // 1. Fetch Razorpay Key ID
     const configRes = await fetch('/api/payments/razorpay/config');
@@ -258,11 +257,11 @@ const initiateRazorpayPayment = async (paymentId = null, amount = 500, receiptNu
       prefill: {
         name: farmerName || (user ? user.name : 'Indian Farmer'),
         email: (user && user.email) || 'farmer@kpms.gov.in',
-        contact: (user && user.mobile) || '9876543210'
+        contact: (user && (user.mobile || user.phone)) || '9876543210'
       },
       notes: {
         receiptNumber: receiptNumber || 'KPMS_SETTLEMENT',
-        mode: 'Razorpay Test Gateway'
+        mode: 'Razorpay Gateway'
       },
       theme: {
         color: '#E06D14'

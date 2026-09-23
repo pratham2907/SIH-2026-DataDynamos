@@ -77,7 +77,7 @@ const loadMandiPricesPage = async () => {
       <main class="main-content" style="max-width:1250px; margin:0 auto; padding-bottom:60px;">
         
         <!-- Header Banner -->
-        <div class="glass-panel" style="padding:24px 28px; margin-bottom:24px; background:linear-gradient(135deg, rgba(26,122,68,0.06), rgba(224,109,20,0.08)); border-left:6px solid var(--green-gov);">
+        <div class="glass-panel" style="padding:24px 28px; margin-bottom:24px; background:#FFFFFF; border:1px solid var(--border-color); border-left:6px solid var(--green-gov); box-shadow:0 6px 24px rgba(0,0,0,0.07);">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
             <div>
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
@@ -152,7 +152,7 @@ const loadMandiPricesPage = async () => {
                   id="commodity-search-input" 
                   class="form-control" 
                   style="padding-left:34px; font-size:0.85rem; height:36px;" 
-                  placeholder="Search item (e.g. Tomato, Onion)..." 
+                  placeholder="${getT('search_commodity', 'Search item (e.g. Tomato, Onion)...')}" 
                   oninput="onCommoditySearch(this.value)" 
                 />
               </div>
@@ -184,7 +184,7 @@ const loadMandiPricesPage = async () => {
               <div style="display:flex; align-items:center; gap:8px;">
                 <div style="width:10px; height:10px; border-radius:50%; background:#10B981; box-shadow:0 0 8px #10B981;"></div>
                 <h3 style="font-size:1.15rem; font-weight:800; color:var(--primary-navy); margin:0;">
-                  Interactive Mandi Geospatial Map
+                  ${getT('interactive_map_title', 'Interactive Mandi Geospatial Map')}
                 </h3>
               </div>
               <span id="map-mandis-count-badge" class="status-pill completed" style="font-size:0.75rem;">
@@ -202,9 +202,9 @@ const loadMandiPricesPage = async () => {
             <!-- Map Legend -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:0.78rem; color:var(--text-muted); flex-wrap:wrap; gap:8px;">
               <div style="display:flex; gap:14px;">
-                <span><i class="fas fa-location-dot" style="color:#2563EB;"></i> Your Location</span>
-                <span><i class="fas fa-store" style="color:#10B981;"></i> High Price Mandi</span>
-                <span><i class="fas fa-store" style="color:#E06D14;"></i> Standard APMC Mandi</span>
+                <span><i class="fas fa-location-dot" style="color:#2563EB;"></i> ${getT('your_location', 'Your Location')}</span>
+                <span><i class="fas fa-store" style="color:#10B981;"></i> ${getT('high_price_mandi', 'High Price Mandi')}</span>
+                <span><i class="fas fa-store" style="color:#E06D14;"></i> ${getT('standard_mandi', 'Standard APMC Mandi')}</span>
               </div>
               <span>Dataset: <code>9ef84268-d588...</code> (data.gov.in)</span>
             </div>
@@ -223,7 +223,7 @@ const loadMandiPricesPage = async () => {
                 Nearby Mandi Comparison (<span id="mandi-list-count">0</span> Mandis)
               </h3>
               <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">
-                <i class="fas fa-arrow-down-short-wide"></i> Sorted by distance
+                <i class="fas fa-arrow-down-short-wide"></i> ${getT('sorted_by_distance', 'Sorted by distance')}
               </span>
             </div>
 

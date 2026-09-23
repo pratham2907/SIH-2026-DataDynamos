@@ -58,15 +58,19 @@ if (typeof window.openLoginModal === 'undefined') {
 }
 
 const openRegisterModal = () => {
-  if (typeof openRegistrationChooser === 'function') {
+  if (typeof window.openRegistrationChooser === 'function') {
+    window.openRegistrationChooser();
+  } else if (typeof openRegistrationChooser === 'function') {
     openRegistrationChooser();
   }
 };
+window.openRegisterModal = openRegisterModal;
 
 const closeModal = () => {
   const modal = document.getElementById('auth-modal');
   if (modal) modal.classList.remove('active');
 };
+window.closeModal = closeModal;
 
 const updateNavAuth = () => {
   const user = getCurrentUser();
@@ -140,7 +144,14 @@ const handleBrandClick = () => {
 window.handleBrandClick = handleBrandClick;
 
 const handleHomeNavClick = () => {
-  routeTo('#landing');
+  const token = localStorage.getItem('kpms_token');
+  const user = getCurrentUser();
+  if (token && user) {
+    const target = user.role === 'admin' ? '#admin-dashboard' : (user.role === 'officer' ? '#officer-dashboard' : '#farmer-dashboard');
+    routeTo(target);
+  } else {
+    routeTo('#landing');
+  }
 };
 window.handleHomeNavClick = handleHomeNavClick;
 
@@ -170,6 +181,10 @@ const renderRoute = (hash = window.location.hash || '#landing') => {
 
   // Update navbar state on route change
   updateNavAuth();
+
+  // Set current page attribute on body for page-specific background and theme styling
+  const pageId = cleanHash.replace('#', '').split('/')[0] || 'landing';
+  document.body.setAttribute('data-page', pageId);
 
   // 1. Public Routes
   if (cleanHash === '#landing' || cleanHash === '' || cleanHash === '#') {
@@ -232,8 +247,8 @@ const renderRoute = (hash = window.location.hash || '#landing') => {
   // 4. Authorized Route Dispatching
   if (cleanHash === '#farmer-dashboard') {
     loadFarmerDashboard();
-  } else if (cleanHash === '#smart-booking') {
-    loadSmartBookingPage();
+  } else if (cleanHash === '#smart-booking' || cleanHash === '#smart-mandi-finder') {
+    loadSmartMandiFinderPage();
   } else if (cleanHash === '#mandi-prices') {
     loadMandiPricesPage();
   } else if (cleanHash === '#book-slot') {
@@ -252,10 +267,25 @@ const renderRoute = (hash = window.location.hash || '#landing') => {
     loadOfficerDashboard();
   } else if (cleanHash === '#officer-queue') {
     loadOfficerQueueView();
+  } else if (cleanHash === '#officer-book-token') {
+    if (typeof loadOfficerBookTokenPage === 'function') loadOfficerBookTokenPage();
+  } else if (cleanHash === '#officer-assisted-bookings') {
+    if (typeof loadOfficerAssistedBookingsPage === 'function') loadOfficerAssistedBookingsPage();
   } else if (cleanHash === '#admin-dashboard') {
     loadAdminDashboard();
   } else if (cleanHash === '#tv-display') {
     loadDisplayBoard();
+  } else if (cleanHash === '#kisan-sahayak') {
+    if (role === 'admin') {
+      loadAdminDashboard();
+    } else if (role === 'officer') {
+      loadOfficerDashboard();
+    } else {
+      loadFarmerDashboard();
+      setTimeout(() => {
+        if (typeof openKisanFAQ === 'function') openKisanFAQ();
+      }, 150);
+    }
   } else if (cleanHash === '#ai-insights') {
     loadAIInsightsDashboard();
   } else {
@@ -398,7 +428,28 @@ const openFaqModal = () => {
   showGenericModal(
     `<i class="fas fa-circle-question" style="color:#0D5C3A;"></i> Frequently Asked Questions`,
     `
-    <div style="padding:10px 0; color:#374151; display:flex; flex-direction:column; gap:14px;">
+    <div style="padding:10px 0; color:#374151; display:flex; flex-direction:column; gap:16px;">
+      <div style="background:#F0FDF4; border:1.5px solid #86EFAC; border-radius:12px; padding:14px 16px;">
+        <div style="font-weight:800; font-size:0.92rem; color:#064E3B; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-wand-magic-sparkles" style="color:#0D5C3A;"></i>
+          Q: On what factors does Smart Mandi evaluate and show the two mandi options (Best Overall & Practical Alternative)?
+        </div>
+        <div style="font-size:0.83rem; color:#1F2937; line-height:1.5;">
+          The system evaluates eligible mandis dynamically to recommend the Best Overall Option and Practical Alternative using these key topics:
+          <div style="margin-top:10px; display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:6px; font-weight:700; color:#065F46; font-size:0.82rem;">
+            <div>• Net Economic Value</div>
+            <div>• Procurement Price</div>
+            <div>• Distance & Expected Travel Delay</div>
+            <div>• Transport Cost</div>
+            <div>• Current Queue & Waiting Time</div>
+            <div>• Mandi Processing Capacity</div>
+            <div>• Real-time Destination Weather</div>
+            <div>• Crop Perishability</div>
+            <div>• Deterioration Loss</div>
+            <div>• Economic Impact</div>
+          </div>
+        </div>
+      </div>
       <div>
         <div style="font-weight:700; font-size:0.9rem; color:#111827; margin-bottom:4px;">
           Q: What documents are required at the mandi?

@@ -52,8 +52,8 @@ const renderPublicLandingPage = () => {
                 <button class="btn btn-primary btn-lg" onclick="handleHeroMandiCta(${isAuthenticated})">
                   <i class="fas fa-location-crosshairs"></i> ${getT('btn_find_best_mandi', 'Find Best Mandi')}
                 </button>
-                <button class="btn btn-outline btn-lg sp-btn-hero-secondary" onclick="handleHeroTrackCta(${isAuthenticated})">
-                  <i class="fas fa-clipboard-check"></i> ${getT('btn_track_procurement', 'Track Procurement')}
+                <button class="btn btn-outline btn-lg sp-btn-hero-secondary" onclick="handleHeroTrackCta(${isAuthenticated})" style="color:#064E3B !important; background:#FFFFFF !important; border:1.5px solid #FFFFFF !important; font-weight:700 !important;">
+                  <i class="fas fa-clipboard-check" style="color:#064E3B !important; margin-right:6px;"></i> ${getT('btn_track_procurement', 'Track Procurement')}
                 </button>
               </div>
 
@@ -512,7 +512,7 @@ const renderPublicLandingPage = () => {
               <div class="sp-footer-brand">
                 <div class="sp-brand-icon"><i class="fas fa-leaf"></i></div>
                 <div>
-                  <div class="sp-footer-title">SmartProcure</div>
+                  <div class="sp-footer-title">KPMS GOVERNMENT PORTAL</div>
                   <div class="sp-footer-subtitle">Digital India &bull; Smart Agriculture</div>
                 </div>
               </div>
@@ -584,6 +584,12 @@ const renderPublicLandingPage = () => {
 
     </div>
   `;
+
+  if (!isAuthenticated && activeAuthCardTab === 'login' && activeAuthRole === 'admin') {
+    if (typeof fetchCaptcha === 'function') {
+      setTimeout(fetchCaptcha, 50);
+    }
+  }
 };
 
 /**
@@ -784,6 +790,33 @@ const renderHeroLoginForm = () => {
         </div>
       </div>
 
+      <!-- Super Admin CAPTCHA Section -->
+      ${activeAuthRole === 'admin' ? `
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" style="font-size:0.8rem; font-weight:700; color:var(--text-main); margin-bottom:4px; display:block;">
+            <i class="fas fa-shield-alt" style="color:var(--primary-dark);"></i> ${getT('captcha_label', 'Security Verification (CAPTCHA)')} <span style="color:#EF4444;">*</span>
+          </label>
+          <div class="captcha-container" style="display:flex; align-items:center; gap:8px; margin-bottom:8px; background:rgba(0,0,0,0.04); border:1px dashed #CBD5E1; padding:8px 12px; border-radius:8px;">
+            <div id="hero-captcha-question-slot" class="captcha-display" style="flex:1; font-family:monospace; font-size:1.25rem; font-weight:800; letter-spacing:3px; text-align:center; color:var(--saffron); user-select:none;">Loading...</div>
+            <button type="button" class="captcha-refresh-btn" onclick="fetchCaptcha()" title="Refresh CAPTCHA">
+              <i class="fas fa-rotate"></i>
+            </button>
+          </div>
+          <div class="form-input-wrapper">
+            <input 
+              type="text" 
+              id="hero-auth-captcha" 
+              name="captcha" 
+              class="form-control" 
+              style="font-size:0.88rem; padding:10px 12px;"
+              placeholder="${getT('placeholder_captcha', 'Enter calculation solution or code')}" 
+              required 
+              autocomplete="off" 
+            />
+          </div>
+        </div>
+      ` : ''}
+
       <!-- Remember Me Checkbox -->
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
         <input type="checkbox" id="hero-auth-remember" name="rememberMe" style="width:15px; height:15px; accent-color:var(--saffron); cursor:pointer;" checked />
@@ -903,12 +936,18 @@ const switchHeroAuthTab = (tab) => {
   activeAuthCardTab = tab;
   const slot = document.getElementById('sp-hero-auth-card');
   if (slot) slot.innerHTML = renderUnauthenticatedHeroCard();
+  if (tab === 'login' && activeAuthRole === 'admin' && typeof fetchCaptcha === 'function') {
+    setTimeout(fetchCaptcha, 30);
+  }
 };
 
 const switchHeroAuthRole = (role) => {
   activeAuthRole = role;
   const content = document.getElementById('sp-hero-auth-content');
   if (content) content.innerHTML = renderHeroLoginForm();
+  if (role === 'admin' && typeof fetchCaptcha === 'function') {
+    setTimeout(fetchCaptcha, 30);
+  }
 };
 
 const toggleHeroPassword = (inputId, iconEl) => {
@@ -932,6 +971,9 @@ const openLandingLoginRole = (role) => {
     if (idField && typeof idField.focus === 'function') {
       idField.focus();
     }
+    if (role === 'admin' && typeof fetchCaptcha === 'function') {
+      setTimeout(fetchCaptcha, 30);
+    }
   } else {
     if (typeof openLoginModal === 'function') {
       openLoginModal(role);
@@ -953,11 +995,26 @@ const handleHeroLoginSubmit = async (e) => {
   const identifier = form.identifier.value.trim();
   const password = form.password.value;
   const rememberMe = form.rememberMe ? form.rememberMe.checked : true;
+  const captchaAnswer = form.captcha ? form.captcha.value.trim() : null;
 
   if (!identifier || !password) {
     if (typeof showToast === 'function') showToast('Please enter both identifier and password.', 'error');
     return;
   }
+
+  if (activeAuthRole === 'admin' && !captchaAnswer) {
+    if (typeof showToast === 'function') showToast('Please enter the CAPTCHA solution.', 'error');
+    const capInput = document.getElementById('hero-auth-captcha');
+    if (capInput && typeof capInput.focus === 'function') capInput.focus();
+    return;
+  }
+
+  const roleConfigs = {
+    farmer: { photo: '/images/roles/farmer.jpg', btnText: getT('login_role_farmer_btn', 'Login to Kisan Portal') },
+    officer: { photo: '/images/roles/officer.jpg', btnText: getT('login_role_officer_btn', 'Login to Officer Portal') },
+    admin: { photo: '/images/roles/admin.jpg', btnText: getT('login_role_admin_btn', 'Login as Administrator') }
+  };
+  const cfg = roleConfigs[activeAuthRole] || roleConfigs.farmer;
 
   const submitBtn = document.getElementById('hero-auth-submit-btn');
   if (submitBtn) {
@@ -966,6 +1023,7 @@ const handleHeroLoginSubmit = async (e) => {
   }
 
   try {
+    const tokenVal = (typeof getCurrentCaptchaToken === 'function' ? getCurrentCaptchaToken() : '') || window.currentCaptchaToken || '';
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -973,7 +1031,9 @@ const handleHeroLoginSubmit = async (e) => {
         role: activeAuthRole,
         identifier,
         password,
-        rememberMe
+        rememberMe,
+        captchaToken: tokenVal,
+        captchaAnswer
       })
     });
 
@@ -982,35 +1042,73 @@ const handleHeroLoginSubmit = async (e) => {
     if (res.status === 423) {
       if (typeof showToast === 'function') showToast(data.message || 'Account locked.', 'error');
       if (typeof renderLockoutNotice === 'function') renderLockoutNotice(data);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<img src="${cfg.photo}" alt="${activeAuthRole}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.6);" /> <span>${cfg.btnText}</span> <i class="fas fa-arrow-right" style="margin-left:4px;"></i>`;
+      }
       return;
     }
 
     if (res.status === 403 && data.status === 'Pending_Admin_Approval') {
       if (typeof renderPendingOfficerNotice === 'function') renderPendingOfficerNotice(data);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<img src="${cfg.photo}" alt="${activeAuthRole}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.6);" /> <span>${cfg.btnText}</span> <i class="fas fa-arrow-right" style="margin-left:4px;"></i>`;
+      }
       return;
     }
 
     if (!data.success) {
+      if (activeAuthRole === 'admin' && typeof fetchCaptcha === 'function') {
+        fetchCaptcha();
+      }
+
+      // Check if user account belongs to a different role
+      if (data.correctRole) {
+        if (typeof showToast === 'function') showToast(data.message, 'warning');
+        switchHeroAuthRole(data.correctRole);
+        const idField = document.getElementById('hero-auth-id');
+        if (idField) idField.value = identifier;
+        const passField = document.getElementById('hero-auth-pass');
+        if (passField) {
+          passField.value = password;
+          passField.focus();
+        }
+        return;
+      }
+
       if (typeof showToast === 'function') showToast(data.message || 'Authentication failed. Please verify credentials.', 'error');
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `<i class="fas fa-right-to-bracket"></i> Login`;
+        submitBtn.innerHTML = `<img src="${cfg.photo}" alt="${activeAuthRole}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.6);" /> <span>${cfg.btnText}</span> <i class="fas fa-arrow-right" style="margin-left:4px;"></i>`;
       }
       return;
     }
 
     // Two-Factor Authentication required
     if (data.requiresOtp) {
+      const sessionObj = {
+        tempSessionId: data.tempSessionId,
+        maskedTarget: data.maskedTarget,
+        role: data.role,
+        mobile: data.mobile,
+        expiresInSeconds: data.expiresInSeconds || 300,
+        resendCooldownSeconds: data.resendCooldownSeconds || 60
+      };
+
+      if (typeof window.setLoginSession === 'function') {
+        window.setLoginSession(sessionObj);
+      } else {
+        window.currentLoginSession = sessionObj;
+        try {
+          sessionStorage.setItem('kpms_login_session', JSON.stringify(sessionObj));
+        } catch (e) {}
+      }
+
       if (typeof openLoginOtpScreen === 'function') {
         const modal = document.getElementById('auth-modal');
         if (modal) modal.classList.add('active');
-        openLoginOtpScreen({
-          tempSessionId: data.tempSessionId,
-          maskedTarget: data.maskedTarget,
-          role: data.role,
-          expiresInSeconds: data.expiresInSeconds || 300,
-          resendCooldownSeconds: data.resendCooldownSeconds || 60
-        });
+        openLoginOtpScreen(sessionObj);
       }
       if (typeof showToast === 'function') showToast(data.message, 'info');
     } else if (data.token) {
@@ -1025,10 +1123,13 @@ const handleHeroLoginSubmit = async (e) => {
       }
     }
   } catch (err) {
+    if (activeAuthRole === 'admin' && typeof fetchCaptcha === 'function') {
+      fetchCaptcha();
+    }
     if (typeof showToast === 'function') showToast('Network error: ' + err.message, 'error');
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<i class="fas fa-right-to-bracket"></i> Login`;
+      submitBtn.innerHTML = `<img src="${cfg.photo}" alt="${activeAuthRole}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.6);" /> <span>${cfg.btnText}</span> <i class="fas fa-arrow-right" style="margin-left:4px;"></i>`;
     }
   }
 };
@@ -1037,10 +1138,18 @@ const handleHeroLoginSubmit = async (e) => {
  * Handle Registration Trigger from Landing Page
  */
 const initiateRegistrationFromHero = (role) => {
-  if (typeof openRegistrationChooser === 'function') {
-    openRegistrationChooser();
+  const modal = document.getElementById('auth-modal');
+  const startFn = window.startRegistrationFlow || (typeof startRegistrationFlow === 'function' ? startRegistrationFlow : null);
+  const chooserFn = window.openRegistrationChooser || (typeof openRegistrationChooser === 'function' ? openRegistrationChooser : null);
+
+  if (role && typeof startFn === 'function') {
+    if (modal) modal.classList.add('active');
+    startFn(role);
+  } else if (typeof chooserFn === 'function') {
+    if (modal) modal.classList.add('active');
+    chooserFn();
   } else {
-    if (typeof showToast === 'function') showToast('Registration module is initializing...', 'info');
+    if (typeof showToast === 'function') showToast('Registration module is loading, please try again...', 'info');
   }
 };
 

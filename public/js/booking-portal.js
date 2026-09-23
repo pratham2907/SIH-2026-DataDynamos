@@ -61,7 +61,7 @@ const loadBookingPortal = async () => {
           <div class="glass-panel" style="padding:28px; max-width:900px; margin:0 auto;">
             
             ${prefill ? `
-              <div class="glass-panel" style="padding:14px 18px; margin-bottom:20px; background:linear-gradient(135deg, rgba(224,109,20,0.1), rgba(26,122,68,0.08)); border-left:4px solid var(--saffron); border-radius:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <div class="glass-panel" style="padding:14px 18px; margin-bottom:20px; background:#FFFFFF; border:1px solid var(--border-color); border-left:4px solid var(--saffron); border-radius:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; box-shadow:0 4px 14px rgba(0,0,0,0.05);">
                 <div style="display:flex; align-items:center; gap:12px;">
                   <img src="/images/crops/${(prefill.crop || 'wheat').toLowerCase().replace(/[^a-z]/g, '')}.jpg" alt="${prefill.crop}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1.5px solid var(--saffron); box-shadow:0 1px 4px rgba(0,0,0,0.1);" onerror="this.onerror=null; this.src='/images/crops/wheat.jpg';" />
                   <span style="font-size:0.92rem; font-weight:700; color:var(--primary-navy);">
@@ -365,7 +365,14 @@ const loadMyBookings = async () => {
               <div class="glass-card" style="padding:22px;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
                   <div>
-                    <span class="status-pill ${b.status.toLowerCase()}">${b.status}</span>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                      <span class="status-pill ${b.status.toLowerCase()}">${b.status}</span>
+                      ${b.bookingSource === 'OFFICER_ASSISTED' ? `
+                        <span class="badge" style="background:#FEF3C7; color:#B45309; border:1px solid #FCD34D; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:6px;">
+                          <i class="fas fa-handshake-angle"></i> Booked with assistance from Procurement Officer${b.assistedByOfficerName ? ` (${b.assistedByOfficerName})` : ''}
+                        </span>
+                      ` : ''}
+                    </div>
                     <h3 style="color:var(--primary-navy); font-size:1.3rem; margin-top:6px;">${b.cropName} (${b.quantity} Quintals)</h3>
                     <div style="color:var(--text-muted); font-size:0.88rem; margin-top:4px;">
                       Booking No: <strong>${b.bookingNumber}</strong> | Center: <strong>${b.centerName || b.centerId}</strong> | Date: <strong>${b.date} (${b.timeSlot})</strong>

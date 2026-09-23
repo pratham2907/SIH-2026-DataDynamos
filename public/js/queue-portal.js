@@ -25,13 +25,13 @@ const loadFarmerQueuePage = async () => {
           <main class="main-content">
             <div class="glass-panel" style="padding:40px; text-align:center; max-width:700px; margin:40px auto;">
               <div style="font-size:3.5rem; color:var(--text-muted); margin-bottom:16px;"><i class="fas fa-ticket-alt"></i></div>
-              <h2 style="color:var(--primary-navy); font-weight:800; margin-bottom:12px;">No Active Queue Token</h2>
+              <h2 style="color:var(--primary-navy); font-weight:800; margin-bottom:12px;">${getT('no_active_queue_token', 'No Active Queue Token')}</h2>
               <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:24px;">
                 You do not have an active queue token for today. Once you book a slot and arrive at the Mandi entrance, show your QR Pass to the Officer Gate Scanner to enter the digital queue.
               </p>
               <div style="display:flex; gap:12px; justify-content:center;">
-                <button class="btn btn-primary" onclick="routeTo('#book-slot')"><i class="fas fa-plus"></i> Book Procurement Slot</button>
-                <button class="btn btn-outline" onclick="routeTo('#my-bookings')"><i class="fas fa-qrcode"></i> View QR Passes</button>
+                <button class="btn btn-primary" onclick="routeTo('#book-slot')"><i class="fas fa-plus"></i> ${getT('btn_book_slot', 'Book Procurement Slot')}</button>
+                <button class="btn btn-outline" onclick="routeTo('#my-bookings')"><i class="fas fa-qrcode"></i> ${getT('btn_view_qr_passes', 'View QR Passes')}</button>
               </div>
             </div>
           </main>
@@ -60,7 +60,7 @@ const loadFarmerQueuePage = async () => {
                 <h2 style="color:var(--primary-navy); font-weight:800;">${getT('queue_tracker_title')}</h2>
                 <p style="color:var(--text-muted); font-size:0.9rem;">Auto-updates continuously via Socket.IO stream.</p>
               </div>
-              <button class="btn btn-outline" onclick="loadFarmerQueuePage()"><i class="fas fa-rotate"></i> Refresh</button>
+              <button class="btn btn-outline" onclick="loadFarmerQueuePage()"><i class="fas fa-rotate"></i> ${getT('btn_refresh', 'Refresh')}</button>
             </div>
 
             <!-- Big Live Token Showcase Card -->
@@ -73,12 +73,12 @@ const loadFarmerQueuePage = async () => {
               <div class="queue-token-badge animate-saffron-pulse">${queue.tokenNumber}</div>
 
               <div style="font-size:1.3rem; font-weight:700; color:var(--primary-navy); margin-top:8px;">
-                Assigned to: <span style="color:var(--green-gov);">${queue.counterNumber}</span>
+                ${getT('assigned_counter', 'Assigned Counter')}: <span style="color:var(--green-gov);">${queue.counterNumber}</span>
               </div>
 
               ${queue.status === 'called' ? `
                 <div style="background:#DBEAFE; color:#1E40AF; padding:12px; border-radius:8px; margin:20px auto 0; max-width:500px; font-weight:700; font-size:1.05rem;">
-                  🔔 YOUR TOKEN IS CALLED! Please proceed immediately to ${queue.counterNumber}.
+                  <i class="fas fa-bell" style="color:#1D4ED8; margin-right:6px;"></i> YOUR TOKEN IS CALLED! Please proceed immediately to ${queue.counterNumber}.
                 </div>
               ` : ''}
             </div>

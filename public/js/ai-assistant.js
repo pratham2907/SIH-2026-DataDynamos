@@ -20,7 +20,6 @@ const loadAIInsightsDashboard = async () => {
           <div class="sidebar-heading">Forecasting & Analytics</div>
           <a class="nav-link" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> Main Portal</a>
           <a class="nav-link active" onclick="loadAIInsightsDashboard()"><i class="fas fa-chart-line"></i> Mandi Insights</a>
-          <a class="nav-link" onclick="openKisanFAQ()"><i class="fas fa-circle-question"></i> Kisan Sahayak FAQ</a>
         </aside>
 
         <main class="main-content">
@@ -149,6 +148,17 @@ const loadAIInsightsDashboard = async () => {
 
 const FAQ_DATA = [
   {
+    category: 'Smart Mandi',
+    icon: 'fa-wand-magic-sparkles',
+    color: '#0D5C3A',
+    questions: [
+      {
+        q: 'On what factors does Smart Mandi recommend the two options (Best Overall & Practical Alternative)?',
+        a: 'The system evaluates eligible mandis dynamically to present the two optimal options based on these key evaluation topics (no formulas):\n\n• Net Economic Value\n• Procurement Price\n• Distance & Expected Travel Delay\n• Transport Cost\n• Current Queue & Waiting Time\n• Mandi Processing Capacity\n• Real-time Destination Weather\n• Crop Perishability\n• Deterioration Loss\n• Economic Impact'
+      }
+    ]
+  },
+  {
     category: 'Slot Booking',
     icon: 'fa-calendar-check',
     color: '#3B82F6',
@@ -209,10 +219,18 @@ let currentFaqCategory = 'ALL';
  * Interactive Kisan Sahayak FAQ & Knowledge Helpdesk
  */
 const openKisanFAQ = (categoryFilter = 'ALL') => {
+  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (user && (user.role === 'admin' || user.role === 'superadmin' || user.role === 'officer')) {
+    if (typeof showToast === 'function') {
+      showToast('Kisan Sahayak is strictly available in the Farmer Portal only.', 'info');
+    }
+    return;
+  }
+
   currentFaqCategory = categoryFilter;
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
-  document.getElementById('modal-title').textContent = '🌾 Kisan Sahayak / किसान सहायक — Mandi Guide & FAQ';
+  document.getElementById('modal-title').innerHTML = '<img src="/images/nav/kisan_sahayak.jpg" style="width:24px; height:24px; border-radius:6px; object-fit:cover; margin-right:8px; vertical-align:middle;" alt="" /> Kisan Sahayak / किसान सहायक — Mandi Guide & FAQ';
 
   const categories = ['ALL', ...FAQ_DATA.map(c => c.category)];
 
@@ -220,7 +238,7 @@ const openKisanFAQ = (categoryFilter = 'ALL') => {
     <div style="max-height:560px; display:flex; flex-direction:column; gap:12px; font-family:'Plus Jakarta Sans', sans-serif;">
       <!-- Search Bar -->
       <div style="position:relative;">
-        <input type="text" id="faq-live-search" class="form-control" placeholder="🔍 Search any topic (e.g., MSP rate, slot booking, payment delay, gate token)..." oninput="handleFaqSearch(this.value)" style="border-radius:20px; padding:10px 18px 10px 40px; font-size:0.9rem;" />
+        <input type="text" id="faq-live-search" class="form-control" placeholder="Search any topic (e.g., MSP rate, slot booking, payment delay, gate token)..." oninput="handleFaqSearch(this.value)" style="border-radius:20px; padding:10px 18px 10px 40px; font-size:0.9rem;" />
         <i class="fas fa-search" style="position:absolute; left:16px; top:12px; color:var(--text-muted);"></i>
       </div>
 
@@ -228,7 +246,7 @@ const openKisanFAQ = (categoryFilter = 'ALL') => {
       <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none;">
         ${categories.map(cat => `
           <button type="button" class="btn ${currentFaqCategory === cat ? 'btn-primary' : 'btn-outline'} btn-sm" style="border-radius:14px; font-size:0.75rem; white-space:nowrap; padding:4px 12px;" onclick="openKisanFAQ('${cat}')">
-            ${cat === 'ALL' ? '🌐 All Questions' : cat}
+            ${cat === 'ALL' ? 'All Questions' : cat}
           </button>
         `).join('')}
       </div>
