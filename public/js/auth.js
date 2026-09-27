@@ -183,8 +183,8 @@ const renderRoleLoginForm = (body, modalTitle, role) => {
       idLabel: 'Farmer ID or Mobile Number',
       idPlaceholder: 'e.g. FRM202600001 or 9876543210',
       idHelp: 'Enter your registered 10-digit mobile number or Farmer ID (FRM...)',
-      defaultId: '9876543210',
-      defaultPass: 'Kisan@123',
+      defaultId: '',
+      defaultPass: '',
       color: '#10B981'
     },
     officer: {
@@ -195,8 +195,8 @@ const renderRoleLoginForm = (body, modalTitle, role) => {
       idLabel: 'Official Email or Employee ID',
       idPlaceholder: 'e.g. officer@kpms.gov.in or OFF-BPL-101',
       idHelp: 'Official government-issued APMC credentials required',
-      defaultId: 'officer@kpms.gov.in',
-      defaultPass: 'Officer@123',
+      defaultId: '',
+      defaultPass: '',
       color: '#2563EB'
     },
     admin: {
@@ -207,8 +207,8 @@ const renderRoleLoginForm = (body, modalTitle, role) => {
       idLabel: 'Super Admin Official Email',
       idPlaceholder: 'e.g. admin@kpms.gov.in',
       idHelp: 'Ministry of Agriculture authorized email address',
-      defaultId: 'admin@kpms.gov.in',
-      defaultPass: 'Admin@123',
+      defaultId: '',
+      defaultPass: '',
       color: '#E06D14'
     }
   };

@@ -929,7 +929,7 @@ const openOfficerFormModal = (officer = null) => {
         ${!isEdit ? `
           <div class="form-group">
             <label class="form-label">Initial Password</label>
-            <input type="password" id="off-pass-input" class="form-control form-control-sm" placeholder="Default: Officer@123" />
+            <input type="password" id="off-pass-input" class="form-control form-control-sm" placeholder="Enter officer password" />
           </div>
         ` : ''}
       </div>

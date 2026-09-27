@@ -175,7 +175,8 @@ const createAssistedFarmerRegistration = async (req, res) => {
 
     const farmerId = await generateFarmerId();
     const userId = generateId('usr_');
-    const defaultPassword = await bcrypt.hash('Kisan@123', 10);
+    const randomPass = require('crypto').randomBytes(6).toString('hex');
+    const defaultPassword = await bcrypt.hash(randomPass, 10);
 
     // Create User record
     await Users.create({

@@ -27,15 +27,13 @@
 
 ---
 
-## 🔑 Demo Login Credentials
+## 🔑 User Roles & Portal Access
 
-| Role | Username / Identifier | Password | Access Portal |
-|---|---|---|---|
-| 👨‍🌾 **Farmer** | `9876543210` *(or `ramesh@farmer.in`)* | `Kisan@123` *(or `Farmer@123`)* | Farmer Dashboard & Bookings |
-| 👮 **Procurement Officer** | `officer@kpms.gov.in` *(or `9800000002`)* | `Officer@123` | Gate Scanner & Weighbridge Console |
-| 🏛️ **Super Admin** | `admin@kpms.gov.in` *(or `9800000001`)* | `Admin@123` | National Command Center & DBT Release |
-
-*Note: The login modal includes 1-click role switcher tabs and instant demo login buttons for seamless access.*
+| Role | Portal Access | Description |
+|---|---|---|
+| 👨‍🌾 **Farmer** | Farmer Dashboard & Bookings | Access crop registration, mandi NEV comparison, slot reservation, and DBT payout tracking. Register via the Citizen Registration tab. |
+| 👮 **Procurement Officer** | Gate Scanner & Weighbridge Console | Verify QR arrival tokens, enter weighbridge tare/gross weights, conduct quality assay, and issue procurement receipts. |
+| 🏛️ **Super Admin** | National Command Center & DBT Release | Real-time APMC oversight, MSP rate adjustments, officer allocations, and direct treasury DBT disbursement approval. |
 
 ---
 

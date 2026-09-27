@@ -504,18 +504,6 @@ const login = async (req, res) => {
       }
     }
 
-    // Universal demo fallback for hackathon presentation reliability
-    const passLower = String(password).trim().toLowerCase();
-    const validDemoPasses = [
-      'admin@123', 'admin123', 'admin', 'superadmin',
-      'officer@123', 'officer123', 'officer',
-      'kisan@123', 'farmer@123', 'farmer123', 'kisan123', 'farmer', 'kisan',
-      'password', '123456', 'demo123'
-    ];
-    if (!isPasswordValid && validDemoPasses.includes(passLower)) {
-      isPasswordValid = true;
-    }
-
     // Handle Invalid Credentials (Generic Failure Response per Prompt)
     if (!user || !isPasswordValid) {
       if (user) {

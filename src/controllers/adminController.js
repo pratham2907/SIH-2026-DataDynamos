@@ -188,7 +188,8 @@ const createOfficer = async (req, res) => {
     }
 
     const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password || 'Officer@123', salt);
+    const officerPassword = password || require('crypto').randomBytes(8).toString('hex');
+    const passwordHash = await bcrypt.hash(officerPassword, salt);
 
     const count = await Users.countDocuments({ role: 'officer' });
     const officerId = `OFF-${String(count + 101).padStart(3, '0')}`;

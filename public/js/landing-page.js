@@ -683,8 +683,8 @@ const renderHeroLoginForm = () => {
     farmer: {
       label: getT('field_farmer_id', 'Mobile Number / Farmer ID'),
       placeholder: getT('placeholder_farmer_id', 'e.g. 9876543210 or FRM202600001'),
-      defaultVal: '9876543210',
-      passVal: 'Kisan@123',
+      defaultVal: '',
+      passVal: '',
       btnText: getT('login_role_farmer_btn', 'Login to Kisan Portal'),
       btnColor: '#0D5C3A',
       photo: '/images/roles/farmer.jpg'
@@ -692,8 +692,8 @@ const renderHeroLoginForm = () => {
     officer: {
       label: getT('field_officer_id', 'Official Email / Employee ID'),
       placeholder: getT('placeholder_officer_id', 'e.g. officer@kpms.gov.in'),
-      defaultVal: 'officer@kpms.gov.in',
-      passVal: 'Officer@123',
+      defaultVal: '',
+      passVal: '',
       btnText: getT('login_role_officer_btn', 'Login to Officer Portal'),
       btnColor: '#2563EB',
       photo: '/images/roles/officer.jpg'
@@ -701,8 +701,8 @@ const renderHeroLoginForm = () => {
     admin: {
       label: getT('field_admin_email', 'Super Admin Email'),
       placeholder: getT('placeholder_admin_id', 'e.g. admin@kpms.gov.in'),
-      defaultVal: 'admin@kpms.gov.in',
-      passVal: 'Admin@123',
+      defaultVal: '',
+      passVal: '',
       btnText: getT('login_role_admin_btn', 'Login as Administrator'),
       btnColor: '#E06D14',
       photo: '/images/roles/admin.jpg'

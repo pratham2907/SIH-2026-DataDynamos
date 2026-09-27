@@ -33,9 +33,11 @@ const seedDemoData = async (force = false) => {
     await SystemSettings.deleteMany({});
     await Holidays.deleteMany({});
 
-    const passwordHash = await bcrypt.hash('Kisan@123', 10);
-    const adminPasswordHash = await bcrypt.hash('Admin@123', 10);
-    const officerPasswordHash = await bcrypt.hash('Officer@123', 10);
+    const crypto = require('crypto');
+    const defaultSeedPass = process.env.DEFAULT_SEED_PASSWORD || crypto.randomBytes(8).toString('hex');
+    const passwordHash = await bcrypt.hash(defaultSeedPass, 10);
+    const adminPasswordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || defaultSeedPass, 10);
+    const officerPasswordHash = await bcrypt.hash(process.env.OFFICER_PASSWORD || defaultSeedPass, 10);
 
     // 1. Super Admin Account
     await Users.create({

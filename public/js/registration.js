@@ -314,7 +314,7 @@ const getFarmerStepHtml = (step) => {
           </div>
           <div class="form-group" style="grid-column:1/-1;">
             <label class="form-label">Portal Account Password *</label>
-            <input type="password" id="frm-pass" name="password" class="form-control" value="${draft.password || 'Kisan@123'}" placeholder="Create a secure password" required />
+            <input type="password" id="frm-pass" name="password" class="form-control" value="${draft.password || ''}" placeholder="Create a secure password" required />
             <div class="field-error" id="err-frm-pass"></div>
           </div>
         </div>
@@ -568,7 +568,7 @@ const getOfficerStepHtml = (step) => {
           </div>
           <div class="form-group">
             <label class="form-label">Portal Access Password *</label>
-            <input type="password" id="off-pass" name="password" class="form-control" value="${draft.password || 'Officer@123'}" required />
+            <input type="password" id="off-pass" name="password" class="form-control" value="${draft.password || ''}" placeholder="Create a secure password" required />
           </div>
         </div>
         <div style="display:flex; justify-content:space-between; margin-top:20px;">
