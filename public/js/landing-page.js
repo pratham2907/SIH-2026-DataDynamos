@@ -83,9 +83,9 @@ const renderPublicLandingPage = () => {
               </div>
             </div>
 
-            <!-- Right Hero: Role Login & Registration Card -->
+            <!-- Right Hero: Video Showcase replacing the Auth Card -->
             <div class="sp-hero-auth-slot">
-              ${renderHeroAuthCard(user, isAuthenticated)}
+              ${renderHeroVideoShowcase(user, isAuthenticated)}
             </div>
 
           </div>
@@ -93,12 +93,7 @@ const renderPublicLandingPage = () => {
       </section>
 
       <!-- ================================================================ -->
-      <!-- 2. DIGITAL MANDI IN ACTION: 16:9 VIDEO & 7-STAGE WORKFLOW ENGINE -->
-      <!-- ================================================================ -->
-      ${renderDigitalMandiVideoSection()}
-
-      <!-- ================================================================ -->
-      <!-- 3. WHY SMARTPROCURE? (4 KEY PILLARS)                            -->
+      <!-- 2. WHY SMARTPROCURE? (4 KEY PILLARS)                            -->
       <!-- ================================================================ -->
       <section class="sp-section" id="why-smartprocure" style="background:var(--bg-main);">
         <div class="sp-content-container">
@@ -588,429 +583,70 @@ const renderPublicLandingPage = () => {
     </div>
   `;
 
-  setTimeout(() => {
-    initDigitalMandiVideo();
-    if (!isAuthenticated && activeAuthCardTab === 'login' && activeAuthRole === 'admin') {
-      if (typeof fetchCaptcha === 'function') setTimeout(fetchCaptcha, 50);
-    }
-  }, 60);
-};
-
-/**
- * ==============================================================================
- * 🎥 DIGITAL MANDI IN ACTION: VIDEO SHOWCASE & WORKFLOW ENGINE
- * ==============================================================================
- */
-const WORKFLOW_STAGES = [
-  {
-    step: 1,
-    title: 'Farmer Arrival',
-    subtitle: 'Centre & Gate Entry',
-    icon: 'fa-tractor',
-    badge: 'Stage 01',
-    desc: 'Farmer arrives at designated APMC Mandi or procurement center within their pre-allocated 30-minute arrival window. Automated gate identification registers vehicle entry.',
-    metric: 'Gate Transit: < 3 mins'
-  },
-  {
-    step: 2,
-    title: 'Slot Verification',
-    subtitle: 'QR Code Scanning',
-    icon: 'fa-qrcode',
-    badge: 'Stage 02',
-    desc: 'Digital token QR code is verified at entry kiosk. Live records cross-check farmer Aadhaar KYC, crop variety, and land parcel quota in real time.',
-    metric: 'Verification: Instant (< 5s)'
-  },
-  {
-    step: 3,
-    title: 'Queue',
-    subtitle: 'Smart Token Allocation',
-    icon: 'fa-users-line',
-    badge: 'Stage 03',
-    desc: 'Dynamic token routing prioritizes perishable produce and assigns the optimal unloading bay without congestion or manual queue jumping.',
-    metric: 'Zero Gridlock Congestion'
-  },
-  {
-    step: 4,
-    title: 'Weighing',
-    subtitle: 'Digital Weighbridge',
-    icon: 'fa-weight-scale',
-    badge: 'Stage 04',
-    desc: 'Calibrated electronic weighbridge captures vehicle gross weight directly into the central cloud ledger, eliminating manual slip manipulation.',
-    metric: 'IoT Digital Capture: 100% Accurate'
-  },
-  {
-    step: 5,
-    title: 'Quality Check',
-    subtitle: 'Assay & AI Grading',
-    icon: 'fa-microscope',
-    badge: 'Stage 05',
-    desc: 'Automated conveyor assay grading lines inspect produce moisture, foreign matter, and size metrics to determine fair MSP quality grade (Grade A / FAQ).',
-    metric: 'Fair Scientific Grading'
-  },
-  {
-    step: 6,
-    title: 'Procurement',
-    subtitle: 'Digital J-Form Issued',
-    icon: 'fa-file-invoice-dollar',
-    badge: 'Stage 06',
-    desc: 'Tare weight is recorded, net produce weight is determined, and a legally certified digital J-Form receipt is generated with cryptographic seal.',
-    metric: 'Instant Digital J-Form Receipt'
-  },
-  {
-    step: 7,
-    title: 'Payment',
-    subtitle: 'Direct DBT Bank Transfer',
-    icon: 'fa-building-columns',
-    badge: 'Stage 07',
-    desc: 'Procurement sanction is routed via PFMS directly to the farmer\'s Aadhaar-linked bank account without middlemen or commission delays.',
-    metric: 'Direct Benefit Transfer in 24-48h'
-  }
-];
-
-let activeWorkflowStepIndex = 1;
-
-const renderWorkflowDetailCard = (stage) => {
-  return `
-    <div class="sp-wf-detail-inner">
-      <div class="sp-wf-detail-left">
-        <span class="sp-wf-badge">${stage.badge}</span>
-        <h4 class="sp-wf-detail-title">
-          <i class="fas ${stage.icon}"></i> ${stage.title} &mdash; <span style="font-weight:600; color:var(--text-muted); font-size:0.95rem;">${stage.subtitle}</span>
-        </h4>
-        <p class="sp-wf-detail-desc">${stage.desc}</p>
-      </div>
-      <div class="sp-wf-detail-right">
-        <div class="sp-wf-metric-pill">
-          <i class="fas fa-bolt" style="color:#E06D14;"></i>
-          <span>${stage.metric}</span>
-        </div>
-        <button type="button" class="btn btn-sm btn-outline" onclick="seekToWorkflowStage(${stage.step})" style="border-radius:8px; font-weight:700; font-size:0.78rem; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
-          <i class="fas fa-play"></i> Watch Stage
-        </button>
-      </div>
-    </div>
-  `;
-};
-
-const renderDigitalMandiVideoSection = () => {
-  return `
-    <section class="sp-digital-mandi-section" id="digital-mandi-section">
-      <!-- Ambient Glow Orbs behind the Glassmorphism card -->
-      <div class="sp-mandi-glow-bg glow-1"></div>
-      <div class="sp-mandi-glow-bg glow-2"></div>
-
-      <div class="sp-content-container">
-        
-        <!-- Section Header -->
-        <div class="sp-section-header text-center" style="margin-bottom: 28px;">
-          <span class="sp-subheading-tag" style="background: rgba(13, 92, 58, 0.08); color: #0D5C3A; border: 1.5px solid rgba(13, 92, 58, 0.22); padding: 5px 14px; border-radius: 9999px; font-weight: 800; letter-spacing: 0.6px; display: inline-flex; align-items: center; gap: 8px;">
-            <i class="fas fa-play-circle" style="color:#E06D14;"></i> DIGITAL MANDI IN ACTION
-          </span>
-          <h2 class="sp-section-title" style="font-size: 2.35rem; margin-top: 12px; margin-bottom: 10px; font-weight: 800; color: var(--primary-dark, #0D5C3A);">
-            From Mandi Queue to Digital Procurement
-          </h2>
-          <p class="sp-section-subtitle" style="font-size: 1.05rem; max-width: 680px; margin: 0 auto; color: var(--text-muted, #4B5563); line-height: 1.6;">
-            Making agricultural procurement faster, transparent and farmer-friendly.
-          </p>
-        </div>
-
-        <!-- Glassmorphism Container with Rounded Corners & Subtle Animation -->
-        <div class="sp-mandi-glass-container" id="sp-mandi-player-card">
-          
-          <!-- 16:9 Responsive Video Player Wrapper -->
-          <div class="sp-mandi-player-wrapper" id="sp-mandi-player-wrapper">
-            <video 
-              id="sp-digital-mandi-video"
-              class="sp-mandi-video-element"
-              poster="/images/digital_mandi_poster.jpg"
-              preload="auto"
-              playsinline
-              webkit-playsinline
-              loop
-              muted
-            >
-              <source src="/videos/mandi_grading_operations.webm" type="video/webm" />
-              <source src="/videos/mandi_grading_operations.webm" type="video/mp4" />
-              Your browser does not support HTML5 video.
-            </video>
-
-            <!-- Krishi Mandi Pill Tag at bottom-left (Matching Live Mandi Grading from screenshot) -->
-            <div class="sp-video-tag-pill" id="sp-video-tag-pill">
-              <span class="sp-video-pulse-dot"></span>
-              <span>Krishi Mandi &bull; Quality Grading &amp; Operations</span>
-            </div>
-
-            <!-- Big Center Play / Pause Floating Button Overlay -->
-            <button 
-              type="button"
-              class="sp-video-center-play-btn" 
-              id="sp-video-center-play" 
-              onclick="toggleMandiVideoPlayback(event)" 
-              aria-label="Play or Pause Video"
-            >
-              <i class="fas fa-play" id="sp-center-play-icon"></i>
-            </button>
-
-            <!-- Bottom Custom Video Controls Bar -->
-            <div class="sp-mandi-controls-bar" id="sp-mandi-controls">
-              <!-- Play / Pause Button -->
-              <button type="button" class="sp-control-btn" id="sp-ctrl-play-btn" onclick="toggleMandiVideoPlayback(event)" title="Play / Pause">
-                <i class="fas fa-play" id="sp-ctrl-play-icon"></i>
-              </button>
-
-              <!-- Current Time / Duration -->
-              <div class="sp-control-time" id="sp-ctrl-time">0:00 / 0:00</div>
-
-              <!-- Interactive Progress Scrubber -->
-              <div class="sp-progress-container" id="sp-video-progress-track" onclick="seekMandiVideo(event)">
-                <div class="sp-progress-bar-filled" id="sp-video-progress-fill"></div>
-              </div>
-
-              <!-- Audio Mute / Unmute Button -->
-              <button type="button" class="sp-control-btn" id="sp-ctrl-mute-btn" onclick="toggleMandiVideoAudio(event)" title="Mute / Unmute">
-                <i class="fas fa-volume-mute" id="sp-ctrl-mute-icon"></i>
-              </button>
-
-              <!-- Fullscreen Toggle Button -->
-              <button type="button" class="sp-control-btn" id="sp-ctrl-fs-btn" onclick="toggleMandiFullscreen(event)" title="Toggle Fullscreen">
-                <i class="fas fa-expand" id="sp-ctrl-fs-icon"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- 7-Stage Visual Lifecycle Representation:
-               Farmer Arrival → Slot Verification → Queue → Weighing → Quality Check → Procurement → Payment -->
-          <div class="sp-mandi-workflow-wrapper">
-            <div class="sp-workflow-header-row">
-              <div class="sp-workflow-title">
-                <i class="fas fa-diagram-project" style="color: #0D5C3A;"></i>
-                <span>Digital Procurement Lifecycle</span>
-              </div>
-              <div class="sp-workflow-hint">
-                <i class="fas fa-circle-info"></i> Click any stage to navigate in video &amp; view protocol
-              </div>
-            </div>
-
-            <div class="sp-mandi-workflow-steps" id="sp-workflow-stepper">
-              ${WORKFLOW_STAGES.map((st, idx) => `
-                <div class="sp-wf-step ${idx === 0 ? 'active' : ''}" data-step="${st.step}" onclick="highlightWorkflowStep(${st.step}, true)">
-                  <div class="sp-wf-step-node">
-                    <span class="sp-wf-step-num">${st.step}</span>
-                    <i class="fas ${st.icon}"></i>
-                  </div>
-                  <div class="sp-wf-step-content">
-                    <strong>${st.title}</strong>
-                    <span>${st.subtitle}</span>
-                  </div>
-                </div>
-                ${idx < WORKFLOW_STAGES.length - 1 ? `<div class="sp-wf-arrow"><i class="fas fa-chevron-right"></i></div>` : ''}
-              `).join('')}
-            </div>
-
-            <!-- Stage Detail Info Card -->
-            <div class="sp-wf-detail-card" id="sp-wf-detail-display">
-              ${renderWorkflowDetailCard(WORKFLOW_STAGES[0])}
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-  `;
-};
-window.renderDigitalMandiVideoSection = renderDigitalMandiVideoSection;
-
-/**
- * Digital Mandi Video Interaction Handlers
- */
-const initDigitalMandiVideo = () => {
-  const vid = document.getElementById('sp-digital-mandi-video');
-  const playBtn = document.getElementById('sp-video-center-play');
-  const playIcon = document.getElementById('sp-center-play-icon');
-  const ctrlPlayIcon = document.getElementById('sp-ctrl-play-icon');
-  const ctrlMuteIcon = document.getElementById('sp-ctrl-mute-icon');
-  const progressBar = document.getElementById('sp-video-progress-fill');
-  const timeDisplay = document.getElementById('sp-ctrl-time');
-
-  if (!vid) return;
-
-  const updatePlayIcons = (isPlaying) => {
-    if (playIcon) playIcon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
-    if (ctrlPlayIcon) ctrlPlayIcon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
-    if (playBtn) {
-      if (isPlaying) {
-        playBtn.classList.add('playing');
-      } else {
-        playBtn.classList.remove('playing');
-      }
-    }
-  };
-
-  const formatTime = (secs) => {
-    if (isNaN(secs) || secs < 0) return '0:00';
-    const m = Math.floor(secs / 60);
-    const s = Math.floor(secs % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  };
-
-  vid.addEventListener('timeupdate', () => {
-    if (vid.duration) {
-      const pct = (vid.currentTime / vid.duration) * 100;
-      if (progressBar) progressBar.style.width = `${pct}%`;
-      if (timeDisplay) timeDisplay.textContent = `${formatTime(vid.currentTime)} / ${formatTime(vid.duration)}`;
-
-      // Highlight corresponding stage automatically during playback
-      const stageIdx = Math.min(WORKFLOW_STAGES.length - 1, Math.floor((vid.currentTime / vid.duration) * WORKFLOW_STAGES.length));
-      const targetStep = WORKFLOW_STAGES[stageIdx].step;
-      if (targetStep !== activeWorkflowStepIndex) {
-        highlightWorkflowStep(targetStep, false);
-      }
-    }
-  });
-
-  vid.addEventListener('play', () => updatePlayIcons(true));
-  vid.addEventListener('pause', () => updatePlayIcons(false));
-  vid.addEventListener('ended', () => {
-    updatePlayIcons(false);
-    vid.currentTime = 0;
-  });
-
-  vid.addEventListener('loadedmetadata', () => {
-    if (timeDisplay && vid.duration) {
-      timeDisplay.textContent = `0:00 / ${formatTime(vid.duration)}`;
-    }
-  });
-
-  // Autoplay safely on scroll/view
-  vid.muted = true;
-  const p = vid.play();
-  if (p !== undefined) {
-    p.catch(() => {
+  // Ensure continuous muted autoplay of farmer & mandi video
+  const initMandiVideo = () => {
+    const vid = document.getElementById('sp-hero-farmer-video');
+    if (!vid) return false;
+    vid.muted = true;
+    vid.defaultMuted = true;
+    const playVid = () => {
       vid.muted = true;
-      vid.play().catch(() => {});
-    });
-  }
-};
-
-window.toggleMandiVideoPlayback = (event) => {
-  if (event) event.stopPropagation();
-  const vid = document.getElementById('sp-digital-mandi-video');
-  if (!vid) return;
-  if (vid.paused) {
-    vid.play().catch(() => {});
-  } else {
-    vid.pause();
-  }
-};
-
-window.toggleMandiVideoAudio = (event) => {
-  if (event) event.stopPropagation();
-  const vid = document.getElementById('sp-digital-mandi-video');
-  const muteIcon = document.getElementById('sp-ctrl-mute-icon');
-  if (!vid) return;
-  vid.muted = !vid.muted;
-  if (muteIcon) {
-    muteIcon.className = vid.muted ? 'fas fa-volume-mute' : 'fas fa-volume-high';
-  }
-};
-
-window.toggleMandiFullscreen = (event) => {
-  if (event) event.stopPropagation();
-  const wrapper = document.getElementById('sp-mandi-player-wrapper');
-  const fsIcon = document.getElementById('sp-ctrl-fs-icon');
-  if (!wrapper) return;
-
-  const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-
-  if (!isFullscreen) {
-    if (wrapper.requestFullscreen) {
-      wrapper.requestFullscreen();
-    } else if (wrapper.webkitRequestFullscreen) {
-      wrapper.webkitRequestFullscreen();
-    } else if (wrapper.mozRequestFullScreen) {
-      wrapper.mozRequestFullScreen();
-    } else if (wrapper.msRequestFullscreen) {
-      wrapper.msRequestFullscreen();
-    }
-    if (fsIcon) fsIcon.className = 'fas fa-compress';
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    }
-    if (fsIcon) fsIcon.className = 'fas fa-expand';
-  }
-};
-
-document.addEventListener('fullscreenchange', () => {
-  const fsIcon = document.getElementById('sp-ctrl-fs-icon');
-  if (fsIcon) {
-    fsIcon.className = document.fullscreenElement ? 'fas fa-compress' : 'fas fa-expand';
-  }
-});
-
-window.seekMandiVideo = (event) => {
-  const track = document.getElementById('sp-video-progress-track');
-  const vid = document.getElementById('sp-digital-mandi-video');
-  if (!track || !vid || !vid.duration) return;
-  const rect = track.getBoundingClientRect();
-  const clickX = event.clientX - rect.left;
-  const pct = Math.max(0, Math.min(1, clickX / rect.width));
-  vid.currentTime = pct * vid.duration;
-};
-
-window.highlightWorkflowStep = (stepNumber, seekVideo = false) => {
-  activeWorkflowStepIndex = stepNumber;
-  const stage = WORKFLOW_STAGES.find(s => s.step === stepNumber) || WORKFLOW_STAGES[0];
-
-  const steps = document.querySelectorAll('.sp-wf-step');
-  steps.forEach(st => {
-    const num = parseInt(st.getAttribute('data-step'), 10);
-    if (num === stepNumber) {
-      st.classList.add('active');
-    } else {
-      st.classList.remove('active');
-    }
-  });
-
-  const detailSlot = document.getElementById('sp-wf-detail-display');
-  if (detailSlot) {
-    detailSlot.innerHTML = renderWorkflowDetailCard(stage);
-  }
-
-  if (seekVideo) {
-    const vid = document.getElementById('sp-digital-mandi-video');
-    if (vid && vid.duration) {
-      const targetTime = ((stage.step - 1) / WORKFLOW_STAGES.length) * vid.duration;
-      vid.currentTime = targetTime;
-      if (vid.paused) {
-        vid.play().catch(() => {});
+      const promise = vid.play();
+      if (promise !== undefined) {
+        promise.catch(() => {
+          vid.muted = true;
+          vid.play().catch(() => {});
+        });
       }
-    }
-  }
-};
+    };
+    playVid();
+    vid.addEventListener('ended', () => {
+      vid.currentTime = 0;
+      playVid();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && vid.paused) {
+        playVid();
+      }
+    });
+    return true;
+  };
 
-window.seekToWorkflowStage = (stepNumber) => {
-  highlightWorkflowStep(stepNumber, true);
+  setTimeout(initMandiVideo, 60);
+  setTimeout(initMandiVideo, 300);
+  setTimeout(initMandiVideo, 1000);
 };
 
 /**
- * Render Authentication Card in Hero
+ * Hero Farmer & Mandi Video Component (Continuous Looping Video)
  */
-const renderHeroAuthCard = (user, isAuthenticated) => {
+const renderHeroVideoShowcase = () => {
   return `
-    <div class="sp-hero-auth-card" id="sp-hero-auth-card">
-      ${isAuthenticated ? renderAuthenticatedHeroCard(user) : renderUnauthenticatedHeroCard()}
+    <div class="sp-hero-video-card" id="sp-hero-auth-card">
+      <div class="sp-hero-video-frame">
+        <video 
+          id="sp-hero-farmer-video"
+          class="sp-farmer-hero-video"
+          autoplay 
+          loop 
+          muted 
+          playsinline 
+          webkit-playsinline
+          preload="auto"
+          poster="/images/sp_mandi_queue_thumb.jpg"
+        >
+          <source src="/videos/mandi_queue_operations.webm" type="video/webm" />
+          Your browser does not support HTML5 video.
+        </video>
+        <div class="sp-video-tag-pill">
+          <span class="sp-video-pulse-dot"></span>
+          <span>Krishi Mandi &bull; Arrival &amp; Queue Management</span>
+        </div>
+      </div>
     </div>
   `;
 };
-window.renderHeroAuthCard = renderHeroAuthCard;
+window.renderHeroVideoShowcase = renderHeroVideoShowcase;
 
 /**
  * Render Authentication Card when user is ALREADY authenticated
@@ -1380,24 +1016,8 @@ const toggleHeroPassword = (inputId, iconEl) => {
 
 const openLandingLoginRole = (role) => {
   activeAuthRole = role;
-  activeAuthCardTab = 'login';
-  const heroCard = document.getElementById('sp-hero-auth-card');
-  if (heroCard) {
-    heroCard.innerHTML = renderUnauthenticatedHeroCard();
-    if (typeof heroCard.scrollIntoView === 'function') {
-      heroCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    const idField = document.getElementById('hero-auth-id');
-    if (idField && typeof idField.focus === 'function') {
-      idField.focus();
-    }
-    if (role === 'admin' && typeof fetchCaptcha === 'function') {
-      setTimeout(fetchCaptcha, 30);
-    }
-  } else {
-    if (typeof openLoginModal === 'function') {
-      openLoginModal(role);
-    }
+  if (typeof openLoginModal === 'function') {
+    openLoginModal(role);
   }
 };
 
