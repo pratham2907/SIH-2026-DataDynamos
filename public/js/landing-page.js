@@ -83,11 +83,9 @@ const renderPublicLandingPage = () => {
               </div>
             </div>
 
-            <!-- Right Hero: Embedded Authentication Card -->
+            <!-- Right Hero: Video Showcase replacing the Auth Card -->
             <div class="sp-hero-auth-slot">
-              <div class="sp-auth-card" id="sp-hero-auth-card">
-                ${isAuthenticated ? renderAuthenticatedHeroCard(user) : renderUnauthenticatedHeroCard()}
-              </div>
+              ${renderHeroVideoShowcase(user, isAuthenticated)}
             </div>
 
           </div>
@@ -585,12 +583,70 @@ const renderPublicLandingPage = () => {
     </div>
   `;
 
-  if (!isAuthenticated && activeAuthCardTab === 'login' && activeAuthRole === 'admin') {
-    if (typeof fetchCaptcha === 'function') {
-      setTimeout(fetchCaptcha, 50);
-    }
-  }
+  // Ensure continuous muted autoplay of farmer & mandi video
+  const initMandiVideo = () => {
+    const vid = document.getElementById('sp-hero-farmer-video');
+    if (!vid) return false;
+    vid.muted = true;
+    vid.defaultMuted = true;
+    const playVid = () => {
+      vid.muted = true;
+      const promise = vid.play();
+      if (promise !== undefined) {
+        promise.catch(() => {
+          vid.muted = true;
+          vid.play().catch(() => {});
+        });
+      }
+    };
+    playVid();
+    vid.addEventListener('ended', () => {
+      vid.currentTime = 0;
+      playVid();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && vid.paused) {
+        playVid();
+      }
+    });
+    return true;
+  };
+
+  setTimeout(initMandiVideo, 60);
+  setTimeout(initMandiVideo, 300);
+  setTimeout(initMandiVideo, 1000);
 };
+
+/**
+ * Hero Farmer & Mandi Video Component (Continuous Looping Video)
+ */
+const renderHeroVideoShowcase = () => {
+  return `
+    <div class="sp-hero-video-card" id="sp-hero-auth-card">
+      <div class="sp-hero-video-frame">
+        <video 
+          id="sp-hero-farmer-video"
+          class="sp-farmer-hero-video"
+          autoplay 
+          loop 
+          muted 
+          playsinline 
+          webkit-playsinline
+          preload="auto"
+          poster="/images/sp_mandi_thumb.jpg"
+        >
+          <source src="/videos/mandi_grading_operations.webm" type="video/webm" />
+          Your browser does not support HTML5 video.
+        </video>
+        <div class="sp-video-tag-pill">
+          <span class="sp-video-pulse-dot"></span>
+          <span>Krishi Mandi &bull; Quality Grading &amp; Operations</span>
+        </div>
+      </div>
+    </div>
+  `;
+};
+window.renderHeroVideoShowcase = renderHeroVideoShowcase;
 
 /**
  * Render Authentication Card when user is ALREADY authenticated
@@ -960,24 +1016,8 @@ const toggleHeroPassword = (inputId, iconEl) => {
 
 const openLandingLoginRole = (role) => {
   activeAuthRole = role;
-  activeAuthCardTab = 'login';
-  const heroCard = document.getElementById('sp-hero-auth-card');
-  if (heroCard) {
-    heroCard.innerHTML = renderUnauthenticatedHeroCard();
-    if (typeof heroCard.scrollIntoView === 'function') {
-      heroCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    const idField = document.getElementById('hero-auth-id');
-    if (idField && typeof idField.focus === 'function') {
-      idField.focus();
-    }
-    if (role === 'admin' && typeof fetchCaptcha === 'function') {
-      setTimeout(fetchCaptcha, 30);
-    }
-  } else {
-    if (typeof openLoginModal === 'function') {
-      openLoginModal(role);
-    }
+  if (typeof openLoginModal === 'function') {
+    openLoginModal(role);
   }
 };
 

@@ -64,6 +64,66 @@ const handleInactivityLogout = () => {
 // ------------------------------------------------------------------------------
 // 2. CENTRAL AUTHENTICATION PAGE & ROLE LOGIN MODAL
 // ------------------------------------------------------------------------------
+const quickDemoLogin = async (role) => {
+  try {
+    if (typeof showToast === 'function') {
+      showToast(`⚡ Authenticating as Demo ${String(role).toUpperCase()}...`, 'info');
+    }
+    const res = await fetch('/api/auth/demo-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role })
+    });
+    const data = await res.json();
+    if (data.success && data.token) {
+      localStorage.setItem('kpms_token', data.token);
+      localStorage.setItem('kpms_user', JSON.stringify(data.user));
+      currentUser = data.user;
+      window.currentUser = data.user;
+
+      if (typeof closeModal === 'function') closeModal();
+      if (typeof showToast === 'function') {
+        showToast(`✅ Welcome, ${data.user.name}! Logged in as ${data.user.role.toUpperCase()}`, 'success');
+      }
+
+      if (typeof updateAuthUI === 'function') updateAuthUI();
+      if (typeof initSocketConnection === 'function') initSocketConnection();
+
+      const targetHash = data.user.role === 'admin' ? '#admin-dashboard' : (data.user.role === 'officer' ? '#officer-dashboard' : '#farmer-dashboard');
+      if (typeof routeTo === 'function') {
+        routeTo(targetHash);
+      } else {
+        window.location.hash = targetHash;
+      }
+    } else {
+      if (typeof showToast === 'function') {
+        showToast(data.message || 'Demo login failed', 'error');
+      }
+    }
+  } catch (err) {
+    if (typeof showToast === 'function') {
+      showToast('Network error during demo login', 'error');
+    }
+  }
+};
+window.quickDemoLogin = quickDemoLogin;
+
+const toggleDemoNavMenu = (e) => {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('sp-demo-nav-menu');
+  if (menu) {
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+  }
+};
+window.toggleDemoNavMenu = toggleDemoNavMenu;
+
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('sp-demo-nav-menu');
+  if (menu && !e.target.closest('.sp-demo-nav-dropdown')) {
+    menu.style.display = 'none';
+  }
+});
+
 const openLoginModal = (presetRole = null) => {
   const modal = document.getElementById('auth-modal');
   const modalTitle = document.getElementById('modal-title');
@@ -86,15 +146,33 @@ const renderCentralAuthHub = (body, modalTitle) => {
 
   body.innerHTML = `
     <div style="padding: 10px 4px;">
-      <div style="text-align:center; margin-bottom:24px;">
-        <div class="brand-emblem" style="width:54px; height:54px; margin:0 auto 12px; font-size:1.8rem;">
-          <i class="fas fa-wheat-awn"></i>
+      <!-- 1-Click Instant Demo Login Strip -->
+      <div class="sp-demo-login-bar" style="background:linear-gradient(135deg, rgba(224,109,20,0.08) 0%, rgba(16,185,129,0.08) 100%); border:1.5px dashed var(--saffron); border-radius:12px; padding:12px 14px; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <span style="font-size:0.84rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+            <i class="fas fa-bolt" style="color:var(--saffron);"></i> Instant Demo Login (1-Click)
+          </span>
+          <span style="font-size:0.72rem; color:#059669; background:#D1FAE5; padding:2px 8px; border-radius:12px; font-weight:700;">Zero Password Required</span>
         </div>
-        <h3 style="font-size:1.35rem; font-weight:800; color:var(--text-main); margin-bottom:6px;">
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+          <button type="button" class="btn btn-outline btn-sm" style="background:#FFFFFF; font-size:0.8rem; font-weight:700; border-color:#10B981; color:#059669; padding:7px 4px; justify-content:center; display:flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(0,0,0,0.04);" onclick="quickDemoLogin('farmer')">
+            🌾 Farmer
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" style="background:#FFFFFF; font-size:0.8rem; font-weight:700; border-color:#2563EB; color:#1D4ED8; padding:7px 4px; justify-content:center; display:flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(0,0,0,0.04);" onclick="quickDemoLogin('officer')">
+            🏢 Officer
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" style="background:#FFFFFF; font-size:0.8rem; font-weight:700; border-color:#E06D14; color:#C25608; padding:7px 4px; justify-content:center; display:flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(0,0,0,0.04);" onclick="quickDemoLogin('admin')">
+            🛡️ Admin
+          </button>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-bottom:20px;">
+        <h3 style="font-size:1.25rem; font-weight:800; color:var(--text-main); margin-bottom:4px;">
           Select Your Access Role
         </h3>
-        <p style="font-size:0.88rem; color:var(--text-muted); max-width:480px; margin:0 auto;">
-          Secure National Procurement Grid with Two-Factor Authentication (2FA) & Role-Based Access Control.
+        <p style="font-size:0.84rem; color:var(--text-muted); max-width:480px; margin:0 auto;">
+          Secure National Procurement Grid with Two-Factor Authentication (2FA) &amp; Role-Based Access Control.
         </p>
       </div>
 
@@ -235,6 +313,17 @@ const renderRoleLoginForm = (body, modalTitle, role) => {
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
         <span class="role-badge ${cfg.badgeClass}">${cfg.badgeText}</span>
         <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-lock"></i> 256-bit SSL Encrypted</span>
+      </div>
+
+      <!-- Instant 1-Click Demo Login Banner -->
+      <div style="background:linear-gradient(135deg, rgba(224,109,20,0.06) 0%, rgba(16,185,129,0.06) 100%); border:1px dashed var(--saffron); border-radius:10px; padding:10px 12px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="font-size:0.8rem; color:var(--text-main);">
+          <strong style="display:flex; align-items:center; gap:5px;"><i class="fas fa-bolt" style="color:var(--saffron);"></i> Instant Demo Login:</strong>
+          <span style="font-size:0.74rem; color:var(--text-muted);">Quickly test as ${role === 'farmer' ? 'Kisan (Ramesh Patel)' : (role === 'officer' ? 'Mandi Officer (Vikram)' : 'Super Admin (Dr. Verma)')}</span>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline" style="background:#FFFFFF; white-space:nowrap; font-weight:700; border-color:${cfg.color}; color:${cfg.color}; padding:6px 12px; font-size:0.8rem; box-shadow:0 2px 4px rgba(0,0,0,0.04);" onclick="quickDemoLogin('${role}')">
+          ⚡ 1-Click Sign In
+        </button>
       </div>
 
       <!-- Main Login Form -->

@@ -1313,6 +1313,83 @@ const getMe = async (req, res) => {
 /**
  * Legacy reset password endpoint compatibility
  */
+/**
+ * 1-Click Instant Demo Login (for Hackathon Judges & Evaluators)
+ */
+const demoLogin = async (req, res) => {
+  try {
+    const { role = 'farmer' } = req.body;
+    const targetRole = String(role).toLowerCase().trim();
+
+    // Ensure database has seeded users
+    const count = await Users.countDocuments();
+    if (count === 0) {
+      const { seedDemoData } = require('../services/demoService');
+      await seedDemoData(false);
+    }
+
+    let user = await Users.findOne({ role: targetRole });
+    if (!user && (targetRole === 'admin' || targetRole === 'superadmin')) {
+      user = await Users.findOne({ $or: [{ role: 'admin' }, { role: 'superadmin' }] });
+    }
+    if (!user) {
+      user = await Users.findOne({});
+    }
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No demo account found.' });
+    }
+
+    let extra = {};
+    if (user.role === 'farmer') {
+      const farmerDoc = await Farmers.findOne({ userId: user._id }) || await Farmers.findOne({});
+      if (farmerDoc) {
+        extra.farmerId = farmerDoc.farmerId;
+        extra.primaryCrop = farmerDoc.primaryCrop;
+        extra.bankName = farmerDoc.bankName;
+        extra.preferredCenterId = farmerDoc.preferredCenterId;
+      }
+    }
+
+    const payload = {
+      _id: user._id,
+      id: user._id,
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+      mobile: user.mobile,
+      role: user.role,
+      officerId: user.officerId,
+      assignedCenterId: user.assignedCenterId,
+      assignedCounter: user.assignedCounter
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+
+    return res.json({
+      success: true,
+      message: `Authenticated as Demo ${user.name} (${user.role.toUpperCase()})`,
+      token,
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
+        role: user.role,
+        designation: user.designation,
+        officerId: user.officerId,
+        assignedCenterId: user.assignedCenterId,
+        assignedCounter: user.assignedCounter,
+        inactivityTimeoutMinutes: ROLE_INACTIVITY_TIMEOUTS_MINUTES[user.role] || 30,
+        ...extra
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Demo login error: ' + err.message });
+  }
+};
+
 const resetPassword = async (req, res) => {
   return forgotPasswordReset(req, res);
 };
@@ -1332,5 +1409,6 @@ module.exports = {
   logoutAll,
   getMe,
   resetPassword,
+  demoLogin,
   pendingLoginSessions
 };

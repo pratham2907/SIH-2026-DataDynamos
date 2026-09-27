@@ -33,8 +33,7 @@ const seedDemoData = async (force = false) => {
     await SystemSettings.deleteMany({});
     await Holidays.deleteMany({});
 
-    const crypto = require('crypto');
-    const defaultSeedPass = process.env.DEFAULT_SEED_PASSWORD || crypto.randomBytes(8).toString('hex');
+    const defaultSeedPass = process.env.DEFAULT_SEED_PASSWORD || 'Demo@1234';
     const passwordHash = await bcrypt.hash(defaultSeedPass, 10);
     const adminPasswordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || defaultSeedPass, 10);
     const officerPasswordHash = await bcrypt.hash(process.env.OFFICER_PASSWORD || defaultSeedPass, 10);

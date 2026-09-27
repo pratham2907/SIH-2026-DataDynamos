@@ -17,3 +17,7 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Large unused video assets
+public/videos/farmer_mandi_harvest.webm
+public/videos/indian_mandi_procurement.webm

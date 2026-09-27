@@ -62,6 +62,25 @@
 
       <!-- Public Auth Actions (Visible when not logged in) -->
       <div class="sp-nav-auth-public" id="sp-nav-public-actions" style="display:flex; align-items:center; gap:8px;">
+        <!-- Instant 1-Click Demo Login Dropdown -->
+        <div class="sp-demo-nav-dropdown" style="position:relative; display:inline-block;">
+          <button class="btn btn-sm" onclick="toggleDemoNavMenu(event)" style="background:linear-gradient(135deg, #E06D14 0%, #D97706 100%); color:#FFFFFF; border:none; font-weight:700; padding:6px 12px; border-radius:8px; display:flex; align-items:center; gap:5px; box-shadow:0 2px 6px rgba(224,109,20,0.35); cursor:pointer;">
+            <i class="fas fa-bolt"></i> Demo Login <i class="fas fa-chevron-down" style="font-size:0.65rem;"></i>
+          </button>
+          <div id="sp-demo-nav-menu" class="sp-dropdown-menu" style="display:none; position:absolute; right:0; top:calc(100% + 6px); background:#FFFFFF; border:1px solid #E2E8F0; border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,0.15); width:210px; padding:6px; z-index:9999;">
+            <div style="font-size:0.72rem; font-weight:700; color:#64748B; padding:6px 8px 4px; text-transform:uppercase; letter-spacing:0.5px;">1-Click Role Login</div>
+            <div class="sp-dropdown-item" onclick="quickDemoLogin('farmer'); toggleDemoNavMenu();" style="display:flex; align-items:center; gap:8px; padding:8px; border-radius:6px; font-size:0.85rem; cursor:pointer;">
+              <span style="font-size:1.1rem;">🌾</span> <span><strong>Farmer</strong> (Ramesh)</span>
+            </div>
+            <div class="sp-dropdown-item" onclick="quickDemoLogin('officer'); toggleDemoNavMenu();" style="display:flex; align-items:center; gap:8px; padding:8px; border-radius:6px; font-size:0.85rem; cursor:pointer;">
+              <span style="font-size:1.1rem;">🏢</span> <span><strong>Officer</strong> (Vikram)</span>
+            </div>
+            <div class="sp-dropdown-item" onclick="quickDemoLogin('admin'); toggleDemoNavMenu();" style="display:flex; align-items:center; gap:8px; padding:8px; border-radius:6px; font-size:0.85rem; cursor:pointer;">
+              <span style="font-size:1.1rem;">🛡️</span> <span><strong>Admin</strong> (Dr. Verma)</span>
+            </div>
+          </div>
+        </div>
+
         <button class="btn btn-outline btn-sm sp-nav-btn-login" onclick="openLoginModal(null)">
           <i class="fas fa-right-to-bracket"></i> <span data-i18n="nav_login">Login</span>
         </button>

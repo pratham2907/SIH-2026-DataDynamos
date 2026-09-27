@@ -59,6 +59,7 @@ router.get('/auth/captcha', authCtrl.getCaptcha);
 router.post('/auth/register', upload.any(), authCtrl.registerFarmer);
 router.post('/auth/verify-otp', authCtrl.verifyOTP);
 router.post('/auth/login', authCtrl.login);
+router.post('/auth/demo-login', authCtrl.demoLogin);
 router.post('/auth/verify-login-otp', authCtrl.verifyLoginOTP);
 router.post('/auth/resend-login-otp', authCtrl.resendLoginOTP);
 
