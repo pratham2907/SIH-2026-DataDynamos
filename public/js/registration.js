@@ -171,6 +171,9 @@ const startRegistrationFlow = async (type, isSuperAdminAvailable = true) => {
 const renderRegistrationWizard = () => {
   const modal = document.getElementById('auth-modal');
   const body = document.getElementById('modal-content-slot');
+  if (modal && !modal.classList.contains('active')) {
+    modal.classList.add('active');
+  }
 
   let title = 'Farmer Registration (7 Steps)';
   if (currentRegType === 'officer') title = 'Procurement Officer Registration';
@@ -201,8 +204,8 @@ const renderRegistrationWizard = () => {
     ];
   } else {
     stepTitles = [
+      'Administrator Details',
       'Organization Details',
-      'Super Admin Details',
       'Identity Verification',
       'Credentials',
       'Review & Confirmation',
@@ -249,6 +252,564 @@ const renderRegistrationWizard = () => {
 };
 
 /**
+ * ====================================================
+ * STEP 1 CONTACT VERIFICATION ENGINE (MOBILE + BREVO EMAIL)
+ * Strictly gates progression to Step 2 across all roles
+ * ====================================================
+ */
+const step1State = {
+  farmer: {
+    mobileVerified: false,
+    emailVerified: false,
+    mobileOtpSent: false,
+    emailOtpSent: false,
+    verifiedMobileNumber: '',
+    verifiedEmailAddress: '',
+    mobileSecondsLeft: 0,
+    emailSecondsLeft: 0,
+    mobileTimerInterval: null,
+    emailTimerInterval: null
+  },
+  officer: {
+    mobileVerified: false,
+    emailVerified: false,
+    mobileOtpSent: false,
+    emailOtpSent: false,
+    verifiedMobileNumber: '',
+    verifiedEmailAddress: '',
+    mobileSecondsLeft: 0,
+    emailSecondsLeft: 0,
+    mobileTimerInterval: null,
+    emailTimerInterval: null
+  },
+  superadmin: {
+    mobileVerified: false,
+    emailVerified: false,
+    mobileOtpSent: false,
+    emailOtpSent: false,
+    verifiedMobileNumber: '',
+    verifiedEmailAddress: '',
+    mobileSecondsLeft: 0,
+    emailSecondsLeft: 0,
+    mobileTimerInterval: null,
+    emailTimerInterval: null
+  }
+};
+
+/**
+ * Render Reusable Step 1 Contact Verification UI
+ */
+const renderStep1ContactBlock = (role, draft) => {
+  const prefix = role === 'farmer' ? 'frm' : (role === 'officer' ? 'off' : 'sadm');
+  const st = step1State[role];
+  const isMobileVerified = st.mobileVerified;
+  const isEmailVerified = st.emailVerified;
+  const isMobileOtpSent = st.mobileOtpSent;
+  const isEmailOtpSent = st.emailOtpSent;
+
+  const mobileVal = isMobileVerified ? st.verifiedMobileNumber : (draft.mobile || '');
+  const emailVal = isEmailVerified ? st.verifiedEmailAddress : (draft.email || draft.officialEmail || '');
+  const emailPlaceholder = role === 'officer' ? 'officer@kpms.gov.in' : (role === 'superadmin' ? 'superadmin@gov.in' : 'farmer@example.com');
+  const emailLabel = role === 'farmer' ? 'Email Address (For Brevo OTP) *' : (role === 'officer' ? 'Official Email Address (For Brevo OTP) *' : 'Official Email Address (For Brevo OTP) *');
+
+  return `
+    <!-- Mobile Verification Block -->
+    <div class="form-group">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <label class="form-label" style="margin-bottom:0; font-weight:700;">Mobile Number (10 Digits) *</label>
+        <span id="${prefix}-mobile-status-pill" style="font-size:0.75rem; font-weight:700; color:${isMobileVerified ? '#059669' : '#D97706'};">
+          ${isMobileVerified ? '<i class="fas fa-circle-check"></i> Mobile Verified' : '<i class="fas fa-shield-alt"></i> OTP Required for Step 2'}
+        </span>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <div style="position:relative; flex:1;">
+          <input type="tel" id="${prefix}-mobile" name="mobile" maxlength="10" class="form-control" value="${mobileVal}" placeholder="9876543210" oninput="onStep1ContactChange('${role}', 'mobile')" ${isMobileVerified ? 'readonly style="background:#F0FDF4; border-color:#86EFAC; font-weight:700; color:#065F46;"' : ''} required />
+          ${isMobileVerified ? '<i class="fas fa-check-circle" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); color:#059669; font-size:1.1rem;"></i>' : ''}
+        </div>
+        ${!isMobileVerified ? `
+          <button type="button" id="btn-${prefix}-send-mobile-otp" class="btn btn-outline btn-sm" onclick="sendStep1MobileOtp('${role}')" style="white-space:nowrap; border-color:var(--saffron); color:var(--saffron); font-weight:700; padding:6px 12px; font-size:0.8rem;">
+            <i class="fas fa-paper-plane"></i> ${isMobileOtpSent ? 'Resend OTP' : 'Send OTP'}
+          </button>
+        ` : `
+          <button type="button" class="btn btn-sm btn-outline" onclick="unlockStep1Contact('${role}', 'mobile')" title="Change Mobile Number" style="border-color:#CBD5E1; color:#64748B; font-size:0.75rem; padding:6px 10px;">
+            <i class="fas fa-pen"></i> Change
+          </button>
+        `}
+      </div>
+      <div class="field-error" id="err-${prefix}-mobile"></div>
+
+      <!-- Mobile OTP Entry Container -->
+      <div id="${prefix}-mobile-otp-wrap" style="display:${(!isMobileVerified && isMobileOtpSent) ? 'block' : 'none'}; margin-top:8px; padding:10px 12px; background:#FFFBEB; border:1px solid #FDE68A; border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:0.78rem; font-weight:700; color:#92400E;">
+            <i class="fas fa-key"></i> Enter 6-Digit SMS OTP
+          </span>
+          <span id="${prefix}-mobile-otp-timer" style="font-size:0.75rem; font-weight:700; color:#B45309;"></span>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input type="text" id="${prefix}-mobile-otp-input" maxlength="6" class="form-control" style="max-width:130px; letter-spacing:3px; font-weight:800; text-align:center; font-size:0.95rem;" placeholder="123456" />
+          <button type="button" id="btn-${prefix}-verify-mobile-otp" class="btn btn-primary btn-sm" onclick="verifyStep1MobileOtp('${role}')" style="padding:7px 14px; font-size:0.8rem; font-weight:700;">
+            <i class="fas fa-shield-check"></i> Verify
+          </button>
+        </div>
+        <div id="${prefix}-mobile-otp-msg" style="font-size:0.75rem; margin-top:5px; color:#92400E;"></div>
+      </div>
+
+      <!-- Mobile Verified Success Banner -->
+      <div id="${prefix}-mobile-verified-banner" style="display:${isMobileVerified ? 'flex' : 'none'}; align-items:center; gap:6px; margin-top:6px; padding:6px 10px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:6px; color:#065F46; font-size:0.78rem; font-weight:700;">
+        <i class="fas fa-check-circle" style="color:#059669;"></i> Mobile Number Verified via SMS OTP
+      </div>
+    </div>
+
+    <!-- Email Verification Block (Brevo API) -->
+    <div class="form-group">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <label class="form-label" style="margin-bottom:0; font-weight:700;">${emailLabel}</label>
+        <span id="${prefix}-email-status-pill" style="font-size:0.75rem; font-weight:700; color:${isEmailVerified ? '#059669' : '#2563EB'};">
+          ${isEmailVerified ? '<i class="fas fa-circle-check"></i> Brevo Email Verified' : '<i class="fas fa-envelope-circle-check"></i> Brevo OTP Required for Step 2'}
+        </span>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <div style="position:relative; flex:1;">
+          <input type="email" id="${prefix}-email" name="email" class="form-control" value="${emailVal}" placeholder="${emailPlaceholder}" oninput="onStep1ContactChange('${role}', 'email')" ${isEmailVerified ? 'readonly style="background:#F0FDF4; border-color:#86EFAC; font-weight:700; color:#065F46;"' : ''} required />
+          ${isEmailVerified ? '<i class="fas fa-check-circle" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); color:#059669; font-size:1.1rem;"></i>' : ''}
+        </div>
+        ${!isEmailVerified ? `
+          <button type="button" id="btn-${prefix}-send-email-otp" class="btn btn-outline btn-sm" onclick="sendStep1EmailOtp('${role}')" style="white-space:nowrap; border-color:#2563EB; color:#2563EB; font-weight:700; padding:6px 12px; font-size:0.8rem;">
+            <i class="fas fa-paper-plane"></i> ${isEmailOtpSent ? 'Resend Brevo OTP' : 'Send Brevo OTP'}
+          </button>
+        ` : `
+          <button type="button" class="btn btn-sm btn-outline" onclick="unlockStep1Contact('${role}', 'email')" title="Change Email Address" style="border-color:#CBD5E1; color:#64748B; font-size:0.75rem; padding:6px 10px;">
+            <i class="fas fa-pen"></i> Change
+          </button>
+        `}
+      </div>
+      <div class="field-error" id="err-${prefix}-email"></div>
+
+      <!-- Email OTP Entry Container -->
+      <div id="${prefix}-email-otp-wrap" style="display:${(!isEmailVerified && isEmailOtpSent) ? 'block' : 'none'}; margin-top:8px; padding:10px 12px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:0.78rem; font-weight:700; color:#1E40AF;">
+            <i class="fas fa-envelope-open-text"></i> Enter 6-Digit Brevo Verification Code
+          </span>
+          <span id="${prefix}-email-otp-timer" style="font-size:0.75rem; font-weight:700; color:#1D4ED8;"></span>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input type="text" id="${prefix}-email-otp-input" maxlength="6" class="form-control" style="max-width:130px; letter-spacing:3px; font-weight:800; text-align:center; font-size:0.95rem;" placeholder="123456" />
+          <button type="button" id="btn-${prefix}-verify-email-otp" class="btn btn-primary btn-sm" onclick="verifyStep1EmailOtp('${role}')" style="padding:7px 14px; font-size:0.8rem; font-weight:700; background:#2563EB; border-color:#2563EB;">
+            <i class="fas fa-shield-check"></i> Verify Email
+          </button>
+        </div>
+        <div id="${prefix}-email-otp-msg" style="font-size:0.75rem; margin-top:5px; color:#1E40AF;"></div>
+      </div>
+
+      <!-- Email Verified Success Banner -->
+      <div id="${prefix}-email-verified-banner" style="display:${isEmailVerified ? 'flex' : 'none'}; align-items:center; gap:6px; margin-top:6px; padding:6px 10px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:6px; color:#065F46; font-size:0.78rem; font-weight:700;">
+        <i class="fas fa-check-circle" style="color:#059669;"></i> Official Email Verified via Brevo Transactional Service
+      </div>
+    </div>
+  `;
+};
+
+/**
+ * Step 1 Input Change Listener: Invalidates verification if contact text is altered
+ */
+const onStep1ContactChange = (role, type) => {
+  const prefix = role === 'farmer' ? 'frm' : (role === 'officer' ? 'off' : 'sadm');
+  const inputEl = document.getElementById(`${prefix}-${type}`);
+  if (!inputEl) return;
+  const val = inputEl.value.trim();
+  const st = step1State[role];
+
+  if (type === 'mobile') {
+    if (st.mobileVerified && val !== st.verifiedMobileNumber) {
+      st.mobileVerified = false;
+      st.verifiedMobileNumber = '';
+      st.mobileOtpSent = false;
+      clearInterval(st.mobileTimerInterval);
+      saveCurrentStep1Draft(role);
+      renderRegistrationWizard();
+      showToast('Mobile number changed. Please re-verify via OTP.', 'info');
+    }
+  } else if (type === 'email') {
+    if (st.emailVerified && val.toLowerCase() !== st.verifiedEmailAddress.toLowerCase()) {
+      st.emailVerified = false;
+      st.verifiedEmailAddress = '';
+      st.emailOtpSent = false;
+      clearInterval(st.emailTimerInterval);
+      saveCurrentStep1Draft(role);
+      renderRegistrationWizard();
+      showToast('Email address changed. Please re-verify via Brevo OTP.', 'info');
+    }
+  }
+};
+
+/**
+ * Unlock Step 1 Contact field to permit changing mobile/email
+ */
+const unlockStep1Contact = (role, type) => {
+  const st = step1State[role];
+  if (type === 'mobile') {
+    st.mobileVerified = false;
+    st.verifiedMobileNumber = '';
+    st.mobileOtpSent = false;
+    clearInterval(st.mobileTimerInterval);
+  } else {
+    st.emailVerified = false;
+    st.verifiedEmailAddress = '';
+    st.emailOtpSent = false;
+    clearInterval(st.emailTimerInterval);
+  }
+  saveCurrentStep1Draft(role);
+  renderRegistrationWizard();
+};
+
+/**
+ * Start 60-Second Countdown Timer for Step 1 OTP
+ */
+const startStep1Timer = (role, type, seconds = 60) => {
+  const prefix = role === 'farmer' ? 'frm' : (role === 'officer' ? 'off' : 'sadm');
+  const st = step1State[role];
+  const timerKey = `${type}TimerInterval`;
+  const secKey = `${type}SecondsLeft`;
+
+  clearInterval(st[timerKey]);
+  st[secKey] = seconds;
+
+  const btn = document.getElementById(`btn-${prefix}-send-${type}-otp`);
+  if (btn) btn.disabled = true;
+
+  st[timerKey] = setInterval(() => {
+    st[secKey]--;
+    const currentTimerEl = document.getElementById(`${prefix}-${type}-otp-timer`);
+    if (currentTimerEl) {
+      currentTimerEl.textContent = `Resend in ${st[secKey]}s`;
+    }
+    if (st[secKey] <= 0) {
+      clearInterval(st[timerKey]);
+      const expTimerEl = document.getElementById(`${prefix}-${type}-otp-timer`);
+      if (expTimerEl) expTimerEl.textContent = '';
+      const expBtn = document.getElementById(`btn-${prefix}-send-${type}-otp`);
+      if (expBtn) {
+        expBtn.disabled = false;
+        expBtn.innerHTML = `<i class="fas fa-rotate-right"></i> Resend ${type === 'email' ? 'Brevo OTP' : 'OTP'}`;
+      }
+    }
+  }, 1000);
+};
+
+/**
+ * Dispatch Mobile OTP for Step 1
+ */
+const sendStep1MobileOtp = async (role) => {
+  const prefix = role === 'farmer' ? 'frm' : (role === 'officer' ? 'off' : 'sadm');
+  const mobileInput = document.getElementById(`${prefix}-mobile`);
+  const mobile = mobileInput ? mobileInput.value.trim() : '';
+  const nameInput = document.getElementById(`${prefix}-name`);
+  const fullName = nameInput ? nameInput.value.trim() : '';
+
+  if (!mobile || !/^\d{10}$/.test(mobile)) {
+    showFieldError(`err-${prefix}-mobile`, 'Please enter a valid 10-digit mobile number first.');
+    if (mobileInput) mobileInput.focus();
+    return;
+  }
+  showFieldError(`err-${prefix}-mobile`, '');
+
+  const btn = document.getElementById(`btn-${prefix}-send-mobile-otp`);
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending...`;
+  }
+
+  try {
+    const res = await fetch('/api/registration/send-mobile-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile, fullName, role })
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(result.message || 'Failed to dispatch mobile OTP.', 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-paper-plane"></i> Send OTP`;
+      }
+      return;
+    }
+
+    step1State[role].mobileOtpSent = true;
+    showToast(result.message || 'OTP sent to mobile!', 'success');
+
+    const wrap = document.getElementById(`${prefix}-mobile-otp-wrap`);
+    if (wrap) wrap.style.display = 'block';
+
+    const msgEl = document.getElementById(`${prefix}-mobile-otp-msg`);
+    if (msgEl) {
+      msgEl.innerHTML = `<span style="color:#059669; font-weight:600;"><i class="fas fa-check"></i> Code sent to +91 ${result.mobile || mobile}. (Demo bypass: 123456)</span>`;
+    }
+
+    startStep1Timer(role, 'mobile', 60);
+
+    const otpInput = document.getElementById(`${prefix}-mobile-otp-input`);
+    if (otpInput) {
+      otpInput.value = '';
+      otpInput.focus();
+    }
+  } catch (err) {
+    showToast('Failed to send mobile OTP: ' + err.message, 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fas fa-paper-plane"></i> Send OTP`;
+    }
+  }
+};
+
+/**
+ * Verify Step 1 Mobile OTP
+ */
+const verifyStep1MobileOtp = async (role) => {
+  const prefix = role === 'farmer' ? 'frm' : (role === 'officer' ? 'off' : 'sadm');
+  const mobileInput = document.getElementById(`${prefix}-mobile`);
+  const mobile = mobileInput ? mobileInput.value.trim() : '';
+  const otpInput = document.getElementById(`${prefix}-mobile-otp-input`);
+  const otp = otpInput ? otpInput.value.trim() : '';
+
+  if (!otp || otp.length !== 6) {
+    showToast('Please enter the 6-digit OTP received on your mobile.', 'warning');
+    if (otpInput) otpInput.focus();
+    return;
+  }
+
+  const vBtn = document.getElementById(`btn-${prefix}-verify-mobile-otp`);
+  if (vBtn) {
+    vBtn.disabled = true;
+    vBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verifying...`;
+  }
+
+  try {
+    const res = await fetch('/api/registration/verify-mobile-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile, otp })
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(result.message || 'Invalid Mobile OTP.', 'error');
+      if (vBtn) {
+        vBtn.disabled = false;
+        vBtn.innerHTML = `<i class="fas fa-shield-check"></i> Verify`;
+      }
+      return;
+    }
+
+    step1State[role].mobileVerified = true;
+    step1State[role].verifiedMobileNumber = mobile;
+    clearInterval(step1State[role].mobileTimerInterval);
+
+    showToast(`✅ Mobile +91 ${mobile} verified successfully!`, 'success');
+
+    saveCurrentStep1Draft(role);
+    renderRegistrationWizard();
+  } catch (err) {
+    showToast('Mobile verification error: ' + err.message, 'error');
+    if (vBtn) {
+      vBtn.disabled = false;
+      vBtn.innerHTML = `<i class="fas fa-shield-check"></i> Verify`;
+    }
+  }
+};
+
+/**
+ * Dispatch Email OTP via Brevo API for Step 1
+ */
+const sendStep1EmailOtp = async (role) => {
+  const prefix = role === 'farmer' ? 'frm' : (role === 'officer' ? 'off' : 'sadm');
+  const emailInput = document.getElementById(`${prefix}-email`);
+  const email = emailInput ? emailInput.value.trim() : '';
+  const nameInput = document.getElementById(`${prefix}-name`);
+  const fullName = nameInput ? nameInput.value.trim() : '';
+
+  if (!email || !/\S+@\S+\.\S+/.test(email)) {
+    showFieldError(`err-${prefix}-email`, 'Please enter a valid email address first.');
+    if (emailInput) emailInput.focus();
+    return;
+  }
+  showFieldError(`err-${prefix}-email`, '');
+
+  const btn = document.getElementById(`btn-${prefix}-send-email-otp`);
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending Brevo OTP...`;
+  }
+
+  try {
+    const res = await fetch('/api/registration/send-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, fullName, role })
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(result.message || 'Failed to dispatch Brevo email OTP.', 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-paper-plane"></i> Send Brevo OTP`;
+      }
+      return;
+    }
+
+    step1State[role].emailOtpSent = true;
+    showToast(result.message || 'Brevo verification OTP dispatched to your email!', 'success');
+
+    const wrap = document.getElementById(`${prefix}-email-otp-wrap`);
+    if (wrap) wrap.style.display = 'block';
+
+    const msgEl = document.getElementById(`${prefix}-email-otp-msg`);
+    if (msgEl) {
+      msgEl.innerHTML = `<span style="color:#1D4ED8; font-weight:600;"><i class="fas fa-envelope"></i> Code sent to ${result.email || email} via Brevo API. (Demo bypass: 123456)</span>`;
+    }
+
+    startStep1Timer(role, 'email', 60);
+
+    const otpInput = document.getElementById(`${prefix}-email-otp-input`);
+    if (otpInput) {
+      otpInput.value = '';
+      otpInput.focus();
+    }
+  } catch (err) {
+    showToast('Failed to dispatch Brevo OTP: ' + err.message, 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fas fa-paper-plane"></i> Send Brevo OTP`;
+    }
+  }
+};
+
+/**
+ * Verify Step 1 Email OTP (dispatched via Brevo API)
+ */
+const verifyStep1EmailOtp = async (role) => {
+  const prefix = role === 'farmer' ? 'frm' : (role === 'officer' ? 'off' : 'sadm');
+  const emailInput = document.getElementById(`${prefix}-email`);
+  const email = emailInput ? emailInput.value.trim() : '';
+  const otpInput = document.getElementById(`${prefix}-email-otp-input`);
+  const otp = otpInput ? otpInput.value.trim() : '';
+
+  if (!otp || otp.length !== 6) {
+    showToast('Please enter the 6-digit Brevo OTP received in your email.', 'warning');
+    if (otpInput) otpInput.focus();
+    return;
+  }
+
+  const vBtn = document.getElementById(`btn-${prefix}-verify-email-otp`);
+  if (vBtn) {
+    vBtn.disabled = true;
+    vBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verifying...`;
+  }
+
+  try {
+    const res = await fetch('/api/registration/verify-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp })
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(result.message || 'Invalid Email OTP.', 'error');
+      if (vBtn) {
+        vBtn.disabled = false;
+        vBtn.innerHTML = `<i class="fas fa-shield-check"></i> Verify Email`;
+      }
+      return;
+    }
+
+    step1State[role].emailVerified = true;
+    step1State[role].verifiedEmailAddress = email;
+    clearInterval(step1State[role].emailTimerInterval);
+
+    showToast(`✅ Email ${email} verified successfully via Brevo!`, 'success');
+
+    saveCurrentStep1Draft(role);
+    renderRegistrationWizard();
+  } catch (err) {
+    showToast('Email verification error: ' + err.message, 'error');
+    if (vBtn) {
+      vBtn.disabled = false;
+      vBtn.innerHTML = `<i class="fas fa-shield-check"></i> Verify Email`;
+    }
+  }
+};
+
+/**
+ * Helper to preserve input values into regDraftData prior to re-render
+ */
+const saveCurrentStep1Draft = (role) => {
+  if (role === 'farmer') {
+    const name = document.getElementById('frm-name')?.value.trim();
+    const father = document.getElementById('frm-father')?.value.trim();
+    const dob = document.getElementById('frm-dob')?.value;
+    const gender = document.getElementById('frm-gender')?.value;
+    const mobile = document.getElementById('frm-mobile')?.value.trim();
+    const email = document.getElementById('frm-email')?.value.trim();
+    const aadhaar = document.getElementById('frm-aadhaar')?.value.trim();
+    const password = document.getElementById('frm-pass')?.value;
+    regDraftData.farmer = {
+      ...regDraftData.farmer,
+      fullName: name || regDraftData.farmer.fullName,
+      fatherName: father || regDraftData.farmer.fatherName,
+      dob: dob || regDraftData.farmer.dob,
+      gender: gender || regDraftData.farmer.gender,
+      mobile: mobile || regDraftData.farmer.mobile,
+      email: email || regDraftData.farmer.email,
+      aadhaarNumber: aadhaar || regDraftData.farmer.aadhaarNumber,
+      password: password || regDraftData.farmer.password
+    };
+  } else if (role === 'officer') {
+    const name = document.getElementById('off-name')?.value.trim();
+    const empId = document.getElementById('off-empid')?.value.trim();
+    const desig = document.getElementById('off-designation')?.value.trim();
+    const dob = document.getElementById('off-dob')?.value;
+    const email = document.getElementById('off-email')?.value.trim();
+    const mobile = document.getElementById('off-mobile')?.value.trim();
+    const aadhaar = document.getElementById('off-aadhaar')?.value.trim();
+    const password = document.getElementById('off-pass')?.value;
+    regDraftData.officer = {
+      ...regDraftData.officer,
+      fullName: name || regDraftData.officer.fullName,
+      employeeId: empId || regDraftData.officer.employeeId,
+      designation: desig || regDraftData.officer.designation,
+      dob: dob || regDraftData.officer.dob,
+      officialEmail: email || regDraftData.officer.officialEmail,
+      mobile: mobile || regDraftData.officer.mobile,
+      aadhaarNumber: aadhaar || regDraftData.officer.aadhaarNumber,
+      password: password || regDraftData.officer.password
+    };
+  } else if (role === 'superadmin') {
+    const name = document.getElementById('sadm-name')?.value.trim();
+    const desig = document.getElementById('sadm-designation')?.value.trim();
+    const empId = document.getElementById('sadm-empid')?.value.trim();
+    const dob = document.getElementById('sadm-dob')?.value;
+    const email = document.getElementById('sadm-email')?.value.trim();
+    const mobile = document.getElementById('sadm-mobile')?.value.trim();
+    const aadhaar = document.getElementById('sadm-aadhaar')?.value.trim();
+    regDraftData.superadmin = {
+      ...regDraftData.superadmin,
+      fullName: name || regDraftData.superadmin.fullName,
+      designation: desig || regDraftData.superadmin.designation,
+      employeeId: empId || regDraftData.superadmin.employeeId,
+      dob: dob || regDraftData.superadmin.dob,
+      officialEmail: email || regDraftData.superadmin.officialEmail,
+      mobile: mobile || regDraftData.superadmin.mobile,
+      aadhaarNumber: aadhaar || regDraftData.superadmin.aadhaarNumber
+    };
+  }
+};
+
+/**
  * ----------------------------------------------------
  * FARMER STEP HTML BUILDERS
  * ----------------------------------------------------
@@ -276,7 +837,7 @@ const getFarmerStepHtml = (step) => {
             <input type="date" id="frm-dob" name="dob" class="form-control" value="${draft.dob || '1985-05-15'}" required />
             <div class="field-error" id="err-frm-dob"></div>
           </div>
-          <div class="form-group">
+          <div class="form-group" style="grid-column:1/-1;">
             <label class="form-label">Gender *</label>
             <select id="frm-gender" name="gender" class="form-control">
               <option value="Male" ${draft.gender === 'Male' ? 'selected' : ''}>Male</option>
@@ -284,29 +845,9 @@ const getFarmerStepHtml = (step) => {
               <option value="Other" ${draft.gender === 'Other' ? 'selected' : ''}>Other</option>
             </select>
           </div>
-          <div class="form-group">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <label class="form-label" style="margin-bottom:0;">Mobile Number (10 Digits) *</label>
-              <button type="button" style="background:none; border:none; color:var(--saffron); font-size:0.75rem; font-weight:700; cursor:pointer; padding:0;" onclick="verifyFarmerMobileViaMsg91()">
-                <i class="fas fa-shield-check"></i> Verify via MSG91 OTP
-              </button>
-            </div>
-            <div style="display:flex; gap:6px; margin-top:4px;">
-              <input type="tel" id="frm-mobile" name="mobile" maxlength="10" class="form-control" value="${draft.mobile || ''}" placeholder="9876543210" required />
-              <button type="button" class="btn btn-outline btn-sm" onclick="verifyFarmerMobileViaMsg91()" title="Verify Mobile via Real SMS OTP" style="white-space:nowrap; border-color:var(--saffron); color:var(--saffron); font-weight:700; padding:4px 10px; font-size:0.78rem;">
-                <i class="fas fa-mobile-screen"></i> Real OTP
-              </button>
-            </div>
-            <div id="frm-mobile-verified-badge" style="display:${(window.KPMS_MSG91 && window.KPMS_MSG91.verifiedNumbers && window.KPMS_MSG91.verifiedNumbers.has(draft.mobile)) ? 'flex' : 'none'}; align-items:center; gap:4px; color:#059669; font-size:0.78rem; font-weight:700; margin-top:4px;">
-              <i class="fas fa-check-circle"></i> Authenticated via MSG91 Real SMS OTP
-            </div>
-            <div class="field-error" id="err-frm-mobile"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Email Address (For Brevo OTP) *</label>
-            <input type="email" id="frm-email" name="email" class="form-control" value="${draft.email || ''}" placeholder="farmer@example.com" required />
-            <div class="field-error" id="err-frm-email"></div>
-          </div>
+
+          ${renderStep1ContactBlock('farmer', draft)}
+
           <div class="form-group">
             <label class="form-label">Aadhaar Number (12 Digits) *</label>
             <input type="text" id="frm-aadhaar" name="aadhaarNumber" maxlength="12" class="form-control" value="${draft.aadhaarNumber || ''}" placeholder="482910482918" required />
@@ -551,16 +1092,9 @@ const getOfficerStepHtml = (step) => {
             <label class="form-label">Date of Birth (Min 18 Years) *</label>
             <input type="date" id="off-dob" name="dob" class="form-control" value="${draft.dob || '1988-08-20'}" required />
           </div>
-          <div class="form-group">
-            <label class="form-label">Official Email Address (@gov.in or official) *</label>
-            <input type="email" id="off-email" name="officialEmail" class="form-control" value="${draft.officialEmail || ''}" placeholder="officer@kpms.gov.in" required />
-            <div class="field-error" id="err-off-email"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mobile Number (10 Digits) *</label>
-            <input type="tel" id="off-mobile" name="mobile" maxlength="10" class="form-control" value="${draft.mobile || ''}" placeholder="9812345678" required />
-            <div class="field-error" id="err-off-mobile"></div>
-          </div>
+
+          ${renderStep1ContactBlock('officer', draft)}
+
           <div class="form-group">
             <label class="form-label">Aadhaar Number (12 Digits) *</label>
             <input type="text" id="off-aadhaar" name="aadhaarNumber" maxlength="12" class="form-control" value="${draft.aadhaarNumber || ''}" placeholder="582910482910" required />
@@ -723,7 +1257,47 @@ const getSuperAdminStepHtml = (step) => {
   if (step === 1) {
     return `
       <form id="sadm-step1-form" onsubmit="event.preventDefault(); validateAndNextSuperAdmin(1);">
-        <h4 style="color:var(--primary-navy); font-weight:800; margin-bottom:14px;"><i class="fas fa-building" style="color:var(--green-gov);"></i> Step 1: Organization & Ministry Profile</h4>
+        <h4 style="color:var(--primary-navy); font-weight:800; margin-bottom:14px;"><i class="fas fa-user-shield" style="color:var(--green-gov);"></i> Step 1: Administrator Personal & Contact Details</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="sadm-name" class="form-control" value="${draft.fullName || ''}" placeholder="Dr. S. K. Awasthi" required />
+            <div class="field-error" id="err-sadm-name"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Official Designation *</label>
+            <input type="text" id="sadm-designation" class="form-control" value="${draft.designation || 'Joint Secretary / Chief Procurement Commissioner'}" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Official Employee ID *</label>
+            <input type="text" id="sadm-empid" class="form-control" value="${draft.employeeId || ''}" placeholder="GOV-IAS-2004" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth (Min 21 Years) *</label>
+            <input type="date" id="sadm-dob" class="form-control" value="${draft.dob || '1976-03-12'}" required />
+            <div class="field-error" id="err-sadm-dob"></div>
+          </div>
+
+          ${renderStep1ContactBlock('superadmin', draft)}
+
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Aadhaar Card Number (12 Digits) *</label>
+            <input type="text" id="sadm-aadhaar" maxlength="12" class="form-control" value="${draft.aadhaarNumber || ''}" placeholder="682910482910" required />
+            <div class="field-error" id="err-sadm-aadhaar"></div>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:20px;">
+          <button type="button" class="btn btn-outline" onclick="openRegistrationChooser()"><i class="fas fa-arrow-left"></i> Change Role</button>
+          <button type="submit" class="btn btn-primary">Next: Organization Details <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </form>
+    `;
+  }
+
+  if (step === 2) {
+    return `
+      <form id="sadm-step2-form" onsubmit="event.preventDefault(); validateAndNextSuperAdmin(2);">
+        <h4 style="color:var(--primary-navy); font-weight:800; margin-bottom:14px;"><i class="fas fa-building" style="color:var(--green-gov);"></i> Step 2: Organization & Ministry Profile</h4>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group" style="grid-column:1/-1;">
             <label class="form-label">Organization / Authority Name *</label>
@@ -740,52 +1314,6 @@ const getSuperAdminStepHtml = (step) => {
           <div class="form-group" style="grid-column:1/-1;">
             <label class="form-label">National Headquarters Address *</label>
             <textarea id="sadm-addr" class="form-control" rows="2" required>${draft.officeAddress || 'Krishi Bhawan, Dr. Rajendra Prasad Road, New Delhi 110001'}</textarea>
-          </div>
-        </div>
-        <div style="display:flex; justify-content:space-between; margin-top:20px;">
-          <button type="button" class="btn btn-outline" onclick="openRegistrationChooser()"><i class="fas fa-arrow-left"></i> Change Role</button>
-          <button type="submit" class="btn btn-primary">Next: Administrator Details <i class="fas fa-arrow-right"></i></button>
-        </div>
-      </form>
-    `;
-  }
-
-  if (step === 2) {
-    return `
-      <form id="sadm-step2-form" onsubmit="event.preventDefault(); validateAndNextSuperAdmin(2);">
-        <h4 style="color:var(--primary-navy); font-weight:800; margin-bottom:14px;"><i class="fas fa-user-shield" style="color:var(--green-gov);"></i> Step 2: Super Admin Personal Profile</h4>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-          <div class="form-group">
-            <label class="form-label">Full Name *</label>
-            <input type="text" id="sadm-name" class="form-control" value="${draft.fullName || ''}" placeholder="Dr. S. K. Awasthi" required />
-            <div class="field-error" id="err-sadm-name"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Designation *</label>
-            <input type="text" id="sadm-designation" class="form-control" value="${draft.designation || 'Joint Secretary / Chief Procurement Commissioner'}" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Official Employee ID *</label>
-            <input type="text" id="sadm-empid" class="form-control" value="${draft.employeeId || ''}" placeholder="GOV-IAS-2004" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Date of Birth (Min 21 Years) *</label>
-            <input type="date" id="sadm-dob" class="form-control" value="${draft.dob || '1976-03-12'}" required />
-            <div class="field-error" id="err-sadm-dob"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Official Email Address *</label>
-            <input type="email" id="sadm-email" class="form-control" value="${draft.officialEmail || ''}" placeholder="superadmin@gov.in" required />
-            <div class="field-error" id="err-sadm-email"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Official Mobile (10 Digits) *</label>
-            <input type="tel" id="sadm-mobile" maxlength="10" class="form-control" value="${draft.mobile || ''}" placeholder="9800000000" required />
-            <div class="field-error" id="err-sadm-mobile"></div>
-          </div>
-          <div class="form-group" style="grid-column:1/-1;">
-            <label class="form-label">Aadhaar Card Number (12 Digits) *</label>
-            <input type="text" id="sadm-aadhaar" maxlength="12" class="form-control" value="${draft.aadhaarNumber || ''}" placeholder="682910482910" required />
           </div>
         </div>
         <div style="display:flex; justify-content:space-between; margin-top:20px;">
@@ -1276,8 +1804,29 @@ const validateAndNextFarmer = (step) => {
       showFieldError('err-frm-email', 'Please enter a valid email address.');
       return;
     }
+
+    // STRICT STEP 1 CONTACT GATING: Mobile and Brevo Email MUST be verified before Step 2
+    if (!step1State.farmer.mobileVerified) {
+      showToast('⚠️ Mobile Number must be verified via OTP before proceeding to Step 2.', 'warning');
+      showFieldError('err-frm-mobile', 'Mobile verification via OTP is mandatory for Step 2.');
+      const mInput = document.getElementById('frm-mobile');
+      if (mInput) mInput.focus();
+      return;
+    }
+    if (!step1State.farmer.emailVerified) {
+      showToast('⚠️ Email Address must be verified via Brevo OTP before proceeding to Step 2.', 'warning');
+      showFieldError('err-frm-email', 'Email verification via Brevo OTP is mandatory for Step 2.');
+      const eInput = document.getElementById('frm-email');
+      if (eInput) eInput.focus();
+      return;
+    }
+
     if (!/^\d{12}$/.test(aadhaar)) {
       showFieldError('err-frm-aadhaar', 'Aadhaar must be exactly 12 digits.');
+      return;
+    }
+    if (!password || password.length < 6) {
+      showFieldError('err-frm-pass', 'Password must be at least 6 characters.');
       return;
     }
 
@@ -1290,7 +1839,9 @@ const validateAndNextFarmer = (step) => {
       mobile,
       email,
       aadhaarNumber: aadhaar,
-      password
+      password,
+      isPhoneVerified: true,
+      isEmailVerified: true
     };
 
     goToStep(2);
@@ -1434,6 +1985,30 @@ const validateAndNextOfficer = (step) => {
       showFieldError('err-off-mobile', 'Mobile number must be 10 digits.');
       return;
     }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      showFieldError('err-off-email', 'Please enter a valid official email address.');
+      return;
+    }
+
+    // STRICT STEP 1 CONTACT GATING: Mobile and Brevo Email MUST be verified before Step 2
+    if (!step1State.officer.mobileVerified) {
+      showToast('⚠️ Mobile Number must be verified via OTP before proceeding to Step 2.', 'warning');
+      showFieldError('err-off-mobile', 'Mobile verification via OTP is mandatory for Step 2.');
+      const mInput = document.getElementById('off-mobile');
+      if (mInput) mInput.focus();
+      return;
+    }
+    if (!step1State.officer.emailVerified) {
+      showToast('⚠️ Official Email must be verified via Brevo OTP before proceeding to Step 2.', 'warning');
+      showFieldError('err-off-email', 'Official Email verification via Brevo OTP is mandatory for Step 2.');
+      const eInput = document.getElementById('off-email');
+      if (eInput) eInput.focus();
+      return;
+    }
+    if (!/^\d{12}$/.test(aadhaar)) {
+      showFieldError('err-off-aadhaar', 'Aadhaar must be exactly 12 digits.');
+      return;
+    }
 
     regDraftData.officer = {
       ...regDraftData.officer,
@@ -1444,7 +2019,9 @@ const validateAndNextOfficer = (step) => {
       officialEmail: email,
       mobile,
       aadhaarNumber: aadhaar,
-      password
+      password,
+      isPhoneVerified: true,
+      isEmailVerified: true
     };
     goToStep(2);
   } else if (step === 2) {
@@ -1506,15 +2083,6 @@ const validateDocsAndNextOfficer = () => {
 
 const validateAndNextSuperAdmin = (step) => {
   if (step === 1) {
-    regDraftData.superadmin = {
-      ...regDraftData.superadmin,
-      orgName: document.getElementById('sadm-org').value.trim(),
-      departmentName: document.getElementById('sadm-dept').value.trim(),
-      ministryName: document.getElementById('sadm-ministry').value.trim(),
-      officeAddress: document.getElementById('sadm-addr').value.trim()
-    };
-    goToStep(2);
-  } else if (step === 2) {
     const name = document.getElementById('sadm-name').value.trim();
     const desig = document.getElementById('sadm-designation').value.trim();
     const empId = document.getElementById('sadm-empid').value.trim();
@@ -1522,6 +2090,39 @@ const validateAndNextSuperAdmin = (step) => {
     const email = document.getElementById('sadm-email').value.trim();
     const mobile = document.getElementById('sadm-mobile').value.trim();
     const aadhaar = document.getElementById('sadm-aadhaar').value.trim();
+
+    if (!name || !desig || !empId || !email || !mobile || !aadhaar) {
+      showToast('All administrator personal details are mandatory.', 'error');
+      return;
+    }
+    if (!/^\d{10}$/.test(mobile)) {
+      showFieldError('err-sadm-mobile', 'Mobile number must be 10 digits.');
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      showFieldError('err-sadm-email', 'Please enter a valid official email address.');
+      return;
+    }
+
+    // STRICT STEP 1 CONTACT GATING: Mobile and Brevo Email MUST be verified before Step 2
+    if (!step1State.superadmin.mobileVerified) {
+      showToast('⚠️ Official Mobile must be verified via OTP before proceeding to Step 2.', 'warning');
+      showFieldError('err-sadm-mobile', 'Mobile verification via OTP is mandatory for Step 2.');
+      const mInput = document.getElementById('sadm-mobile');
+      if (mInput) mInput.focus();
+      return;
+    }
+    if (!step1State.superadmin.emailVerified) {
+      showToast('⚠️ Official Email must be verified via Brevo OTP before proceeding to Step 2.', 'warning');
+      showFieldError('err-sadm-email', 'Official Email verification via Brevo OTP is mandatory for Step 2.');
+      const eInput = document.getElementById('sadm-email');
+      if (eInput) eInput.focus();
+      return;
+    }
+    if (!/^\d{12}$/.test(aadhaar)) {
+      showFieldError('err-sadm-aadhaar', 'Aadhaar must be exactly 12 digits.');
+      return;
+    }
 
     regDraftData.superadmin = {
       ...regDraftData.superadmin,
@@ -1531,7 +2132,28 @@ const validateAndNextSuperAdmin = (step) => {
       dob,
       officialEmail: email,
       mobile,
-      aadhaarNumber: aadhaar
+      aadhaarNumber: aadhaar,
+      isPhoneVerified: true,
+      isEmailVerified: true
+    };
+    goToStep(2);
+  } else if (step === 2) {
+    const orgName = document.getElementById('sadm-org').value.trim();
+    const departmentName = document.getElementById('sadm-dept').value.trim();
+    const ministryName = document.getElementById('sadm-ministry').value.trim();
+    const officeAddress = document.getElementById('sadm-addr').value.trim();
+
+    if (!orgName || !departmentName || !ministryName || !officeAddress) {
+      showToast('All organization profile fields are mandatory.', 'error');
+      return;
+    }
+
+    regDraftData.superadmin = {
+      ...regDraftData.superadmin,
+      orgName,
+      departmentName,
+      ministryName,
+      officeAddress
     };
     goToStep(3);
   } else if (step === 4) {
@@ -2109,3 +2731,9 @@ window.lookupIFSC = lookupIFSC;
 window.lookupCentreCode = lookupCentreCode;
 window.calcRealisticYield = calcRealisticYield;
 window.checkPasswordStrength = checkPasswordStrength;
+window.sendStep1MobileOtp = sendStep1MobileOtp;
+window.verifyStep1MobileOtp = verifyStep1MobileOtp;
+window.sendStep1EmailOtp = sendStep1EmailOtp;
+window.verifyStep1EmailOtp = verifyStep1EmailOtp;
+window.onStep1ContactChange = onStep1ContactChange;
+window.unlockStep1Contact = unlockStep1Contact;

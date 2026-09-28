@@ -40,6 +40,10 @@ const handleDocumentUpload = (req, res, next) => {
 
 router.get('/registration/superadmin-status', regCtrl.checkSuperAdminStatus);
 router.post('/registration/verify-document', handleDocumentUpload, regCtrl.verifyDocumentOCR);
+router.post('/registration/send-email-otp', regCtrl.sendEmailOtp);
+router.post('/registration/verify-email-otp', regCtrl.verifyEmailOtp);
+router.post('/registration/send-mobile-otp', regCtrl.sendMobileOtp);
+router.post('/registration/verify-mobile-otp', regCtrl.verifyMobileOtp);
 router.post('/registration/farmer/initiate', regCtrl.initiateFarmerRegistration);
 router.post('/registration/farmer/verify-otp', regCtrl.verifyFarmerOTP);
 router.get('/registration/farmer/receipt/:id', regCtrl.downloadFarmerReceipt);
