@@ -1,8 +1,9 @@
 const https = require('https');
 require('dotenv').config();
 
-const WIDGET_ID = process.env.MSG91_WIDGET_ID || '3669676d316f323335383235';
-const TOKEN_AUTH = process.env.MSG91_TOKEN_AUTH || '568684TJ6Q4Cu9Q6a9ec1f4P1';
+const WIDGET_ID = process.env.MSG91_WIDGET_ID || '';
+const TOKEN_AUTH = process.env.MSG91_TOKEN_AUTH || '';
+
 
 // In-memory cache of verified phone numbers (phone -> verification record)
 const verifiedPhoneNumbers = new Map();

@@ -424,10 +424,9 @@ const initLeafletMap = (markers) => {
     // Default centered around Central India
     adminMapInstance = L.map('national-leaflet-map').setView([23.2599, 77.4126], 5);
 
-    // Reliable CartoDB Voyager Tile Layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO | KPMS Gov India',
-      subdomains: 'abcd',
+    // OpenStreetMap Standard Tile Layer (Reliable, no API key watermark)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors | KPMS Gov India',
       maxZoom: 19
     }).addTo(adminMapInstance);
 

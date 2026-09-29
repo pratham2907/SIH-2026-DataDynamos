@@ -47,18 +47,11 @@ const loadBookingPortal = async () => {
     }
 
     container.innerHTML = `
-      <div class="app-container">
-        <aside class="sidebar">
-          <div class="sidebar-heading">${getT('nav_portal')}</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard')}</a>
-          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> ${getT('btn_smart_mandi_finder')}</a>
-          <a class="nav-link active" onclick="loadBookingPortal()"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot')}</a>
-          <a class="nav-link" onclick="loadMyBookings()"><i class="fas fa-ticket-alt"></i> ${getT('status_booked')}</a>
-          <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('queue_tracker_title')}</a>
-        </aside>
+      <div class="sp-app-layout">
+        ${typeof getFarmerSidebar === 'function' ? getFarmerSidebar(getCurrentUser(), 'book-slot') : (window.getFarmerSidebar ? window.getFarmerSidebar(getCurrentUser(), 'book-slot') : '')}
 
-        <main class="main-content">
-          <div class="glass-panel" style="padding:28px; max-width:900px; margin:0 auto;">
+        <main class="sp-main">
+          <div class="glass-panel" style="padding:28px; max-width:960px; margin:0 auto;">
             
             ${prefill ? `
               <div class="glass-panel" style="padding:14px 18px; margin-bottom:20px; background:#FFFFFF; border:1px solid var(--border-color); border-left:4px solid var(--saffron); border-radius:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; box-shadow:0 4px 14px rgba(0,0,0,0.05);">
@@ -341,16 +334,10 @@ const loadMyBookings = async () => {
     const bookings = result.data || [];
 
     container.innerHTML = `
-      <div class="app-container">
-        <aside class="sidebar">
-          <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard', 'Dashboard')}</a>
-          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-plus"></i> ${getT('btn_book_slot', 'Book Slot')}</a>
-          <a class="nav-link active" onclick="loadMyBookings()"><i class="fas fa-ticket-alt"></i> ${getT('my_bookings', 'My Bookings')}</a>
-          <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('live_queue_tracker', 'Live Queue Tracker')}</a>
-        </aside>
+      <div class="sp-app-layout">
+        ${typeof getFarmerSidebar === 'function' ? getFarmerSidebar(getCurrentUser(), 'my-bookings') : (window.getFarmerSidebar ? window.getFarmerSidebar(getCurrentUser(), 'my-bookings') : '')}
 
-        <main class="main-content">
+        <main class="sp-main">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
             <div>
               <h2 style="color:var(--primary-navy); font-weight:800;">My Procurement Bookings</h2>

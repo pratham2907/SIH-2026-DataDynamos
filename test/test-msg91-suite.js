@@ -41,8 +41,14 @@ async function runTests() {
   const configRes = await makeRequest('GET', '/api/auth/msg91/config');
   assert.strictEqual(configRes.status, 200, 'Config endpoint should return 200');
   assert.strictEqual(configRes.data.success, true, 'Config success should be true');
-  assert.strictEqual(configRes.data.widgetId, '3669676d316f323335383235', 'widgetId must match configured widget');
-  assert.strictEqual(configRes.data.tokenAuth, '568684TJ6Q4Cu9Q6a9ec1f4P1', 'tokenAuth must match configured token');
+  const expectedWidgetId = process.env.MSG91_WIDGET_ID || '';
+  const expectedTokenAuth = process.env.MSG91_TOKEN_AUTH || '';
+  if (expectedWidgetId) {
+    assert.strictEqual(configRes.data.widgetId, expectedWidgetId, 'widgetId must match configured widget');
+  }
+  if (expectedTokenAuth) {
+    assert.strictEqual(configRes.data.tokenAuth, expectedTokenAuth, 'tokenAuth must match configured token');
+  }
   console.log('✅ Config returned valid MSG91 credentials:');
   console.log('   Widget ID:', configRes.data.widgetId);
   console.log('   Token Auth:', configRes.data.tokenAuth.substring(0, 8) + '...');

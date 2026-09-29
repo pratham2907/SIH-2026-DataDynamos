@@ -14,15 +14,31 @@ const loadAIInsightsDashboard = async () => {
     const result = await res.json();
     const { centerInsights, weatherAlerts, demandForecast } = result.data;
 
-    container.innerHTML = `
-      <div class="app-container">
-        <aside class="sidebar">
-          <div class="sidebar-heading">Forecasting & Analytics</div>
-          <a class="nav-link" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> Main Portal</a>
-          <a class="nav-link active" onclick="loadAIInsightsDashboard()"><i class="fas fa-chart-line"></i> Mandi Insights</a>
-        </aside>
+    const user = getCurrentUser();
+    const isFarmer = user && user.role === 'farmer';
 
-        <main class="main-content">
+    container.innerHTML = `
+      <div class="${isFarmer ? 'sp-app-layout' : 'app-container'}">
+        ${isFarmer && typeof getFarmerSidebar === 'function' ? getFarmerSidebar(user, 'kisan-sahayak') : `
+        <aside class="sp-sidebar" style="width:240px;">
+          <div style="padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:12px;">
+            <div style="font-weight:700; color:#FFF; font-size:1.05rem;">Forecasting & AI</div>
+            <div style="font-size:0.75rem; color:var(--saffron); font-weight:600;"><i class="fas fa-brain"></i> Predictive Analytics</div>
+          </div>
+          <nav class="sp-nav-list">
+            <a class="sp-nav-item" onclick="routeTo('#landing')">
+              <span class="sp-nav-photo-badge"><i class="fas fa-arrow-left"></i></span>
+              <span>Main Portal</span>
+            </a>
+            <a class="sp-nav-item active" onclick="loadAIInsightsDashboard()">
+              <span class="sp-nav-photo-badge"><i class="fas fa-chart-line"></i></span>
+              <span>Mandi Insights</span>
+            </a>
+          </nav>
+        </aside>
+        `}
+
+        <main class="${isFarmer ? 'sp-main' : 'main-content'}">
           <div style="margin-bottom:24px;">
             <span class="hero-pill"><i class="fas fa-wand-magic-sparkles"></i> Heuristic & Predictive Intelligence</span>
             <h2 style="color:var(--primary-navy); font-weight:800;">Congestion & Mandi Demand Forecast</h2>

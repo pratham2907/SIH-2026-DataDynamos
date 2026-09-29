@@ -20,16 +20,10 @@ const loadFarmerPaymentsPage = async () => {
     const { stats, payments } = result;
 
     container.innerHTML = `
-      <div class="app-container">
-        <aside class="sidebar">
-          <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard', 'Dashboard')}</a>
-          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot', 'Book Slot')}</a>
-          <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> ${getT('my_bookings', 'My Bookings')}</a>
-          <a class="nav-link active" onclick="loadFarmerPaymentsPage()"><i class="fas fa-money-check-dollar"></i> ${getT('dbt_tracker', 'DBT Payment Tracker')}</a>
-        </aside>
+      <div class="sp-app-layout">
+        ${typeof getFarmerSidebar === 'function' ? getFarmerSidebar(getCurrentUser(), 'farmer-payments') : (window.getFarmerSidebar ? window.getFarmerSidebar(getCurrentUser(), 'farmer-payments') : '')}
 
-        <main class="main-content">
+        <main class="sp-main">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
             <div>
               <div style="display:flex; align-items:center; gap:8px;">

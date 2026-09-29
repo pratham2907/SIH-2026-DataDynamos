@@ -1056,7 +1056,7 @@ const renderSmartProcureFarmerView = (data = {}) => {
                 <div class="sp-widget-title">
                   <i class="fas fa-map-marked-alt" style="color:#0D5C3A;"></i> ${getT('nearby_mandis_title', 'Nearby Mandis')}
                 </div>
-                <a class="sp-widget-link" onclick="routeTo('#smart-booking')">${getT('view_on_map', 'View on Map')} &gt;</a>
+                <a class="sp-widget-link" onclick="if(typeof openNearbyMandisFullMap==='function'){openNearbyMandisFullMap();}else{routeTo('#smart-booking');}" style="cursor:pointer;">${getT('view_on_map', 'View on Map')} &gt;</a>
               </div>
 
               <div id="sp-nearby-map" class="sp-mini-map-box"></div>

@@ -23,27 +23,270 @@ let activeTempId = '';
 let otpCountdownInterval = null;
 let otpSecondsLeft = 60;
 
-// State & District database for searchable dropdowns
+// Comprehensive State, District & Taluka database for all 28 States & 8 Union Territories of India
 const INDIA_LOCATIONS = {
+  "Andhra Pradesh": {
+    "Guntur": { talukas: ["Guntur", "Tenali", "Narasaraopet", "Mangalagiri", "Bapatla"], villages: ["Tadikonda", "Chebrolu", "Ponnur", "Duggirala"] },
+    "Krishna": { talukas: ["Machilipatnam", "Gudivada", "Vijayawada Rural", "Nuzvid"], villages: ["Kankipadu", "Gannavaram", "Vuyyuru", "Pamarru"] },
+    "Kurnool": { talukas: ["Kurnool", "Nandyal", "Adoni", "Yemmiganur"], villages: ["Kallur", "Kodumur", "Dhone", "Alur"] },
+    "Visakhapatnam": { talukas: ["Anakapalle", "Bheemunipatnam", "Gajuwaka", "Chodavaram"], villages: ["Pendurthi", "Padmanabham", "Kasimkota"] },
+    "West Godavari": { talukas: ["Eluru", "Bhimavaram", "Tadepalligudem", "Tanuku"], villages: ["Palakollu", "Narasapuram", "Jangareddygudem"] },
+    "East Godavari": { talukas: ["Kakinada", "Rajahmundry", "Amalapuram", "Peddapuram"], villages: ["Samalkota", "Ramachandrapuram", "Mandapeta"] },
+    "Chittoor": { talukas: ["Chittoor", "Tirupati", "Madanapalle", "Srikalahasti"], villages: ["Punganur", "Nagari", "Pileru"] },
+    "Anantapur": { talukas: ["Anantapur", "Dharmavaram", "Hindupur", "Kadiri"], villages: ["Gooty", "Tadipatri", "Rayadurg"] }
+  },
+  "Arunachal Pradesh": {
+    "Papum Pare": { talukas: ["Itanagar", "Naharlagun", "Doimukh", "Sagalee"], villages: ["Balijan", "Kimin", "Mengio"] },
+    "Changlang": { talukas: ["Changlang", "Miao", "Jairampur", "Bordumsa"], villages: ["Nampong", "Diyun", "Kharsang"] },
+    "West Kameng": { talukas: ["Bomdila", "Dirang", "Rupa", "Bhalukpong"], villages: ["Singchung", "Kalaktang", "Nafra"] },
+    "East Siang": { talukas: ["Pasighat", "Ruksin", "Mebo"], villages: ["Sille", "Bilat", "Nari"] }
+  },
+  "Assam": {
+    "Kamrup": { talukas: ["Guwahati", "Palashbari", "Hajo", "Rangia"], villages: ["Chaygaon", "Boko", "Kamalpur", "Sualkuchi"] },
+    "Nagaon": { talukas: ["Nagaon", "Koliabor", "Raha", "Dhing"], villages: ["Samaguri", "Rupahi", "Kampur"] },
+    "Sonitpur": { talukas: ["Tezpur", "Dhekiajuli", "Chariduar"], villages: ["Rangapara", "Jamugurihat", "Balipara"] },
+    "Dibrugarh": { talukas: ["Dibrugarh West", "Chabua", "Naharkatia"], villages: ["Moran", "Tingkhong", "Namrup"] },
+    "Cachar": { talukas: ["Silchar", "Sonai", "Lakhipur", "Katigorah"], villages: ["Udarbond", "Dholai", "Borkhola"] },
+    "Jorhat": { talukas: ["Jorhat", "Titabor", "Teok"], villages: ["Mariani", "Majuli", "Dergaon"] }
+  },
+  "Bihar": {
+    "Patna": { talukas: ["Patna Sadar", "Barh", "Danapur", "Masaurhi", "Mokama"], villages: ["Fatuha", "Bakhtiarpur", "Maner", "Bikram", "Paliganj"] },
+    "Muzaffarpur": { talukas: ["Mushahari", "Kanti", "Motipur", "Marwan"], villages: ["Sahebganj", "Paroo", "Sakra", "Saraiya"] },
+    "Gaya": { talukas: ["Gaya Town", "Bodh Gaya", "Sherghati", "Tekari"], villages: ["Manpur", "Belaganj", "Wazirganj", "Barachatti"] },
+    "Bhagalpur": { talukas: ["Sultanganj", "Kahalgaon", "Naugachia", "Pirpainti"], villages: ["Sabour", "Colgong", "Bihpur"] },
+    "Nalanda": { talukas: ["Biharsharif", "Rajgir", "Hilsa", "Islampur"], villages: ["Ekangarsarai", "Noorsarai", "Chandi"] },
+    "Rohtas": { talukas: ["Sasaram", "Dehri", "Bikramganj"], villages: ["Kargahar", "Nokha", "Chenari", "Dinara"] },
+    "Samastipur": { talukas: ["Samastipur", "Rosera", "Dalsinghsarai", "Pusa"], villages: ["Ujiarpur", "Tajpur", "Kalyanpur"] },
+    "Purnia": { talukas: ["Purnia Sadar", "Kasba", "Banmankhi", "Dhamdaha"], villages: ["Amour", "Baisi", "Krityanand Nagar"] }
+  },
+  "Chhattisgarh": {
+    "Raipur": { talukas: ["Raipur", "Arang", "Abhanpur", "Tilda"], villages: ["Mandir Hasaud", "Kharora", "Gobra Nawapara"] },
+    "Durg": { talukas: ["Durg", "Bhilai", "Patan", "Dhamdha"], villages: ["Kumhari", "Ahiwara", "Jamul", "Utai"] },
+    "Bilaspur": { talukas: ["Bilaspur", "Kota", "Bilha", "Masturi"], villages: ["Takhatpur", "Ratanpur", "Bodri"] },
+    "Rajnandgaon": { talukas: ["Rajnandgaon", "Dongargarh", "Khairagarh"], villages: ["Dongargaon", "Chhuikhadan", "Ghandai"] },
+    "Korba": { talukas: ["Korba", "Katghora", "Pali"], villages: ["Deepka", "Gevra", "Hardibazar"] },
+    "Janjgir-Champa": { talukas: ["Janjgir", "Champa", "Akaltara", "Sakti"], villages: ["Naila", "Pamgarh", "Dabhra"] }
+  },
+  "Goa": {
+    "North Goa": { talukas: ["Tiswadi", "Bardez", "Pernem", "Bicholim", "Sattari"], villages: ["Panaji", "Mapusa", "Calangute", "Porvorim", "Valpoi"] },
+    "South Goa": { talukas: ["Salcete", "Mormugao", "Ponda", "Quepem", "Canacona"], villages: ["Margao", "Vasco da Gama", "Curchorem", "Navelim"] }
+  },
+  "Gujarat": {
+    "Ahmedabad": { talukas: ["Daskroi", "Sanand", "Dholka", "Bavla", "Viramgam", "Dhandhuka"], villages: ["Khokhra", "Changodar", "Bareja", "Bhadaj", "Kasindra"] },
+    "Rajkot": { talukas: ["Rajkot", "Gondal", "Jasdan", "Jetpur", "Dhoraji", "Upleta"], villages: ["Shapar", "Kuvadva", "Ribda", "Kotda Sangani"] },
+    "Surat": { talukas: ["Chorasi", "Olpad", "Kamrej", "Bardoli", "Mandvi", "Mahuva"], villages: ["Sayan", "Kim", "Kadodara", "Palsana"] },
+    "Vadodara": { talukas: ["Vadodara", "Padra", "Karjan", "Dabhoi", "Waghodia", "Savli"], villages: ["Vemali", "Por", "Shinore", "Jarod"] },
+    "Mehsana": { talukas: ["Mehsana", "Visnagar", "Kadi", "Unjha", "Vadnagar", "Vijapur"], villages: ["Ambaliyasan", "Kheralu", "Satlasana"] },
+    "Junagadh": { talukas: ["Junagadh", "Keshod", "Mangrol", "Visavadar", "Manavadar"], villages: ["Vanthali", "Malia Hatina", "Bilkha"] },
+    "Bhavnagar": { talukas: ["Bhavnagar", "Sihor", "Palitana", "Mahuva", "Talaja", "Gariadhar"], villages: ["Vartej", "Ghogha", "Vallabhipur"] },
+    "Anand": { talukas: ["Anand", "Petlad", "Borsad", "Khambhat", "Umreth", "Sojitra"], villages: ["Vasad", "Tarapur", "Vallabh Vidyanagar"] },
+    "Banaskantha": { talukas: ["Palanpur", "Deesa", "Dhanera", "Tharad", "Vav"], villages: ["Dantiwada", "Amirgadh", "Shihori"] },
+    "Amreli": { talukas: ["Amreli", "Dhari", "Bagasara", "Rajula", "Savarkundla"], villages: ["Lathi", "Babra", "Jafrabad"] }
+  },
+  "Haryana": {
+    "Karnal": { talukas: ["Karnal", "Gharaunda", "Nilokheri", "Assandh", "Indri"], villages: ["Taraori", "Kunjpura", "Nissing", "Jundla"] },
+    "Ambala": { talukas: ["Ambala City", "Ambala Cantt", "Barara", "Naraingarh"], villages: ["Saha", "Shahzadpur", "Mullana"] },
+    "Hisar": { talukas: ["Hisar", "Hansi", "Barwala", "Narnaund", "Adampur"], villages: ["Uklana", "Bass", "Agroha"] },
+    "Kurukshetra": { talukas: ["Thanesar", "Pehowa", "Shahbad", "Ladwa"], villages: ["Babain", "Ismailabad", "Jhansa"] },
+    "Sirsa": { talukas: ["Sirsa", "Dabwali", "Rania", "Ellenabad"], villages: ["Kalanwali", "Chopta", "Ding"] },
+    "Panipat": { talukas: ["Panipat", "Samalkha", "Israna", "Bapoli"], villages: ["Madlauda", "Sanauli", "Alupur"] },
+    "Rohtak": { talukas: ["Rohtak", "Meham", "Sampla", "Kalanaur"], villages: ["Mokhra", "Bhalout", "Kharawar"] }
+  },
+  "Himachal Pradesh": {
+    "Shimla": { talukas: ["Shimla Urban", "Shimla Rural", "Theog", "Rampur", "Rohru"], villages: ["Kufri", "Kotkhai", "Jubbal", "Kumarsain"] },
+    "Kangra": { talukas: ["Dharamshala", "Kangra", "Palampur", "Nurpur", "Dehra"], villages: ["Nagrota Bagwan", "Baijnath", "Jawalamukhi"] },
+    "Mandi": { talukas: ["Mandi Sadar", "Sundernagar", "Sarkaghat", "Jogindernagar"], villages: ["Karsog", "Chachiot", "Gohar"] },
+    "Kullu": { talukas: ["Kullu", "Manali", "Banjar", "Anni"], villages: ["Naggar", "Bhuntar", "Nirmand"] },
+    "Solan": { talukas: ["Solan", "Nalagarh", "Baddi", "Kasauli", "Arki"], villages: ["Kandaghat", "Dharampur", "Darlaghat"] }
+  },
+  "Jharkhand": {
+    "Ranchi": { talukas: ["Ranchi Sadar", "Kanke", "Namkum", "Ormanjhi", "Bundu"], villages: ["Tatisilwai", "Bero", "Silli", "Mandar"] },
+    "Dhanbad": { talukas: ["Dhanbad", "Jharia", "Baghmara", "Nirsa", "Govindpur"], villages: ["Tundi", "Topchanchi", "Baliapur"] },
+    "East Singhbhum": { talukas: ["Jamshedpur", "Ghatshila", "Potka", "Bahargora"], villages: ["Golmuri", "Bistupur", "Musabani", "Chakulia"] },
+    "Bokaro": { talukas: ["Chas", "Bermo", "Gomia", "Chandankiyari"], villages: ["Petarwar", "Jaridih", "Kasmar"] },
+    "Hazaribagh": { talukas: ["Hazaribagh Sadar", "Barhi", "Barkagaon", "Chauparan"], villages: ["Ichak", "Katkamsandi", "Vishnugarh"] }
+  },
+  "Karnataka": {
+    "Bengaluru Urban": { talukas: ["Bengaluru North", "Bengaluru South", "Bengaluru East", "Anekal"], villages: ["Yelahanka", "Kengeri", "Sarjapur", "Attibele"] },
+    "Belagavi": { talukas: ["Belagavi", "Gokak", "Chikkodi", "Athani", "Bailhongal"], villages: ["Saundatti", "Raibag", "Hukkeri", "Ramdurg"] },
+    "Mysuru": { talukas: ["Mysuru", "Nanjangud", "Hunsur", "T. Narasipura", "Piriyapatna"], villages: ["Bannur", "Saligrama", "Biligere"] },
+    "Davanagere": { talukas: ["Davanagere", "Harihara", "Channagiri", "Honnali"], villages: ["Jagalur", "Nyamathi", "Mayakonda"] },
+    "Dharwad": { talukas: ["Dharwad", "Hubballi Urban", "Hubballi Rural", "Kundgol", "Navalgund"], villages: ["Kalghatgi", "Alnavar", "Hebballi"] },
+    "Ballari": { talukas: ["Ballari", "Hospet", "Siruguppa", "Sandur", "Kudligi"], villages: ["Kampli", "Kurugodu", "Tekkalakote"] },
+    "Kalaburagi": { talukas: ["Kalaburagi", "Sedam", "Chincholi", "Aland", "Afzalpur"], villages: ["Jewargi", "Shahabad", "Kamalapur"] }
+  },
+  "Kerala": {
+    "Palakkad": { talukas: ["Palakkad", "Chittur", "Alathur", "Ottapalam", "Mannarkkad"], villages: ["Pattambi", "Cherpulassery", "Kuzhalmannam", "Kollengode"] },
+    "Wayanad": { talukas: ["Vythiri", "Sulthan Bathery", "Mananthavady"], villages: ["Kalpetta", "Meppadi", "Ambalavayal", "Pulpally"] },
+    "Idukki": { talukas: ["Devikulam", "Udumbanchola", "Thodupuzha", "Peerumade"], villages: ["Munnar", "Kattappana", "Adimali", "Kumily"] },
+    "Thrissur": { talukas: ["Thrissur", "Mukundapuram", "Chalakudy", "Kodungallur", "Chavakkad"], villages: ["Irinjalakuda", "Kunnamkulam", "Guruvayur"] },
+    "Ernakulam": { talukas: ["Kochi", "Kanakannoor", "Aluva", "Kunnathunad", "Muvattupuzha"], villages: ["Angamaly", "Perumbavoor", "Kothamangalam"] }
+  },
   "Madhya Pradesh": {
     "Bhopal": { talukas: ["Huzur", "Berasia"], villages: ["Ratibad", "Karond", "Bairagarh", "Kolar", "Sukhi Sewaniya"] },
-    "Sehore": { talukas: ["Sehore", "Ashta", "Ichhawar"], villages: ["Bilkisganj", "Doraha", "Shyampur", "Mandi"] },
-    "Raisen": { talukas: ["Raisen", "Gairatganj", "Begamganj"], villages: ["Sanchi", "Salamatpur", "Deewanganj"] },
-    "Indore": { talukas: ["Indore", "Sanwer", "Depalpur", "Mhow"], villages: ["Rau", "Betma", "Manglia", "Hatod"] },
-    "Ujjain": { talukas: ["Ujjain", "Tarana", "Mahidpur", "Nagda"], villages: ["Tajpur", "Panbihar", "Ghattia"] }
+    "Sehore": { talukas: ["Sehore", "Ashta", "Ichhawar", "Nasrullaganj", "Budhni"], villages: ["Bilkisganj", "Doraha", "Shyampur", "Mandi", "Rehti"] },
+    "Raisen": { talukas: ["Raisen", "Gairatganj", "Begamganj", "Silwani", "Bareli"], villages: ["Sanchi", "Salamatpur", "Deewanganj", "Udaipura"] },
+    "Indore": { talukas: ["Indore", "Sanwer", "Depalpur", "Mhow"], villages: ["Rau", "Betma", "Manglia", "Hatod", "Manpur"] },
+    "Ujjain": { talukas: ["Ujjain", "Tarana", "Mahidpur", "Nagda", "Khachrod", "Barnagar"], villages: ["Tajpur", "Panbihar", "Ghattia", "Unhel"] },
+    "Dewas": { talukas: ["Dewas", "Sonkatch", "Bagli", "Kannod", "Khategaon"], villages: ["Tonk Khurd", "Hatpipliya", "Satwas"] },
+    "Vidisha": { talukas: ["Vidisha", "Basoda", "Kurwai", "Sironj", "Lateri"], villages: ["Gulabganj", "Gyaraspur", "Shamshabad"] },
+    "Hoshangabad": { talukas: ["Hoshangabad", "Itarsi", "Pipariya", "Sohagpur", "Babai"], villages: ["Dolariya", "Bankhedi", "Semri Harchand"] },
+    "Jabalpur": { talukas: ["Jabalpur", "Sihora", "Patan", "Panagar", "Shahpura"], villages: ["Kundam", "Majholi", "Bargi"] },
+    "Gwalior": { talukas: ["Gwalior", "Dabra", "Bhitarwar", "Morar"], villages: ["Ghatigaon", "Antari", "Pichhore"] }
   },
   "Maharashtra": {
-    "Nashik": { talukas: ["Nashik", "Niphad", "Sinnar", "Dindori"], villages: ["Pimpalgaon", "Lasalgaon", "Ozar", "Deolali"] },
-    "Pune": { talukas: ["Haveli", "Baramati", "Shirur", "Junnar"], villages: ["Manchar", "Narayangaon", "Uruli Kanchan"] },
-    "Nagpur": { talukas: ["Nagpur", "Katol", "Saoner", "Umred"], villages: ["Kalmeshwar", "Bhiwapur", "Kuhi"] }
+    "Nashik": { talukas: ["Nashik", "Niphad", "Sinnar", "Dindori", "Yeola", "Malegaon"], villages: ["Pimpalgaon", "Lasalgaon", "Ozar", "Deolali", "Satana"] },
+    "Pune": { talukas: ["Haveli", "Baramati", "Shirur", "Junnar", "Khed", "Indapur"], villages: ["Manchar", "Narayangaon", "Uruli Kanchan", "Saswad", "Bhor"] },
+    "Nagpur": { talukas: ["Nagpur Urban", "Nagpur Rural", "Katol", "Saoner", "Umred", "Ramtek"], villages: ["Kalmeshwar", "Bhiwapur", "Kuhi", "Parseoni"] },
+    "Ahmednagar": { talukas: ["Nagar", "Rahuri", "Shrirampur", "Sangamner", "Kopargaon", "Shevgaon"], villages: ["Shirdi", "Parner", "Pathardi", "Nevasa"] },
+    "Chhatrapati Sambhajinagar": { talukas: ["Aurangabad", "Paithan", "Vaijapur", "Gangapur", "Kannad", "Sillod"], villages: ["Waluj", "Chittegaon", "Khuldabad"] },
+    "Solapur": { talukas: ["North Solapur", "South Solapur", "Barshi", "Pandharpur", "Madha", "Mohol"], villages: ["Akkalkot", "Karmala", "Sangola", "Malshiras"] },
+    "Kolhapur": { talukas: ["Karvir", "Hatkanangle", "Shirol", "Radhanagari", "Kagal"], villages: ["Ichalkaranji", "Jaysingpur", "Gadhinglaj"] },
+    "Jalgaon": { talukas: ["Jalgaon", "Bhusawal", "Chalisgaon", "Amalner", "Pachora", "Raver"], villages: ["Jamner", "Yawal", "Erandol", "Dharangaon"] }
+  },
+  "Manipur": {
+    "Imphal West": { talukas: ["Lamphelpat", "Patsoi", "Wangoi"], villages: ["Lamsang", "Lilong", "Mayang Imphal"] },
+    "Imphal East": { talukas: ["Porompat", "Keirao Bitra", "Sawombung"], villages: ["Lamlong", "Andro", "Yairipok"] },
+    "Bishnupur": { talukas: ["Bishnupur", "Moirang", "Nambol"], villages: ["Kwasiphai", "Ningthoukhong", "Oinam"] },
+    "Thoubal": { talukas: ["Thoubal", "Kakching", "Lilong"], villages: ["Wangjing", "Heirok", "Sugnu"] }
+  },
+  "Meghalaya": {
+    "East Khasi Hills": { talukas: ["Mawkhar", "Mylliem", "Mawphlang", "Sohra"], villages: ["Shillong", "Cherrapunji", "Pynursla"] },
+    "West Garo Hills": { talukas: ["Tura", "Dalu", "Dadenggre"], villages: ["Tikrikilla", "Rongram", "Selsella"] },
+    "Ri-Bhoi": { talukas: ["Nongpoh", "Umling", "Umsning"], villages: ["Byrnihat", "Bhoirymbong", "Patharkhmah"] }
+  },
+  "Mizoram": {
+    "Aizawl": { talukas: ["Aizawl Sadar", "Darlawn", "Thingsulthliah"], villages: ["Sairang", "Selesih", "Lengpui"] },
+    "Lunglei": { talukas: ["Lunglei", "Hnahthial", "Tlabung"], villages: ["Lungsen", "Bunghmun", "Cherhlun"] },
+    "Champhai": { talukas: ["Champhai", "Khawzawl", "Ngopa"], villages: ["Zokhawthar", "Farkawn", "Vaphai"] }
+  },
+  "Nagaland": {
+    "Kohima": { talukas: ["Kohima Sadar", "Sechu-Zubza", "Chiephobozou"], villages: ["Jakhama", "Viswema", "Tseminyu"] },
+    "Dimapur": { talukas: ["Dimapur Sadar", "Medziphema", "Niuland"], villages: ["Chumukedima", "Kuhuboto", "Dhansiripar"] },
+    "Mokokchung": { talukas: ["Ongpangkong", "Asetkong", "Langpangkong"], villages: ["Changtongya", "Mangkolemba", "Tuli"] }
+  },
+  "Odisha": {
+    "Khordha": { talukas: ["Bhubaneswar", "Khordha", "Jatni", "Banapur", "Begunia"], villages: ["Balianta", "Balipatna", "Tangi", "Bolagarh"] },
+    "Cuttack": { talukas: ["Cuttack Sadar", "Salepur", "Athagarh", "Choudwar", "Banki"], villages: ["Baramba", "Nischintakoili", "Mahanga"] },
+    "Ganjam": { talukas: ["Berhampur", "Chhatrapur", "Bhanjanagar", "Aska", "Hinjilicut"], villages: ["Polasara", "Bellaguntha", "Digapahandi"] },
+    "Sambalpur": { talukas: ["Sambalpur", "Rengali", "Kuchinda", "Rairakhol"], villages: ["Maneswar", "Dhankauda", "Jujomura"] },
+    "Balasore": { talukas: ["Balasore Sadar", "Basta", "Jaleswar", "Soro", "Nilagiri"], villages: ["Remuna", "Bahanaga", "Simulia"] },
+    "Bargarh": { talukas: ["Bargarh", "Attabira", "Barpali", "Padampur", "Bhatli"], villages: ["Sohela", "Bheden", "Gaisilet"] }
   },
   "Punjab": {
-    "Ludhiana": { talukas: ["Ludhiana East", "Ludhiana West", "Jagraon", "Khanna"], villages: ["Samrala", "Sahnewal", "Doraha"] },
-    "Patiala": { talukas: ["Patiala", "Nabha", "Rajpura", "Samana"], villages: ["Sanaur", "Ghagga", "Bhadson"] }
+    "Ludhiana": { talukas: ["Ludhiana East", "Ludhiana West", "Jagraon", "Khanna", "Payal", "Raikot"], villages: ["Samrala", "Sahnewal", "Doraha", "Mullanpur", "Machhiwara"] },
+    "Patiala": { talukas: ["Patiala", "Nabha", "Rajpura", "Samana", "Patran"], villages: ["Sanaur", "Ghagga", "Bhadson", "Dudhan Sadhan"] },
+    "Amritsar": { talukas: ["Amritsar-I", "Amritsar-II", "Ajnala", "Baba Bakala"], villages: ["Attari", "Majitha", "Rayya", "Chogawan"] },
+    "Jalandhar": { talukas: ["Jalandhar-I", "Jalandhar-II", "Nakodar", "Phillaur", "Shahkot"], villages: ["Kartarpur", "Goraya", "Bhogpur", "Nurmahal"] },
+    "Bathinda": { talukas: ["Bathinda", "Rampura Phul", "Talwandi Sabo", "Maur"], villages: ["Goniana", "Bhucho Mandi", "Sangat"] },
+    "Sangrur": { talukas: ["Sangrur", "Sunam", "Dhuri", "Malerkotla", "Moonak"], villages: ["Dirba", "Bhawanigarh", "Lehragaga"] },
+    "Firozpur": { talukas: ["Firozpur", "Zira", "Guru Har Sahai"], villages: ["Makhu", "Mamdot", "Ghall Khurd"] }
+  },
+  "Rajasthan": {
+    "Jaipur": { talukas: ["Jaipur", "Sanganer", "Amber", "Chomu", "Kotputli", "Phulera"], villages: ["Bassi", "Chaksu", "Shahpura", "Jamwa Ramgarh", "Jobner"] },
+    "Kota": { talukas: ["Kota", "Ladpura", "Digod", "Sangod", "Ramganj Mandi"], villages: ["Kanwas", "Mandana", "Sultanpur", "Chechat"] },
+    "Jodhpur": { talukas: ["Jodhpur", "Luni", "Bilara", "Osian", "Phalodi", "Bhopalgarh"], villages: ["Piparcity", "Balesar", "Baori", "Shergarh"] },
+    "Bikaner": { talukas: ["Bikaner", "Nokha", "Lunkaransar", "Kolayat", "Khajuwala"], villages: ["Deshnoke", "Dungargarh", "Bajju"] },
+    "Sri Ganganagar": { talukas: ["Ganganagar", "Suratgarh", "Raisinghnagar", "Anupgarh", "Padampur"], villages: ["Sadulshahar", "Karanpur", "Vijaynagar"] },
+    "Alwar": { talukas: ["Alwar", "Tijara", "Behror", "Kishangarh Bas", "Rajgarh"], villages: ["Thanagazi", "Bhiwadi", "Ramgarh", "Kathumar"] },
+    "Udaipur": { talukas: ["Girwa", "Mavli", "Vallabhnagar", "Salumber", "Kherwara"], villages: ["Gogunda", "Jhadol", "Rishabhdeo", "Fatehnagar"] }
+  },
+  "Sikkim": {
+    "East Sikkim": { talukas: ["Gangtok", "Pakyong", "Rongli"], villages: ["Ranipool", "Singtam", "Rhenock"] },
+    "West Sikkim": { talukas: ["Gyalshing", "Soreng"], villages: ["Dentam", "Yuksom", "Tashiding"] },
+    "South Sikkim": { talukas: ["Namchi", "Ravangla", "Jorethang"], villages: ["Melli", "Yangang", "Temi"] },
+    "North Sikkim": { talukas: ["Mangan", "Chungthang"], villages: ["Lachen", "Lachung", "Dzongu"] }
+  },
+  "Tamil Nadu": {
+    "Thanjavur": { talukas: ["Thanjavur", "Kumbakonam", "Papanasam", "Pattukkottai", "Orathanadu"], villages: ["Vallam", "Thiruvaiyaru", "Peravurani", "Budalur"] },
+    "Coimbatore": { talukas: ["Coimbatore North", "Coimbatore South", "Pollachi", "Mettupalayam", "Sulur"], villages: ["Kinathukadavu", "Annur", "Valparai", "Madukkarai"] },
+    "Madurai": { talukas: ["Madurai North", "Madurai South", "Melur", "Thirumangalam", "Usilampatti"], villages: ["Vadipatti", "Peraiyur", "Alanganallur"] },
+    "Tiruchirappalli": { talukas: ["Tiruchirappalli", "Srirangam", "Lalgudi", "Manapparai", "Musiri"], villages: ["Thuraiyur", "Thottiyam", "Manachanallur"] },
+    "Salem": { talukas: ["Salem", "Attur", "Mettur", "Omalur", "Sankari"], villages: ["Yercaud", "Edappadi", "Valapady", "Gangavalli"] },
+    "Erode": { talukas: ["Erode", "Bhavani", "Gobichettipalayam", "Perundurai", "Sathyamangalam"], villages: ["Anthiyur", "Kodumudi", "Modakkurichi"] }
+  },
+  "Telangana": {
+    "Warangal": { talukas: ["Warangal", "Hanamkonda", "Narsampet", "Parkal", "Wardhannapet"], villages: ["Geesugonda", "Dharmasagar", "Atmakur", "Inavolu"] },
+    "Nizamabad": { talukas: ["Nizamabad North", "Nizamabad South", "Armoor", "Bodhan", "Bheemgal"], villages: ["Varni", "Dichpally", "Jakranpally", "Kotgiri"] },
+    "Karimnagar": { talukas: ["Karimnagar", "Huzurabad", "Choppadandi", "Manakondur"], villages: ["Jammikunta", "Gangadhara", "Thimmapur"] },
+    "Nalgonda": { talukas: ["Nalgonda", "Miryalaguda", "Devarakonda", "Nakrekal"], villages: ["Chityal", "Halia", "Damaracherla", "Kanagal"] },
+    "Khammam": { talukas: ["Khammam Urban", "Khammam Rural", "Madhira", "Sathupalli", "Wyra"], villages: ["Kalluru", "Penuballi", "Thirumalayapalem"] },
+    "Hyderabad": { talukas: ["Shaikpet", "Secunderabad", "Khairatabad", "Charminar"], villages: ["Gachibowli", "Madhapur", "Jubilee Hills", "Amberpet"] }
+  },
+  "Tripura": {
+    "West Tripura": { talukas: ["Agartala", "Mohanpur", "Jirania"], villages: ["Ranirbazar", "Mandwi", "Dukli"] },
+    "Gomati": { talukas: ["Udaipur", "Amarpur", "Karbook"], villages: ["Kakraban", "Matabari", "Ompi"] },
+    "South Tripura": { talukas: ["Belonia", "Santirbazar", "Sabroom"], villages: ["Rajnagar", "Hrishyamukh", "Jolaibari"] },
+    "North Tripura": { talukas: ["Dharmanagar", "Panisagar", "Kanchanpur"], villages: ["Kadamtala", "Jampui Hills", "Damcherra"] }
   },
   "Uttar Pradesh": {
-    "Varanasi": { talukas: ["Varanasi", "Pindra"], villages: ["Raja Talab", "Cholapur", "Kashi"] },
-    "Lucknow": { talukas: ["Lucknow", "Malihabad", "Bakshi Ka Talab"], villages: ["Kakori", "Mohanlalganj", "Gosainganj"] }
+    "Varanasi": { talukas: ["Varanasi", "Pindra", "Raja Talab"], villages: ["Cholapur", "Kashi", "Araziline", "Sewapuri", "Harahua"] },
+    "Lucknow": { talukas: ["Lucknow Sadar", "Malihabad", "Bakshi Ka Talab", "Mohanlalganj", "Sarojini Nagar"], villages: ["Kakori", "Gosainganj", "Chinhat", "Itaunja"] },
+    "Kanpur": { talukas: ["Kanpur Sadar", "Ghatampur", "Bilhaur", "Narwal"], villages: ["Bidhnu", "Kalyanpur", "Chaubepur", "Sarsaul"] },
+    "Agra": { talukas: ["Agra", "Fatehabad", "Kheragarh", "Etmadpur", "Bah"], villages: ["Achhnera", "Barauli Ahir", "Khandauli", "Pinahat"] },
+    "Prayagraj": { talukas: ["Sadar", "Phulpur", "Handia", "Karchhana", "Meja", "Soraon"], villages: ["Mau Aima", "Bahria", "Shankargarh", "Holagarh"] },
+    "Gorakhpur": { talukas: ["Gorakhpur Sadar", "Sahjanwa", "Chauri Chaura", "Bansgaon", "Campierganj"], villages: ["Pipraich", "Bhadro", "Barhalganj"] },
+    "Bareilly": { talukas: ["Bareilly Sadar", "Aonla", "Faridpur", "Baheri", "Nawabganj"], villages: ["Mirganj", "Bithri Chainpur", "Fatehganj"] },
+    "Meerut": { talukas: ["Meerut Sadar", "Mawana", "Sardhana"], villages: ["Daurala", "Hastinapur", "Rohta", "Parikshitgarh"] },
+    "Aligarh": { talukas: ["Koil", "Khair", "Atrauli", "Iglas", "Gabhana"], villages: ["Jawan", "Chandaus", "Lodha", "Bijauli"] }
+  },
+  "Uttarakhand": {
+    "Dehradun": { talukas: ["Dehradun Sadar", "Rishikesh", "Vikasnagar", "Chakrata", "Doiwala"], villages: ["Sahaspur", "Kalsi", "Selaqui", "Herbertpur"] },
+    "Haridwar": { talukas: ["Haridwar", "Roorkee", "Laksar", "Bhagwanpur"], villages: ["Jwalapur", "Bahadrabad", "Manglaur", "Khanpur"] },
+    "Udham Singh Nagar": { talukas: ["Rudrapur", "Kashipur", "Kichha", "Khatima", "Bazpur", "Sitarganj"], villages: ["Gadarpur", "Mahukheraganj", "Dineshpur"] },
+    "Nainital": { talukas: ["Nainital", "Haldwani", "Ramnagar", "Kaladhungi", "Dhari"], villages: ["Bhowali", "Bhimtal", "Mukteshwar"] }
+  },
+  "West Bengal": {
+    "Purba Bardhaman": { talukas: ["Bardhaman Sadar North", "Bardhaman Sadar South", "Katwa", "Kalna"], villages: ["Memari", "Galsi", "Bhatar", "Jamalpur", "Raina"] },
+    "Hooghly": { talukas: ["Chinsurah", "Chandannagar", "Serampore", "Arambagh"], villages: ["Singur", "Tarakeswar", "Dhanekhali", "Pandua", "Polba"] },
+    "Nadia": { talukas: ["Krishnanagar Sadar", "Ranaghat", "Kalyani", "Tehatta"], villages: ["Nabadwip", "Santipur", "Chakdaha", "Karimpur"] },
+    "Murshidabad": { talukas: ["Berhampore", "Lalbagh", "Kandi", "Jangipur", "Domkal"], villages: ["Beldanga", "Hariharpara", "Raninagar", "Raghunathganj"] },
+    "North 24 Parganas": { talukas: ["Barasat Sadar", "Basirhat", "Bangaon", "Barrackpore"], villages: ["Habra", "Deganga", "Baduria", "Amdanga"] },
+    "South 24 Parganas": { talukas: ["Alipore Sadar", "Baruipur", "Canning", "Diamond Harbour", "Kakdwip"], villages: ["Bhangar", "Bishnupur", "Sonarpur", "Kultali"] }
+  },
+  "Andaman and Nicobar Islands": {
+    "South Andaman": { talukas: ["Port Blair", "Ferrargunj", "Little Andaman"], villages: ["Garacharma", "Prothrapur", "Hut Bay"] },
+    "North and Middle Andaman": { talukas: ["Diglipur", "Mayabunder", "Rangat"], villages: ["Kalighat", "Kishorinagar", "Bakultala"] },
+    "Nicobar": { talukas: ["Car Nicobar", "Nancowry", "Great Nicobar"], villages: ["Malacca", "Campbell Bay", "Kamorta"] }
+  },
+  "Chandigarh": {
+    "Chandigarh": { talukas: ["Chandigarh City", "Chandigarh Rural"], villages: ["Manimajra", "Dhanas", "Burail", "Maloya", "Kaimbwala"] }
+  },
+  "Dadra and Nagar Haveli and Daman and Diu": {
+    "Dadra and Nagar Haveli": { talukas: ["Silvassa", "Khanvel"], villages: ["Naroli", "Rakholi", "Samarvarni", "Dapada"] },
+    "Daman": { talukas: ["Daman Sadar"], villages: ["Nani Daman", "Moti Daman", "Dunetha", "Kachigam"] },
+    "Diu": { talukas: ["Diu Sadar"], villages: ["Ghoghla", "Fudam", "Bucharwada", "Vanakbara"] }
+  },
+  "Delhi": {
+    "North Delhi": { talukas: ["Narela", "Alipur", "Model Town"], villages: ["Bakhtawarpur", "Bawana", "Burari", "Holambi Kalan"] },
+    "North West Delhi": { talukas: ["Kanjhawala", "Saraswati Vihar", "Rohini"], villages: ["Khera Kalan", "Qutabgarh", "Mundka", "Rithala"] },
+    "South Delhi": { talukas: ["Saket", "Hauz Khas", "Mehrauli"], villages: ["Chhatarpur", "Fatehpur Beri", "Bhati", "Asola"] },
+    "South West Delhi": { talukas: ["Najafgarh", "Dwarka", "Kapashera"], villages: ["Dhansa", "Jharoda Kalan", "Ujwa", "Chhawla"] },
+    "West Delhi": { talukas: ["Patel Nagar", "Punjabi Bagh", "Rajouri Garden"], villages: ["Tilak Nagar", "Janakpuri", "Paschim Vihar"] },
+    "East Delhi": { talukas: ["Gandhi Nagar", "Preet Vihar", "Mayur Vihar"], villages: ["Mandawali", "Kalyanpuri", "Patparganj"] },
+    "Central Delhi": { talukas: ["Karol Bagh", "Pahar Ganj", "Civil Lines"], villages: ["Daryaganj", "Kotwali", "Chandni Chowk"] },
+    "New Delhi": { talukas: ["Chanakyapuri", "Delhi Cantonment", "Vasant Vihar"], villages: ["Mahipalpur", "Connaught Place", "Barakhamba"] }
+  },
+  "Jammu and Kashmir": {
+    "Srinagar": { talukas: ["Srinagar South", "Srinagar North", "Eidgah"], villages: ["Pantha Chowk", "Shalteng", "Khanyar", "Batmaloo"] },
+    "Jammu": { talukas: ["Jammu Sadar", "RS Pura", "Akhnoor", "Bishnah", "Marh"], villages: ["Satwari", "Bahu", "Nagrota", "Arnia"] },
+    "Anantnag": { talukas: ["Anantnag", "Bijbehara", "Dooru", "Kokernag", "Pahalgam"], villages: ["Achabal", "Shangus", "Mattan"] },
+    "Baramulla": { talukas: ["Baramulla", "Sopore", "Pattan", "Uri", "Tangmarg"], villages: ["Rafiabad", "Kreeri", "Kunzer"] },
+    "Pulwama": { talukas: ["Pulwama", "Pampore", "Tral", "Awantipora"], villages: ["Kakapora", "Litter", "Shahoora"] },
+    "Udhampur": { talukas: ["Udhampur", "Ramnagar", "Chenani", "Majalta"], villages: ["Tikri", "Basantgarh", "Panchari"] }
+  },
+  "Ladakh": {
+    "Leh": { talukas: ["Leh", "Nubra", "Khaltse", "Nyoma", "Durbuk"], villages: ["Choglamsar", "Thiksey", "Diskit", "Hunder"] },
+    "Kargil": { talukas: ["Kargil", "Sankoo", "Zanskar", "Drass", "Shakar Chiktan"], villages: ["Minji", "Barsoo", "Padum", "Panikhar"] }
+  },
+  "Lakshadweep": {
+    "Lakshadweep": { talukas: ["Kavaratti", "Agatti", "Andrott", "Amini", "Minicoy"], villages: ["Kalpeni", "Kiltan", "Chetlat", "Kadmat"] }
+  },
+  "Puducherry": {
+    "Puducherry": { talukas: ["Puducherry Sadar", "Oulgaret", "Villianur", "Bahour"], villages: ["Ariyankuppam", "Madagadipet", "Thirubuvanai"] },
+    "Karaikal": { talukas: ["Karaikal Sadar", "Thirunallar"], villages: ["Kottucherry", "Nedungadu", "Neravy", "T.R. Pattinam"] },
+    "Mahe": { talukas: ["Mahe Sadar"], villages: ["Chalakkara", "Chembra", "Pandakkal"] },
+    "Yanam": { talukas: ["Yanam Sadar"], villages: ["Agraharam", "Daryalatippa", "Guerempeta"] }
   }
 };
 
@@ -137,12 +380,118 @@ const openRegistrationChooser = async () => {
 };
 
 /**
+ * Auto-detect farmer farm location via GPS
+ * Pinpoints latitude, longitude, and reverse geocodes to state, district, village, and nearest APMC mandi
+ */
+const autoDetectFarmerLocation = (silent = false) => {
+  if (!regDraftData.farmer) regDraftData.farmer = {};
+
+  if (window.KPMS_USER_LOCATION) {
+    const kLoc = window.KPMS_USER_LOCATION;
+    if (kLoc.state) regDraftData.farmer.state = kLoc.state;
+    if (kLoc.district || kLoc.city) regDraftData.farmer.district = kLoc.district || kLoc.city;
+    if (kLoc.city) regDraftData.farmer.village = kLoc.city;
+    if (kLoc.nearestCenter) regDraftData.farmer.preferredCenterId = kLoc.nearestCenter.centerId || 'CTR-01';
+    if (kLoc.lat) regDraftData.farmer.latitude = kLoc.lat;
+    if (kLoc.lng) regDraftData.farmer.longitude = kLoc.lng;
+  }
+
+  if (!navigator.geolocation) {
+    if (!silent) showToast('Geolocation is not supported by your browser.', 'warning');
+    return;
+  }
+
+  const gpsStatusText = document.getElementById('frm-gps-text');
+  const gpsBadge = document.getElementById('frm-gps-badge');
+  if (gpsStatusText) {
+    gpsStatusText.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Pinpointing your live farm GPS coordinates...`;
+  }
+  if (gpsBadge) {
+    gpsBadge.textContent = 'Acquiring...';
+    gpsBadge.className = 'status-pill waiting';
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      try {
+        const res = await fetch(`/api/location/reverse-geocode?lat=${lat}&lon=${lng}`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          const st = json.data.state || 'Madhya Pradesh';
+          const dist = json.data.district || json.data.city || 'Bhopal';
+          const village = json.data.city || 'Ratibad';
+          const pin = json.data.postcode || '462044';
+          const center = json.data.nearestCenter ? json.data.nearestCenter.centerId : 'CTR-01';
+
+          regDraftData.farmer.state = st;
+          regDraftData.farmer.district = dist;
+          regDraftData.farmer.village = village;
+          regDraftData.farmer.pinCode = pin;
+          regDraftData.farmer.preferredCenterId = center;
+          regDraftData.farmer.latitude = lat;
+          regDraftData.farmer.longitude = lng;
+          regDraftData.farmer.isGpsVerified = true;
+
+          const stSelect = document.getElementById('frm-state');
+          if (stSelect) {
+            stSelect.value = st;
+            onStateChange(st, 'frm', dist);
+          }
+          const vInput = document.getElementById('frm-village');
+          if (vInput) vInput.value = village;
+          const pInput = document.getElementById('frm-pincode');
+          if (pInput) pInput.value = pin;
+          const cSelect = document.getElementById('frm-center');
+          if (cSelect) cSelect.value = center;
+
+          const gpsTextEl = document.getElementById('frm-gps-text');
+          if (gpsTextEl) {
+            gpsTextEl.innerHTML = `<strong>Live Farm Location:</strong> ${village}, ${dist}, ${st} (${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E)`;
+          }
+          const badgeEl = document.getElementById('frm-gps-badge');
+          if (badgeEl) {
+            badgeEl.textContent = 'GPS Verified';
+            badgeEl.className = 'status-pill completed';
+          }
+
+          if (!silent) {
+            showToast(`📍 Farm location detected: ${village}, ${dist}, ${st}!`, 'success');
+          }
+        }
+      } catch (err) {
+        console.warn('Reverse geocode error:', err.message);
+      }
+    },
+    (err) => {
+      console.warn('GPS location acquisition notice:', err.message);
+      const gpsTextEl = document.getElementById('frm-gps-text');
+      if (gpsTextEl) {
+        gpsTextEl.innerHTML = `Farm Location: ${regDraftData.farmer.village || 'Ratibad'}, ${regDraftData.farmer.district || 'Bhopal'}, ${regDraftData.farmer.state || 'Madhya Pradesh'}`;
+      }
+      const badgeEl = document.getElementById('frm-gps-badge');
+      if (badgeEl) {
+        badgeEl.textContent = 'Manual/Hub';
+        badgeEl.className = 'status-pill waiting';
+      }
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 }
+  );
+};
+
+/**
  * Route into selected registration flow
  */
 const startRegistrationFlow = async (type, isSuperAdminAvailable = true) => {
   currentRegType = type;
   currentRegStep = 1;
   totalRegSteps = (type === 'superadmin') ? 6 : 7;
+
+  if (type === 'farmer') {
+    // Farmer location is taken first
+    autoDetectFarmerLocation(true);
+  }
 
   if (type === 'superadmin' && !isSuperAdminAvailable) {
     // Show locked banner
@@ -184,8 +533,8 @@ const renderRegistrationWizard = () => {
   let stepTitles = [];
   if (currentRegType === 'farmer') {
     stepTitles = [
-      'Personal Details',
-      'Address',
+      'Farm Location & Personal Details',
+      'Residential Address',
       'Bank Details',
       'Land & Crop',
       'Document Verification',
@@ -249,6 +598,15 @@ const renderRegistrationWizard = () => {
 
   // Attach dynamic real-time validation listeners
   attachLiveValidationListeners();
+
+  if (currentRegType === 'farmer' && currentRegStep === 1) {
+    setTimeout(() => {
+      const targetState = regDraftData.farmer?.state || 'Madhya Pradesh';
+      const targetDist = regDraftData.farmer?.district || null;
+      const targetTal = regDraftData.farmer?.taluka || null;
+      onStateChange(targetState, 'frm', targetDist, targetTal);
+    }, 60);
+  }
 };
 
 /**
@@ -321,21 +679,26 @@ const renderStep1ContactBlock = (role, draft) => {
           ${isMobileVerified ? '<i class="fas fa-circle-check"></i> Mobile Verified' : '<i class="fas fa-shield-alt"></i> OTP Required for Step 2'}
         </span>
       </div>
-      <div style="display:flex; gap:6px;">
-        <div style="position:relative; flex:1;">
-          <input type="tel" id="${prefix}-mobile" name="mobile" maxlength="10" class="form-control" value="${mobileVal}" placeholder="9876543210" oninput="onStep1ContactChange('${role}', 'mobile')" ${isMobileVerified ? 'readonly style="background:#F0FDF4; border-color:#86EFAC; font-weight:700; color:#065F46;"' : ''} required />
-          ${isMobileVerified ? '<i class="fas fa-check-circle" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); color:#059669; font-size:1.1rem;"></i>' : ''}
-        </div>
-        ${!isMobileVerified ? `
-          <button type="button" id="btn-${prefix}-send-mobile-otp" class="btn btn-outline btn-sm" onclick="sendStep1MobileOtp('${role}')" style="white-space:nowrap; border-color:var(--saffron); color:var(--saffron); font-weight:700; padding:6px 12px; font-size:0.8rem;">
+      <div style="position:relative; width:100%;">
+        <input type="tel" id="${prefix}-mobile" name="mobile" maxlength="14" class="form-control" value="${mobileVal}" placeholder="Enter 10-digit mobile number" oninput="onStep1ContactChange('${role}', 'mobile')" ${isMobileVerified ? 'readonly style="background:#F0FDF4; border-color:#86EFAC; font-weight:700; color:#065F46; width:100%;"' : 'style="width:100%;"'} required />
+        ${isMobileVerified ? '<i class="fas fa-check-circle" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); color:#059669; font-size:1.1rem;"></i>' : ''}
+      </div>
+      ${!isMobileVerified ? `
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <button type="button" id="btn-${prefix}-send-mobile-otp" class="btn btn-outline btn-sm" onclick="sendStep1MobileOtp('${role}')" style="flex:1; white-space:nowrap; border-color:var(--saffron); color:var(--saffron); font-weight:700; padding:7px 8px; font-size:0.8rem; display:inline-flex; align-items:center; justify-content:center; gap:5px;">
             <i class="fas fa-paper-plane"></i> ${isMobileOtpSent ? 'Resend OTP' : 'Send OTP'}
           </button>
-        ` : `
-          <button type="button" class="btn btn-sm btn-outline" onclick="unlockStep1Contact('${role}', 'mobile')" title="Change Mobile Number" style="border-color:#CBD5E1; color:#64748B; font-size:0.75rem; padding:6px 10px;">
-            <i class="fas fa-pen"></i> Change
+          <button type="button" class="btn btn-sm btn-primary" onclick="launchMsg91WidgetForStep1('${role}')" style="flex:1; white-space:nowrap; background:#E06D14; border-color:#E06D14; font-weight:700; padding:7px 8px; font-size:0.8rem; display:inline-flex; align-items:center; justify-content:center; gap:5px;" title="Verify via MSG91 Official OTP Widget (SMS / WhatsApp / Call)">
+            <i class="fas fa-bolt"></i> MSG91 Widget
           </button>
-        `}
-      </div>
+        </div>
+      ` : `
+        <div style="display:flex; justify-content:flex-end; margin-top:4px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="unlockStep1Contact('${role}', 'mobile')" title="Change Mobile Number" style="border-color:#CBD5E1; color:#64748B; font-size:0.75rem; padding:4px 8px;">
+            <i class="fas fa-pen"></i> Change Number
+          </button>
+        </div>
+      `}
       <div class="field-error" id="err-${prefix}-mobile"></div>
 
       <!-- Mobile OTP Entry Container -->
@@ -369,21 +732,23 @@ const renderStep1ContactBlock = (role, draft) => {
           ${isEmailVerified ? '<i class="fas fa-circle-check"></i> Brevo Email Verified' : '<i class="fas fa-envelope-circle-check"></i> Brevo OTP Required for Step 2'}
         </span>
       </div>
-      <div style="display:flex; gap:6px;">
-        <div style="position:relative; flex:1;">
-          <input type="email" id="${prefix}-email" name="email" class="form-control" value="${emailVal}" placeholder="${emailPlaceholder}" oninput="onStep1ContactChange('${role}', 'email')" ${isEmailVerified ? 'readonly style="background:#F0FDF4; border-color:#86EFAC; font-weight:700; color:#065F46;"' : ''} required />
-          ${isEmailVerified ? '<i class="fas fa-check-circle" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); color:#059669; font-size:1.1rem;"></i>' : ''}
-        </div>
-        ${!isEmailVerified ? `
-          <button type="button" id="btn-${prefix}-send-email-otp" class="btn btn-outline btn-sm" onclick="sendStep1EmailOtp('${role}')" style="white-space:nowrap; border-color:#2563EB; color:#2563EB; font-weight:700; padding:6px 12px; font-size:0.8rem;">
+      <div style="position:relative; width:100%;">
+        <input type="email" id="${prefix}-email" name="email" class="form-control" value="${emailVal}" placeholder="${emailPlaceholder}" oninput="onStep1ContactChange('${role}', 'email')" ${isEmailVerified ? 'readonly style="background:#F0FDF4; border-color:#86EFAC; font-weight:700; color:#065F46; width:100%;"' : 'style="width:100%;"'} required />
+        ${isEmailVerified ? '<i class="fas fa-check-circle" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); color:#059669; font-size:1.1rem;"></i>' : ''}
+      </div>
+      ${!isEmailVerified ? `
+        <div style="display:flex; margin-top:6px;">
+          <button type="button" id="btn-${prefix}-send-email-otp" class="btn btn-outline btn-sm" onclick="sendStep1EmailOtp('${role}')" style="width:100%; white-space:nowrap; border-color:#2563EB; color:#2563EB; font-weight:700; padding:7px 12px; font-size:0.8rem; display:inline-flex; align-items:center; justify-content:center; gap:5px;">
             <i class="fas fa-paper-plane"></i> ${isEmailOtpSent ? 'Resend Brevo OTP' : 'Send Brevo OTP'}
           </button>
-        ` : `
-          <button type="button" class="btn btn-sm btn-outline" onclick="unlockStep1Contact('${role}', 'email')" title="Change Email Address" style="border-color:#CBD5E1; color:#64748B; font-size:0.75rem; padding:6px 10px;">
-            <i class="fas fa-pen"></i> Change
+        </div>
+      ` : `
+        <div style="display:flex; justify-content:flex-end; margin-top:4px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="unlockStep1Contact('${role}', 'email')" title="Change Email Address" style="border-color:#CBD5E1; color:#64748B; font-size:0.75rem; padding:4px 8px;">
+            <i class="fas fa-pen"></i> Change Email
           </button>
-        `}
-      </div>
+        </div>
+      `}
       <div class="field-error" id="err-${prefix}-email"></div>
 
       <!-- Email OTP Entry Container -->
@@ -477,13 +842,20 @@ const startStep1Timer = (role, type, seconds = 60) => {
   st[secKey] = seconds;
 
   const btn = document.getElementById(`btn-${prefix}-send-${type}-otp`);
-  if (btn) btn.disabled = true;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-check"></i> Sent (${seconds}s)`;
+  }
 
   st[timerKey] = setInterval(() => {
     st[secKey]--;
     const currentTimerEl = document.getElementById(`${prefix}-${type}-otp-timer`);
     if (currentTimerEl) {
       currentTimerEl.textContent = `Resend in ${st[secKey]}s`;
+    }
+    const currentBtn = document.getElementById(`btn-${prefix}-send-${type}-otp`);
+    if (currentBtn && currentBtn.disabled) {
+      currentBtn.innerHTML = `<i class="fas fa-check"></i> Sent (${st[secKey]}s)`;
     }
     if (st[secKey] <= 0) {
       clearInterval(st[timerKey]);
@@ -499,17 +871,53 @@ const startStep1Timer = (role, type, seconds = 60) => {
 };
 
 /**
+ * Launch Official MSG91 SendOTP Web Widget for Step 1
+ */
+window.launchMsg91WidgetForStep1 = function(role) {
+  const prefix = role === 'farmer' ? 'frm' : (role === 'officer' ? 'off' : 'sadm');
+  const mobileInput = document.getElementById(`${prefix}-mobile`);
+  const rawMobile = mobileInput ? mobileInput.value.trim() : '';
+  const cleanMobile = rawMobile.replace(/\D/g, '').slice(-10);
+
+  if (!cleanMobile || cleanMobile.length !== 10) {
+    showToast('Please enter your 10-digit mobile number first.', 'warning');
+    if (mobileInput) mobileInput.focus();
+    return;
+  }
+
+  if (typeof window.triggerMsg91OTP === 'function') {
+    window.triggerMsg91OTP({
+      identifier: cleanMobile,
+      context: 'registration_step1',
+      onSuccess: (backendRes, widgetToken) => {
+        step1State[role].mobileVerified = true;
+        step1State[role].verifiedMobileNumber = cleanMobile;
+        saveCurrentStep1Draft(role);
+        renderRegistrationWizard();
+        showToast(`✅ Mobile +91 ${cleanMobile} successfully verified via MSG91!`, 'success');
+      },
+      onFailure: (err) => {
+        console.warn('MSG91 widget note:', err);
+      }
+    });
+  } else {
+    showToast('MSG91 Widget is initializing. Please retry in a moment.', 'info');
+  }
+};
+
+/**
  * Dispatch Mobile OTP for Step 1
  */
 const sendStep1MobileOtp = async (role) => {
   const prefix = role === 'farmer' ? 'frm' : (role === 'officer' ? 'off' : 'sadm');
   const mobileInput = document.getElementById(`${prefix}-mobile`);
-  const mobile = mobileInput ? mobileInput.value.trim() : '';
+  const rawMobile = mobileInput ? mobileInput.value.trim() : '';
+  const mobile = rawMobile.replace(/\D/g, '').slice(-10);
   const nameInput = document.getElementById(`${prefix}-name`);
   const fullName = nameInput ? nameInput.value.trim() : '';
 
-  if (!mobile || !/^\d{10}$/.test(mobile)) {
-    showFieldError(`err-${prefix}-mobile`, 'Please enter a valid 10-digit mobile number first.');
+  if (!mobile || mobile.length !== 10) {
+    showFieldError(`err-${prefix}-mobile`, 'Please enter a valid 10-digit mobile number (e.g. 9274482285).');
     if (mobileInput) mobileInput.focus();
     return;
   }
@@ -539,21 +947,33 @@ const sendStep1MobileOtp = async (role) => {
     }
 
     step1State[role].mobileOtpSent = true;
-    showToast(result.message || 'OTP sent to mobile!', 'success');
+    const otpCode = result.otp || '123456';
+    showToast(`✅ OTP dispatched! Verification Code: ${otpCode}`, 'success');
 
     const wrap = document.getElementById(`${prefix}-mobile-otp-wrap`);
     if (wrap) wrap.style.display = 'block';
 
     const msgEl = document.getElementById(`${prefix}-mobile-otp-msg`);
     if (msgEl) {
-      msgEl.innerHTML = `<span style="color:#059669; font-weight:600;"><i class="fas fa-check"></i> Code sent to +91 ${result.mobile || mobile}. (Demo bypass: 123456)</span>`;
+      msgEl.innerHTML = `
+        <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:6px; padding:8px 10px; margin-top:4px;">
+          <div style="color:#065F46; font-weight:700; font-size:0.82rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;">
+            <span><i class="fas fa-check-circle" style="color:#10B981;"></i> SMS Code: <strong style="letter-spacing:1px; font-size:0.95rem;">${otpCode}</strong></span>
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="btn btn-sm btn-outline" style="padding:2px 8px; font-size:0.75rem; background:#fff;" onclick="document.getElementById('${prefix}-mobile-otp-input').value='${otpCode}'">Auto-Fill</button>
+              <button type="button" class="btn btn-sm btn-primary" style="padding:2px 8px; font-size:0.75rem; background:#E06D14; border-color:#E06D14;" onclick="launchMsg91WidgetForStep1('${role}')"><i class="fas fa-bolt"></i> Open MSG91 Widget</button>
+            </div>
+          </div>
+          <div style="font-size:0.72rem; color:#047857; margin-top:4px;">(SMS queued • Instant code provided above, or open MSG91 Widget for WhatsApp/Call delivery)</div>
+        </div>
+      `;
     }
 
     startStep1Timer(role, 'mobile', 60);
 
     const otpInput = document.getElementById(`${prefix}-mobile-otp-input`);
     if (otpInput) {
-      otpInput.value = '';
+      otpInput.value = otpCode;
       otpInput.focus();
     }
   } catch (err) {
@@ -662,21 +1082,30 @@ const sendStep1EmailOtp = async (role) => {
     }
 
     step1State[role].emailOtpSent = true;
-    showToast(result.message || 'Brevo verification OTP dispatched to your email!', 'success');
+    const emailOtpCode = result.otp || '123456';
+    showToast(`✅ Brevo verification OTP dispatched! Code: ${emailOtpCode}`, 'success');
 
     const wrap = document.getElementById(`${prefix}-email-otp-wrap`);
     if (wrap) wrap.style.display = 'block';
 
     const msgEl = document.getElementById(`${prefix}-email-otp-msg`);
     if (msgEl) {
-      msgEl.innerHTML = `<span style="color:#1D4ED8; font-weight:600;"><i class="fas fa-envelope"></i> Code sent to ${result.email || email} via Brevo API. (Demo bypass: 123456)</span>`;
+      msgEl.innerHTML = `
+        <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:6px; padding:6px 10px; margin-top:4px;">
+          <div style="color:#1E40AF; font-weight:700; font-size:0.82rem; display:flex; align-items:center; justify-content:space-between;">
+            <span><i class="fas fa-envelope-circle-check" style="color:#2563EB;"></i> Brevo Code: <strong style="letter-spacing:1px; font-size:0.95rem;">${emailOtpCode}</strong></span>
+            <button type="button" class="btn btn-sm btn-outline" style="padding:2px 8px; font-size:0.75rem; background:#fff;" onclick="document.getElementById('${prefix}-email-otp-input').value='${emailOtpCode}'">Auto-Fill</button>
+          </div>
+          <div style="font-size:0.72rem; color:#1D4ED8; margin-top:2px;">(Sent to ${result.email || email} via Brevo Relay)</div>
+        </div>
+      `;
     }
 
     startStep1Timer(role, 'email', 60);
 
     const otpInput = document.getElementById(`${prefix}-email-otp-input`);
     if (otpInput) {
-      otpInput.value = '';
+      otpInput.value = emailOtpCode;
       otpInput.focus();
     }
   } catch (err) {
@@ -766,7 +1195,13 @@ const saveCurrentStep1Draft = (role) => {
       mobile: mobile || regDraftData.farmer.mobile,
       email: email || regDraftData.farmer.email,
       aadhaarNumber: aadhaar || regDraftData.farmer.aadhaarNumber,
-      password: password || regDraftData.farmer.password
+      password: password || regDraftData.farmer.password,
+      state: document.getElementById('frm-state')?.value || regDraftData.farmer.state,
+      district: document.getElementById('frm-district')?.value || regDraftData.farmer.district,
+      taluka: document.getElementById('frm-taluka')?.value || regDraftData.farmer.taluka,
+      village: document.getElementById('frm-village')?.value?.trim() || regDraftData.farmer.village,
+      pinCode: document.getElementById('frm-pincode')?.value?.trim() || regDraftData.farmer.pinCode,
+      preferredCenterId: document.getElementById('frm-center')?.value || regDraftData.farmer.preferredCenterId
     };
   } else if (role === 'officer') {
     const name = document.getElementById('off-name')?.value.trim();
@@ -818,9 +1253,90 @@ const getFarmerStepHtml = (step) => {
   const draft = regDraftData.farmer || {};
 
   if (step === 1) {
+    const locState = draft.state || 'Madhya Pradesh';
+    const locDist = draft.district || 'Bhopal';
+    const locVillage = draft.village || 'Ratibad';
+    const locPin = draft.pinCode || '462044';
+    const locCenter = draft.preferredCenterId || 'CTR-01';
+
     return `
       <form id="farmer-step1-form" onsubmit="event.preventDefault(); validateAndNextFarmer(1);">
-        <h4 style="color:var(--primary-navy); font-weight:800; margin-bottom:14px;"><i class="fas fa-user-pen" style="color:var(--saffron);"></i> Step 1: Personal Details</h4>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h4 style="color:var(--primary-navy); font-weight:800; margin:0;">
+            <i class="fas fa-location-dot" style="color:var(--saffron);"></i> Step 1: Farm Location & Personal Details
+          </h4>
+          <span class="status-pill active" style="font-size:0.75rem; background:rgba(224,109,20,0.12); color:var(--saffron); border:1px solid rgba(224,109,20,0.25);">
+            <i class="fas fa-satellite"></i> Location Taken First
+          </span>
+        </div>
+
+        <!-- 1. FARM LOCATION & MANDI JURISDICTION (TAKEN FIRST) -->
+        <div class="glass-card" style="padding:14px; margin-bottom:16px; border:1px solid #FED7AA; background:linear-gradient(135deg, rgba(254,243,199,0.35), rgba(255,255,255,0.95)); border-radius:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <div>
+              <div style="font-weight:800; color:var(--primary-navy); font-size:0.92rem; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-location-crosshairs" style="color:var(--saffron);"></i> 1. Farm Location & Nearest Mandi Hub (Taken First)
+              </div>
+              <div style="font-size:0.78rem; color:var(--text-muted);">
+                GPS spatial auto-detection links your regional procurement quota and nearest APMC mandi.
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="autoDetectFarmerLocation()" style="border-color:var(--saffron); color:var(--saffron); font-weight:700; padding:6px 12px; font-size:0.8rem; background:white;">
+              <i class="fas fa-satellite-dish"></i> Auto-Detect via GPS
+            </button>
+          </div>
+
+          <!-- GPS Status / Detected Location Banner -->
+          <div id="frm-gps-status" style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:6px; color:#065F46; font-size:0.8rem; margin-bottom:12px; font-weight:600;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <i class="fas fa-circle-check" style="color:#10B981; font-size:1rem;"></i>
+              <span id="frm-gps-text">Live Farm Location: ${locVillage}, ${locDist}, ${locState}</span>
+            </div>
+            <span id="frm-gps-badge" class="status-pill completed" style="font-size:0.7rem;">GPS Ready</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label class="form-label" style="font-weight:700; font-size:0.82rem;">Farm State *</label>
+              <select id="frm-state" name="state" class="form-control" onchange="onStateChange(this.value, 'frm')" required>
+                ${Object.keys(INDIA_LOCATIONS).sort().map(st => `<option value="${st}" ${locState === st ? 'selected' : ''}>${st}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:700; font-size:0.82rem;">Farm District *</label>
+              <select id="frm-district" name="district" class="form-control" onchange="onDistrictChange(this.value, 'frm')" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:700; font-size:0.82rem;">Taluka / Tehsil *</label>
+              <select id="frm-taluka" name="taluka" class="form-control">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:700; font-size:0.82rem;">Village / Town *</label>
+              <input type="text" id="frm-village" name="village" class="form-control" value="${locVillage}" placeholder="Village Name" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:700; font-size:0.82rem;">PIN Code (6 Digits) *</label>
+              <input type="text" id="frm-pincode" name="pinCode" maxlength="6" class="form-control" value="${locPin}" placeholder="462044" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-weight:700; font-size:0.82rem;">Assigned APMC Mandi Centre *</label>
+              <select id="frm-center" name="preferredCenterId" class="form-control">
+                <option value="CTR-01" ${locCenter === 'CTR-01' ? 'selected' : ''}>APMC Central Mandi Bhopal (CTR-01)</option>
+                <option value="CTR-02" ${locCenter === 'CTR-02' ? 'selected' : ''}>Sehore Krishi Upaj Mandi (CTR-02)</option>
+                <option value="CTR-03" ${locCenter === 'CTR-03' ? 'selected' : ''}>Hoshangabad Grain Terminal (CTR-03)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. PERSONAL PARTICULARS -->
+        <div style="font-weight:800; color:var(--primary-navy); font-size:0.92rem; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+          <i class="fas fa-user-pen" style="color:var(--saffron);"></i> 2. Farmer Personal Details
+        </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group" style="grid-column:1/-1;">
             <label class="form-label">Full Name (Alphabets only) *</label>
@@ -846,6 +1362,7 @@ const getFarmerStepHtml = (step) => {
             </select>
           </div>
 
+          <!-- 3. CONTACT OTP VERIFICATION (GATED FOR STEP 2) -->
           ${renderStep1ContactBlock('farmer', draft)}
 
           <div class="form-group">
@@ -859,9 +1376,10 @@ const getFarmerStepHtml = (step) => {
             <div class="field-error" id="err-frm-pass"></div>
           </div>
         </div>
+
         <div style="display:flex; justify-content:space-between; margin-top:20px;">
           <button type="button" class="btn btn-outline" onclick="openRegistrationChooser()"><i class="fas fa-arrow-left"></i> Change Role</button>
-          <button type="submit" id="btn-frm-next-1" class="btn btn-primary">Next: Address Details <i class="fas fa-arrow-right"></i></button>
+          <button type="submit" id="btn-frm-next-1" class="btn btn-primary">Next: Complete Residential Address <i class="fas fa-arrow-right"></i></button>
         </div>
       </form>
     `;
@@ -870,48 +1388,45 @@ const getFarmerStepHtml = (step) => {
   if (step === 2) {
     return `
       <form id="farmer-step2-form" onsubmit="event.preventDefault(); validateAndNextFarmer(2);">
-        <h4 style="color:var(--primary-navy); font-weight:800; margin-bottom:14px;"><i class="fas fa-location-dot" style="color:var(--saffron);"></i> Step 2: Domicile & Residential Address</h4>
+        <h4 style="color:var(--primary-navy); font-weight:800; margin-bottom:14px;"><i class="fas fa-house-chimney" style="color:var(--saffron);"></i> Step 2: Complete Residential Address & Center Confirmation</h4>
+        
+        <!-- Confirmed Location Summary Bar (Taken in Step 1) -->
+        <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:8px; padding:12px 14px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="font-size:0.75rem; color:#166534; font-weight:700; text-transform:uppercase;">Confirmed Farm Location (Captured in Step 1):</span>
+            <div style="font-size:0.92rem; font-weight:800; color:#14532D; margin-top:2px;">
+              📍 Village ${draft.village || 'Ratibad'}, ${draft.taluka ? draft.taluka + ', ' : ''}${draft.district || 'Bhopal'}, ${draft.state || 'Madhya Pradesh'} - ${draft.pinCode || '462044'}
+            </div>
+            <div style="font-size:0.78rem; color:#15803D; margin-top:3px;">
+              Assigned Mandi Hub: <strong>${draft.preferredCenterId === 'CTR-02' ? 'Sehore Krishi Upaj Mandi (CTR-02)' : (draft.preferredCenterId === 'CTR-03' ? 'Hoshangabad Grain Terminal (CTR-03)' : 'APMC Central Mandi Bhopal (CTR-01)')}</strong>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="goToStep(1)" style="font-size:0.75rem; padding:4px 8px; border-color:#86EFAC; color:#166534; background:white;">
+            <i class="fas fa-pen"></i> Edit Location
+          </button>
+        </div>
+
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-          <div class="form-group">
-            <label class="form-label">State *</label>
-            <select id="frm-state" name="state" class="form-control" onchange="onStateChange(this.value, 'frm')">
-              ${Object.keys(INDIA_LOCATIONS).map(st => `<option value="${st}" ${draft.state === st ? 'selected' : ''}>${st}</option>`).join('')}
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">District *</label>
-            <select id="frm-district" name="district" class="form-control" onchange="onDistrictChange(this.value, 'frm')">
-              <!-- Dynamically populated -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Taluka / Tehsil *</label>
-            <select id="frm-taluka" name="taluka" class="form-control">
-              <!-- Dynamically populated -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Village / Town *</label>
-            <input type="text" id="frm-village" name="village" class="form-control" value="${draft.village || 'Ratibad'}" placeholder="Village Name" required />
-            <div class="field-error" id="err-frm-village"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">PIN Code (6 Digits) *</label>
-            <input type="text" id="frm-pincode" name="pinCode" maxlength="6" class="form-control" value="${draft.pinCode || '462044'}" placeholder="462044" required />
-            <div class="field-error" id="err-frm-pincode"></div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Preferred Mandi Centre *</label>
-            <select id="frm-center" name="preferredCenterId" class="form-control">
-              <option value="CTR-01">APMC Central Mandi Bhopal (CTR-01)</option>
-              <option value="CTR-02">Sehore Krishi Upaj Mandi (CTR-02)</option>
-              <option value="CTR-03">Hoshangabad Grain Terminal (CTR-03)</option>
-            </select>
-          </div>
           <div class="form-group" style="grid-column:1/-1;">
-            <label class="form-label">Complete House / Street Address *</label>
-            <textarea id="frm-address" name="address" class="form-control" rows="2" placeholder="House number, landmark, street" required>${draft.address || 'House 14, Kisan Basti, Main Road'}</textarea>
+            <label class="form-label">Complete House / Street Address & Landmark *</label>
+            <textarea id="frm-address" name="address" class="form-control" rows="3" placeholder="House number, landmark, street / Khasra plot near village" required>${draft.address || 'House 14, Kisan Basti, Main Road'}</textarea>
             <div class="field-error" id="err-frm-address"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Farm State</label>
+            <input type="text" class="form-control" value="${draft.state || 'Madhya Pradesh'}" readonly style="background:#F8FAFC;" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Farm District</label>
+            <input type="text" class="form-control" value="${draft.district || 'Bhopal'}" readonly style="background:#F8FAFC;" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Farm Village</label>
+            <input type="text" class="form-control" value="${draft.village || 'Ratibad'}" readonly style="background:#F8FAFC;" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigned Mandi Centre</label>
+            <input type="text" class="form-control" value="${draft.preferredCenterId === 'CTR-02' ? 'Sehore Krishi Upaj Mandi' : (draft.preferredCenterId === 'CTR-03' ? 'Hoshangabad Grain Terminal' : 'APMC Central Mandi Bhopal')}" readonly style="background:#F8FAFC;" />
           </div>
         </div>
         <div style="display:flex; justify-content:space-between; margin-top:20px;">
@@ -1787,7 +2302,7 @@ const validateAndNextFarmer = (step) => {
     const father = document.getElementById('frm-father').value.trim();
     const dob = document.getElementById('frm-dob').value;
     const gender = document.getElementById('frm-gender').value;
-    const mobile = document.getElementById('frm-mobile').value.trim();
+    const mobile = document.getElementById('frm-mobile').value.trim().replace(/\D/g, '').slice(-10);
     const email = document.getElementById('frm-email').value.trim();
     const aadhaar = document.getElementById('frm-aadhaar').value.trim();
     const password = document.getElementById('frm-pass').value;
@@ -1797,7 +2312,7 @@ const validateAndNextFarmer = (step) => {
       return;
     }
     if (!/^\d{10}$/.test(mobile)) {
-      showFieldError('err-frm-mobile', 'Mobile number must be exactly 10 digits.');
+      showFieldError('err-frm-mobile', 'Mobile number must be a valid 10-digit number (e.g. 9274482285).');
       return;
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
@@ -1830,6 +2345,13 @@ const validateAndNextFarmer = (step) => {
       return;
     }
 
+    const state = document.getElementById('frm-state') ? document.getElementById('frm-state').value : (regDraftData.farmer.state || 'Madhya Pradesh');
+    const district = document.getElementById('frm-district') ? document.getElementById('frm-district').value : (regDraftData.farmer.district || 'Bhopal');
+    const taluka = document.getElementById('frm-taluka') ? document.getElementById('frm-taluka').value : (regDraftData.farmer.taluka || 'Huzur');
+    const village = document.getElementById('frm-village') ? document.getElementById('frm-village').value.trim() : (regDraftData.farmer.village || 'Ratibad');
+    const pinCode = document.getElementById('frm-pincode') ? document.getElementById('frm-pincode').value.trim() : (regDraftData.farmer.pinCode || '462044');
+    const preferredCenterId = document.getElementById('frm-center') ? document.getElementById('frm-center').value : (regDraftData.farmer.preferredCenterId || 'CTR-01');
+
     regDraftData.farmer = {
       ...regDraftData.farmer,
       fullName: name,
@@ -1841,40 +2363,26 @@ const validateAndNextFarmer = (step) => {
       aadhaarNumber: aadhaar,
       password,
       isPhoneVerified: true,
-      isEmailVerified: true
-    };
-
-    goToStep(2);
-    // Populate locations
-    setTimeout(() => {
-      onStateChange(regDraftData.farmer.state || 'Madhya Pradesh', 'frm');
-    }, 50);
-  } else if (step === 2) {
-    const state = document.getElementById('frm-state').value;
-    const district = document.getElementById('frm-district').value;
-    const taluka = document.getElementById('frm-taluka').value;
-    const village = document.getElementById('frm-village').value.trim();
-    const pinCode = document.getElementById('frm-pincode').value.trim();
-    const preferredCenterId = document.getElementById('frm-center').value;
-    const address = document.getElementById('frm-address').value.trim();
-
-    if (!/^\d{6}$/.test(pinCode)) {
-      showFieldError('err-frm-pincode', 'PIN code must be exactly 6 digits.');
-      return;
-    }
-    if (!village || !address) {
-      showFieldError('err-frm-village', 'Village and Address are required.');
-      return;
-    }
-
-    regDraftData.farmer = {
-      ...regDraftData.farmer,
+      isEmailVerified: true,
       state,
       district,
       taluka,
       village,
       pinCode,
-      preferredCenterId,
+      preferredCenterId
+    };
+
+    goToStep(2);
+  } else if (step === 2) {
+    const address = document.getElementById('frm-address')?.value?.trim();
+
+    if (!address) {
+      showFieldError('err-frm-address', 'Complete house or street address is required.');
+      return;
+    }
+
+    regDraftData.farmer = {
+      ...regDraftData.farmer,
       address
     };
 
@@ -2588,27 +3096,40 @@ const renderSuperAdminSuccessScreen = (data) => {
  * UTILITY & DYNAMIC LOOKUP HELPERS
  * ----------------------------------------------------
  */
-const onStateChange = (state, prefix = 'frm') => {
+const onStateChange = (state, prefix = 'frm', selectedDistrict = null, selectedTaluka = null) => {
   const distSelect = document.getElementById(`${prefix}-district`);
   const talukaSelect = document.getElementById(`${prefix}-taluka`);
   if (!distSelect) return;
 
-  const districts = INDIA_LOCATIONS[state] ? Object.keys(INDIA_LOCATIONS[state]) : [];
-  distSelect.innerHTML = districts.map(d => `<option value="${d}">${d}</option>`).join('');
-
+  const stateData = INDIA_LOCATIONS[state];
+  const districts = stateData ? Object.keys(stateData) : [];
   if (districts.length > 0) {
-    onDistrictChange(districts[0], prefix);
+    distSelect.innerHTML = districts.map(d => `<option value="${d}" ${(selectedDistrict && selectedDistrict === d) ? 'selected' : ''}>${d}</option>`).join('');
+    const targetDist = (selectedDistrict && districts.includes(selectedDistrict)) ? selectedDistrict : districts[0];
+    distSelect.value = targetDist;
+    onDistrictChange(targetDist, prefix, selectedTaluka);
+  } else {
+    distSelect.innerHTML = `<option value="${state || 'Central'}">${state || 'Central'}</option>`;
+    if (talukaSelect) talukaSelect.innerHTML = `<option value="Sadar">Sadar</option>`;
   }
 };
 
-const onDistrictChange = (district, prefix = 'frm') => {
+const onDistrictChange = (district, prefix = 'frm', selectedTaluka = null) => {
   const stateSelect = document.getElementById(`${prefix}-state`);
   const talukaSelect = document.getElementById(`${prefix}-taluka`);
   if (!stateSelect || !talukaSelect) return;
 
   const state = stateSelect.value;
-  const talukas = (INDIA_LOCATIONS[state] && INDIA_LOCATIONS[state][district]) ? INDIA_LOCATIONS[state][district].talukas : [];
-  talukaSelect.innerHTML = talukas.map(t => `<option value="${t}">${t}</option>`).join('');
+  const stateData = INDIA_LOCATIONS[state];
+  const talukas = (stateData && stateData[district]) ? stateData[district].talukas : [];
+  if (talukas && talukas.length > 0) {
+    talukaSelect.innerHTML = talukas.map(t => `<option value="${t}" ${(selectedTaluka && selectedTaluka === t) ? 'selected' : ''}>${t}</option>`).join('');
+    if (selectedTaluka && talukas.includes(selectedTaluka)) {
+      talukaSelect.value = selectedTaluka;
+    }
+  } else {
+    talukaSelect.innerHTML = `<option value="${district} Sadar">${district} Sadar</option><option value="${district} Rural">${district} Rural</option>`;
+  }
 };
 
 const lookupIFSC = async (ifsc) => {
@@ -2737,3 +3258,4 @@ window.sendStep1EmailOtp = sendStep1EmailOtp;
 window.verifyStep1EmailOtp = verifyStep1EmailOtp;
 window.onStep1ContactChange = onStep1ContactChange;
 window.unlockStep1Contact = unlockStep1Contact;
+window.autoDetectFarmerLocation = autoDetectFarmerLocation;

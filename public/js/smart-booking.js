@@ -89,24 +89,10 @@ const renderSmartMandiView = () => {
   const currentStep = smartMandiState.step;
 
   container.innerHTML = `
-    <div class="app-container">
-      <aside class="sidebar">
-        <div style="padding:10px 14px; border-bottom:1px solid var(--border-color); margin-bottom:12px;">
-          <div style="font-weight:700; color:#FFF; font-size:1.05rem;">${user.name || 'Kisan Bandhu'}</div>
-          <div style="font-size:0.75rem; color:var(--saffron); font-weight:600;"><i class="fas fa-id-card"></i> ${user.farmerId || 'Farmer'}</div>
-        </div>
-        <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
-        <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('back_to_dashboard', 'Back to Dashboard')}</a>
-        <a class="nav-link active" onclick="loadSmartMandiFinderPage()"><i class="fas fa-wand-magic-sparkles" style="color:var(--saffron);"></i> Smart Mandi Finder</a>
-        <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('manual_slot_booking', 'Manual Slot Booking')}</a>
-        <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('live_queue_tracker', 'Live Queue Tracker')}</a>
-        <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> ${getT('my_bookings', 'My Bookings')}</a>
-        <div style="margin-top:auto; padding-top:16px;">
-          <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ${getT('nav_logout', 'Logout')}</a>
-        </div>
-      </aside>
+    <div class="sp-app-layout">
+      ${typeof getFarmerSidebar === 'function' ? getFarmerSidebar(user, 'smart-booking') : (window.getFarmerSidebar ? window.getFarmerSidebar(user, 'smart-booking') : '')}
 
-      <main class="main-content" style="max-width:1050px; margin:0 auto; padding-bottom:60px;">
+      <main class="sp-main" style="max-width:1150px; margin:0 auto; padding-bottom:60px;">
         
         <!-- Header Banner -->
         <div class="glass-panel" style="padding:24px 28px; margin-bottom:20px; background:#FFFFFF; border:1px solid #CBD5E1; border-left:6px solid var(--saffron); box-shadow:0 6px 24px rgba(0,0,0,0.07);">

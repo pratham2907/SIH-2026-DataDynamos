@@ -1005,20 +1005,36 @@ const initNearbyMandisMiniMap = () => {
 
       window.spMiniMap = L.map('sp-nearby-map', {
         center: defaultCenter,
-        zoom: 8,
-        zoomControl: false,
+        zoom: 9,
+        zoomControl: true,
         attributionControl: false
       });
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      // Free, high-reliability OpenStreetMap tile layer (No API key, no watermark)
+      const primaryTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        subdomains: 'abcd',
-        attribution: '&copy; OpenStreetMap &copy; CARTO'
-      }).addTo(window.spMiniMap);
+        attribution: '&copy; OpenStreetMap contributors'
+      });
 
-      setTimeout(() => {
-        if (window.spMiniMap) window.spMiniMap.invalidateSize();
-      }, 300);
+      // Fallback to Esri World Street Map if OSM experiences tile errors
+      primaryTileLayer.on('tileerror', function() {
+        if (!window.spMiniMap._fallbackSet) {
+          window.spMiniMap._fallbackSet = true;
+          L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: '&copy; Esri &copy; OpenStreetMap'
+          }).addTo(window.spMiniMap);
+        }
+      });
+
+      primaryTileLayer.addTo(window.spMiniMap);
+
+      // Multiple invalidateSize calls to guarantee tile coverage after layout
+      [100, 300, 600, 1200].forEach(delay => {
+        setTimeout(() => {
+          if (window.spMiniMap) window.spMiniMap.invalidateSize();
+        }, delay);
+      });
     } catch (e) {
       console.warn('Map initialization notice:', e.message);
     }
@@ -1045,85 +1061,186 @@ const updateNearbyMandisMiniMap = (userLoc, topCentres, crop = 'Wheat', qty = 50
     const bounds = [];
     let originCoord = null;
 
-    // Add Farmer Location Marker
+    // 1. Add Farmer Origin Pin Marker
     if (userLoc && userLoc.lat && (userLoc.lng || userLoc.lon)) {
-      const uLat = userLoc.lat;
-      const uLng = userLoc.lng || userLoc.lon;
+      const uLat = parseFloat(userLoc.lat);
+      const uLng = parseFloat(userLoc.lng || userLoc.lon);
       originCoord = [uLat, uLng];
       bounds.push(originCoord);
 
+      // Elegant Teardrop Pin with tractor icon pointing precisely to location
       const farmerIcon = L.divIcon({
-        html: '<div style="background:#15803D; color:#FFF; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(21,128,61,0.5); border:2px solid #FFF;"><i class="fas fa-tractor" style="font-size:12px;"></i></div>',
-        className: '',
-        iconSize: [28, 28],
-        iconAnchor: [14, 14]
+        html: `
+          <div style="cursor:pointer; display:flex; flex-direction:column; align-items:center; filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35)); transform:translate(-50%, -100%);">
+            <div style="background:#15803D; color:#FFF; width:32px; height:32px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; border:2.5px solid #FFFFFF; box-shadow:inset 0 0 4px rgba(0,0,0,0.2);">
+              <i class="fas fa-tractor" style="transform:rotate(45deg); font-size:12px;"></i>
+            </div>
+            <span style="background:#15803D; color:#FFFFFF; font-size:9px; font-weight:800; padding:1px 6px; border-radius:4px; margin-top:2px; letter-spacing:0.3px; border:1px solid rgba(255,255,255,0.7); white-space:nowrap;">
+              My Farm
+            </span>
+          </div>
+        `,
+        className: 'kpms-farm-origin-pin',
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
       });
 
-      const farmerMarker = L.marker(originCoord, { icon: farmerIcon }).addTo(window.spMiniMap);
+      const farmerMarker = L.marker(originCoord, { icon: farmerIcon, zIndexOffset: 1000 }).addTo(window.spMiniMap);
 
       farmerMarker.bindPopup(`
-        <div style="font-family:sans-serif; font-size:0.82rem; padding:4px;">
-          <strong style="color:#065F46;"><i class="fas fa-tractor"></i> Your Farm Origin</strong><br>
-          ${userLoc.city || userLoc.formattedName || 'Current Location'}
+        <div style="font-family:sans-serif; font-size:0.84rem; padding:4px 6px;">
+          <div style="color:#065F46; font-weight:800; display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+            <i class="fas fa-tractor" style="color:#15803D;"></i> Your Farm Location
+          </div>
+          <div style="font-size:0.8rem; color:#374151;">
+            ${userLoc.city || userLoc.formattedName || 'Your Location'}<br>
+            <span style="font-size:0.74rem; color:#6B7280;">(${uLat.toFixed(4)}° N, ${uLng.toFixed(4)}° E)</span>
+          </div>
         </div>
       `);
       window.spMiniMapMarkers.push(farmerMarker);
     }
 
-    // Add Candidate Centre Markers and Route Lines
-    const colors = ['#0D5C3A', '#2563EB', '#D97706'];
+    // 2. Add Candidate Mandi Pin Markers (With anti-collision separation)
+    const pinColors = ['#0D5C3A', '#2563EB', '#D97706'];
+    const badgeTitles = ['#1 Best Match', '#2 Fast Slot', '#3 Top Return'];
+
     topCentres.forEach((c, idx) => {
-      const cLat = (c.centre && c.centre.latitude) || c.latitude || (c.coordinates && c.coordinates[1]);
-      const cLng = (c.centre && c.centre.longitude) || c.longitude || (c.coordinates && c.coordinates[0]);
-      if (!cLat || !cLng) return;
+      let cLat = parseFloat((c.centre && c.centre.latitude) || c.latitude || (c.coordinates && c.coordinates[1]));
+      let cLng = parseFloat((c.centre && c.centre.longitude) || c.longitude || (c.coordinates && c.coordinates[0]));
+      if (isNaN(cLat) || isNaN(cLng)) return;
 
-      const mandiCoord = [cLat, cLng];
-      bounds.push(mandiCoord);
+      const rawCoord = [cLat, cLng];
+      bounds.push(rawCoord);
 
-      // Draw corridor line to recommended centre
+      // Anti-Collision Spiderfy / Offset:
+      // If mandi is situated extremely close to farmer (< 0.02 deg ~ 2 km) or previous mandi, apply a visual radial offset
+      let renderLat = cLat;
+      let renderLng = cLng;
+      let isOffset = false;
+
+      if (originCoord) {
+        const dLat = Math.abs(cLat - originCoord[0]);
+        const dLng = Math.abs(cLng - originCoord[1]);
+        if (dLat < 0.025 && dLng < 0.025) {
+          isOffset = true;
+          // Offset based on index to spread around farmer pin
+          const angle = (idx * 1.5) + 0.4;
+          renderLat = cLat + Math.sin(angle) * 0.022;
+          renderLng = cLng + Math.cos(angle) * 0.028;
+        }
+      }
+
+      const displayCoord = [renderLat, renderLng];
+
+      // Draw dashed connector from real coord to offset position if offset
+      if (isOffset) {
+        const offsetLeader = L.polyline([rawCoord, displayCoord], {
+          color: pinColors[idx] || '#0D5C3A',
+          weight: 1.5,
+          dashArray: '3, 4',
+          opacity: 0.8
+        }).addTo(window.spMiniMap);
+        window.spMiniMapMarkers.push(offsetLeader);
+      }
+
+      // Draw corridor route line to recommended centre (#1)
       if (originCoord && idx === 0) {
-        const routeLine = L.polyline([originCoord, mandiCoord], {
+        const routeLine = L.polyline([originCoord, rawCoord], {
           color: '#0D5C3A',
           weight: 3.5,
-          opacity: 0.85,
+          opacity: 0.9,
           dashArray: '6, 8'
         }).addTo(window.spMiniMap);
         window.spMiniMapMarkers.push(routeLine);
       }
 
+      // Styled Mandi Pin Marker with Numbered Badge
       const mandiIcon = L.divIcon({
-        html: `<div style="background:${colors[idx] || '#0D5C3A'}; color:#FFF; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.3); border:2px solid #FFF; font-weight:800; font-size:11px;">${idx + 1}</div>`,
-        className: '',
-        iconSize: [26, 26],
-        iconAnchor: [13, 13]
+        html: `
+          <div style="cursor:pointer; display:flex; flex-direction:column; align-items:center; filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35)); transform:translate(-50%, -100%);">
+            <div style="background:${pinColors[idx] || '#0D5C3A'}; color:#FFF; width:30px; height:30px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; border:2.5px solid #FFFFFF;">
+              <span style="transform:rotate(45deg); font-weight:900; font-size:12px;">${idx + 1}</span>
+            </div>
+            <span style="background:${pinColors[idx] || '#0D5C3A'}; color:#FFFFFF; font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px; margin-top:2px; letter-spacing:0.2px; border:1px solid rgba(255,255,255,0.7); white-space:nowrap; max-width:85px; overflow:hidden; text-overflow:ellipsis;">
+              ${c.district || c.shortName || 'Mandi'}
+            </span>
+          </div>
+        `,
+        className: `kpms-mandi-pin-${idx + 1}`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
       });
 
-      const marker = L.marker(mandiCoord, { icon: mandiIcon }).addTo(window.spMiniMap);
+      const marker = L.marker(displayCoord, { icon: mandiIcon, zIndexOffset: 500 - (idx * 50) }).addTo(window.spMiniMap);
 
       marker.bindPopup(`
-        <div style="font-family:sans-serif; font-size:0.82rem; padding:4px;">
-          <strong style="color:#0F5132;">${c.shortName || c.centerName}</strong><br>
-          ${c.distance} km away &bull; Match: <strong>${c.matchScore}%</strong><br>
-          Price: <strong>₹${c.pricePerQuintal}/Q</strong><br>
-          <a onclick="bookRecommendedSlot('${c.centerId}', '${crop}', ${qty})" style="color:#15803D; font-weight:700; cursor:pointer; text-decoration:underline; display:inline-block; margin-top:4px;">Book This Mandi</a>
+        <div style="font-family:sans-serif; font-size:0.82rem; padding:4px 6px; min-width:180px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+            <span style="font-size:0.7rem; font-weight:800; color:${pinColors[idx]}; text-transform:uppercase;">${badgeTitles[idx]}</span>
+            <span style="font-size:0.72rem; color:#047857; font-weight:700;">${c.matchScore || 90}% Match</span>
+          </div>
+          <strong style="color:#0F5132; font-size:0.9rem; display:block; margin-bottom:2px;">${c.shortName || c.centerName}</strong>
+          <div style="color:#4B5563; font-size:0.78rem; margin-bottom:4px;">
+            <i class="fas fa-route" style="color:#059669;"></i> <strong>${c.distance} km</strong> away &bull; ~${c.travelTimeDisplay || '45 min'}
+          </div>
+          <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:4px; padding:3px 6px; margin-bottom:6px; font-size:0.78rem; color:#14532D;">
+            MSP Price: <strong>₹${c.pricePerQuintal}/Q</strong>
+          </div>
+          <a onclick="bookRecommendedSlot('${c.centerId}', '${crop}', ${qty})" class="btn btn-primary btn-sm" style="display:inline-block; font-size:0.75rem; padding:4px 10px; width:100%; text-align:center; text-decoration:none; cursor:pointer;">
+            <i class="fas fa-calendar-check"></i> Book This Mandi
+          </a>
         </div>
       `);
       window.spMiniMapMarkers.push(marker);
     });
 
+    // 3. Smart Bounding and Zoom Calculation
     if (bounds.length > 0) {
-      window.spMiniMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 12 });
-      setTimeout(() => {
-        if (window.spMiniMap) window.spMiniMap.invalidateSize();
-      }, 300);
+      if (bounds.length === 1) {
+        window.spMiniMap.setView(bounds[0], 11);
+      } else {
+        // Expand bounds slightly so pins and labels never get clipped at borders
+        let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+        bounds.forEach(([lat, lng]) => {
+          if (lat < minLat) minLat = lat;
+          if (lat > maxLat) maxLat = lat;
+          if (lng < minLng) minLng = lng;
+          if (lng > maxLng) maxLng = lng;
+        });
+
+        const latSpan = Math.max(0.12, (maxLat - minLat) * 1.3);
+        const lngSpan = Math.max(0.14, (maxLng - minLng) * 1.3);
+        const centerLat = (minLat + maxLat) / 2;
+        const centerLng = (minLng + maxLng) / 2;
+
+        const paddedBounds = [
+          [centerLat - (latSpan / 2), centerLng - (lngSpan / 2)],
+          [centerLat + (latSpan / 2), centerLng + (lngSpan / 2)]
+        ];
+
+        window.spMiniMap.fitBounds(paddedBounds, {
+          padding: [20, 20],
+          maxZoom: 13
+        });
+      }
+
+      [150, 400, 800].forEach(delay => {
+        setTimeout(() => {
+          if (window.spMiniMap) window.spMiniMap.invalidateSize();
+        }, delay);
+      });
     }
 
     // Update distance pill labels underneath mini-map dynamically
     const distPillsEl = document.getElementById('sp-nearby-dist-pills');
     if (distPillsEl && topCentres.length > 0) {
-      const colorDots = ['#0D5C3A', '#2563EB', '#EA580C'];
+      const colorDots = ['#0D5C3A', '#2563EB', '#D97706'];
       distPillsEl.innerHTML = topCentres.slice(0, 3).map((c, i) => `
-        <span><i class="fas fa-circle" style="color:${colorDots[i] || '#0D5C3A'}; font-size:0.65rem;"></i> ${c.district || c.shortName} (${c.distance} km)</span>
+        <span style="display:inline-flex; align-items:center; gap:4px; cursor:pointer;" onclick="if(window.spMiniMapMarkers[${i + 1}]){window.spMiniMapMarkers[${i + 1}].openPopup();}">
+          <i class="fas fa-circle" style="color:${colorDots[i] || '#0D5C3A'}; font-size:0.65rem;"></i>
+          <strong>${c.district || c.shortName}</strong> (${c.distance} km)
+        </span>
       `).join('');
     }
   } catch (err) {
@@ -1131,6 +1248,114 @@ const updateNearbyMandisMiniMap = (userLoc, topCentres, crop = 'Wheat', qty = 50
   }
 };
 window.updateNearbyMandisMiniMap = updateNearbyMandisMiniMap;
+
+// Fullscreen Interactive Mandi Map Modal Opener
+const openNearbyMandisFullMap = () => {
+  const modal = document.getElementById('auth-modal');
+  const body = document.getElementById('modal-content-slot');
+  const title = document.getElementById('modal-title');
+  if (!modal || !body) {
+    if (typeof routeTo === 'function') routeTo('#smart-booking');
+    return;
+  }
+
+  title.innerHTML = '<i class="fas fa-map-location-dot" style="color:#15803D;"></i> Regional Mandi Procurement Network Map';
+
+  const userLoc = (window.KPMS_USER_LOCATION && window.KPMS_USER_LOCATION.lat)
+    ? window.KPMS_USER_LOCATION
+    : { city: 'Bhopal', state: 'Madhya Pradesh', lat: 23.2599, lng: 77.4126 };
+
+  body.innerHTML = `
+    <div style="padding:4px 0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+        <div style="font-size:0.86rem; color:#4B5563;">
+          <i class="fas fa-satellite-dish" style="color:#15803D;"></i> Your Origin: <strong>${userLoc.city || userLoc.formattedName || 'Current Location'}, ${userLoc.state || ''}</strong>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="closeModal(); routeTo('#smart-booking');" style="font-size:0.8rem; padding:6px 14px;">
+          <i class="fas fa-wand-magic-sparkles"></i> Open Smart Booking Finder
+        </button>
+      </div>
+
+      <div id="sp-full-modal-map" style="width:100%; height:460px; border-radius:12px; border:1px solid #E5E7EB; overflow:hidden; position:relative; box-shadow:0 4px 12px rgba(0,0,0,0.08);"></div>
+
+      <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:0.8rem; color:#6B7280;">
+        <div style="display:flex; gap:16px;">
+          <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#15803D; margin-right:4px;"></span> Your Farm</span>
+          <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#0D5C3A; margin-right:4px;"></span> Best Mandi</span>
+          <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#2563EB; margin-right:4px;"></span> Alternate Mandis</span>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="closeModal()" style="font-size:0.78rem; padding:4px 12px;">Close Map</button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('active');
+
+  setTimeout(() => {
+    try {
+      const fullMap = L.map('sp-full-modal-map', {
+        center: [userLoc.lat, userLoc.lng || userLoc.lon],
+        zoom: 9
+      });
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(fullMap);
+
+      // Add user pin
+      const uPin = L.marker([userLoc.lat, userLoc.lng || userLoc.lon], {
+        icon: L.divIcon({
+          html: '<div style="background:#15803D; color:#FFF; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.3); border:2.5px solid #FFF;"><i class="fas fa-tractor"></i></div>',
+          className: '',
+          iconSize: [34, 34],
+          iconAnchor: [17, 17]
+        })
+      }).addTo(fullMap);
+      uPin.bindPopup(`<strong>Your Farm</strong><br>${userLoc.city || 'Origin'}`).openPopup();
+
+      // Populate candidate centres from SmartBookingEngine
+      const centres = (window.SmartBookingEngine && window.SmartBookingEngine.DEFAULT_PROCUREMENT_CENTRES) || [];
+      const bounds = [[userLoc.lat, userLoc.lng || userLoc.lon]];
+
+      centres.slice(0, 12).forEach((c, idx) => {
+        if (!c.latitude || !c.longitude) return;
+        bounds.push([c.latitude, c.longitude]);
+        const mPin = L.marker([c.latitude, c.longitude], {
+          icon: L.divIcon({
+            html: `<div style="background:#0D5C3A; color:#FFF; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.3); border:2px solid #FFF; font-weight:800; font-size:12px;">${idx + 1}</div>`,
+            className: '',
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+          })
+        }).addTo(fullMap);
+
+        mPin.bindPopup(`
+          <div style="font-size:0.82rem; min-width:180px;">
+            <strong style="color:#0F5132;">${c.name}</strong><br>
+            ${c.district}, ${c.state}<br>
+            Capacity: ${c.availableCapacity || 100} Q<br>
+            <button onclick="closeModal(); bookRecommendedSlot('${c.id}', 'Wheat', 50);" class="btn btn-primary btn-sm" style="margin-top:6px; width:100%; font-size:0.75rem; padding:4px 8px;">Book Slot</button>
+          </div>
+        `);
+      });
+
+      if (bounds.length > 1) {
+        fullMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 11 });
+      }
+
+      [100, 300, 600, 1000].forEach(d => {
+        setTimeout(() => {
+          if (fullMap) fullMap.invalidateSize();
+        }, d);
+      });
+    } catch (e) {
+      console.warn('Full map init notice:', e.message);
+    }
+  }, 100);
+};
+window.openNearbyMandisFullMap = openNearbyMandisFullMap;
+
 
 
 // Global App Initialization

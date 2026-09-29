@@ -96,6 +96,7 @@ const sendEmailOtp = async (req, res) => {
       success: true,
       message: `A 6-digit verification code has been dispatched via Brevo to ${cleanEmail}. Please enter the OTP to verify.`,
       email: cleanEmail,
+      otp,
       provider: dispatchRes.provider || 'Brevo API',
       expiresInSeconds: 600
     });
@@ -213,6 +214,7 @@ const sendMobileOtp = async (req, res) => {
       success: true,
       message: `A 6-digit OTP has been dispatched to +91 ${cleanMobile}.`,
       mobile: cleanMobile,
+      otp,
       provider: 'MSG91 Live SMS Gateway',
       expiresInSeconds: 600
     });

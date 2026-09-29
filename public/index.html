@@ -152,8 +152,8 @@
   <!-- MSG91 Official OTP Widget Configuration & Loader -->
   <script type="text/javascript">
   var configuration = {
-    widgetId: "3669676d316f323335383235",
-    tokenAuth: "568684TJ6Q4Cu9Q6a9ec1f4P1",
+    widgetId: "",
+    tokenAuth: "",
     identifier: "",
     exposeMethods: true,
     success: (data) => {
@@ -171,6 +171,21 @@
         }
     }
   };
+
+  // Dynamically load MSG91 keys from environment config endpoint
+  fetch('/api/auth/msg91/config')
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.widgetId) {
+        configuration.widgetId = data.widgetId;
+        configuration.tokenAuth = data.tokenAuth;
+        if (window.KPMS_MSG91) {
+          window.KPMS_MSG91.widgetId = data.widgetId;
+          window.KPMS_MSG91.tokenAuth = data.tokenAuth;
+        }
+      }
+    })
+    .catch(err => console.warn('MSG91 config load note:', err));
   </script>
   <script type="text/javascript">
   (function loadOtpScript(urls) {

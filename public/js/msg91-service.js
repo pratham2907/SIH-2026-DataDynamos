@@ -4,8 +4,8 @@
  */
 
 window.KPMS_MSG91 = {
-  widgetId: "3669676d316f323335383235",
-  tokenAuth: "568684TJ6Q4Cu9Q6a9ec1f4P1",
+  widgetId: "",
+  tokenAuth: "",
   isReady: false,
   verifiedNumbers: new Set(),
   lastVerifiedToken: null
@@ -19,6 +19,10 @@ window.KPMS_MSG91 = {
     if (data.success && data.widgetId) {
       window.KPMS_MSG91.widgetId = data.widgetId;
       window.KPMS_MSG91.tokenAuth = data.tokenAuth;
+      if (typeof window.configuration === 'object') {
+        window.configuration.widgetId = data.widgetId;
+        window.configuration.tokenAuth = data.tokenAuth;
+      }
     }
   } catch (e) {
     console.warn('MSG91 config fetch note:', e.message);

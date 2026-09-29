@@ -45,24 +45,8 @@ const loadMandiPricesPage = async () => {
   const isFarmer = user && user.role === 'farmer';
 
   container.innerHTML = `
-    <div class="app-container">
-      ${isFarmer ? `
-        <aside class="sidebar">
-          <div style="padding:10px 14px; border-bottom:1px solid var(--border-color); margin-bottom:12px;">
-            <div style="font-weight:700; color:#FFF; font-size:1.05rem;">${user.name}</div>
-            <div style="font-size:0.75rem; color:var(--saffron); font-weight:600;"><i class="fas fa-id-card"></i> ${user.farmerId || 'Farmer'}</div>
-          </div>
-          <div class="sidebar-heading">${getT('nav_portal')}</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard')}</a>
-          <a class="nav-link active" onclick="loadMandiPricesPage()"><i class="fas fa-carrot" style="color:var(--saffron);"></i> ${getT('nav_mandi_prices')}</a>
-          <a class="nav-link" onclick="routeTo('#smart-booking')"><i class="fas fa-wand-magic-sparkles"></i> ${getT('btn_smart_mandi_finder')}</a>
-          <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot')}</a>
-          <a class="nav-link" onclick="routeTo('#farmer-queue')"><i class="fas fa-users-line"></i> ${getT('queue_tracker_title')}</a>
-          <div style="margin-top:auto; padding-top:16px;">
-            <a class="nav-link" style="color:#EF4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ${getT('nav_logout')}</a>
-          </div>
-        </aside>
-      ` : `
+    <div class="${isFarmer ? 'sp-app-layout' : 'app-container'}">
+      ${isFarmer && typeof getFarmerSidebar === 'function' ? getFarmerSidebar(user, 'dashboard') : (isFarmer && window.getFarmerSidebar ? window.getFarmerSidebar(user, 'dashboard') : `
         <aside class="sidebar">
           <div class="sidebar-heading">Market Intelligence</div>
           <a class="nav-link" onclick="routeTo('#landing')"><i class="fas fa-arrow-left"></i> Home</a>
@@ -71,10 +55,10 @@ const loadMandiPricesPage = async () => {
           <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> ${getT('nav_display_board')}</a>
           <a class="nav-link" onclick="routeTo('#ai-insights')"><i class="fas fa-chart-line"></i> Market Insights</a>
         </aside>
-      `}
+      `)}
 
       <!-- Main Content Area -->
-      <main class="main-content" style="max-width:1250px; margin:0 auto; padding-bottom:60px;">
+      <main class="${isFarmer ? 'sp-main' : 'main-content'}" style="max-width:1250px; margin:0 auto; padding-bottom:60px;">
         
         <!-- Header Banner -->
         <div class="glass-panel" style="padding:24px 28px; margin-bottom:24px; background:#FFFFFF; border:1px solid var(--border-color); border-left:6px solid var(--green-gov); box-shadow:0 6px 24px rgba(0,0,0,0.07);">
@@ -730,10 +714,9 @@ const renderLeafletMandiMap = (mandis, userLoc, radiusKm, cropMeta) => {
   });
   mandiPriceState.mapInstance = map;
 
-  // Reliable CartoDB Voyager Tile Layer
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO | Agmarknet India',
-    subdomains: 'abcd',
+  // OpenStreetMap Standard Tile Layer (Reliable, no API key watermark)
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors | Agmarknet India',
     maxZoom: 19
   }).addTo(map);
 

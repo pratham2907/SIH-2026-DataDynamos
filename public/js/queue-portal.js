@@ -15,14 +15,9 @@ const loadFarmerQueuePage = async () => {
 
     if (!result.success || !result.hasActiveQueue) {
       container.innerHTML = `
-        <div class="app-container">
-          <aside class="sidebar">
-            <div class="sidebar-heading">${getT('sidebar_navigation', 'Navigation')}</div>
-            <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard', 'Dashboard')}</a>
-            <a class="nav-link" onclick="routeTo('#book-slot')"><i class="fas fa-calendar-plus"></i> ${getT('btn_book_slot', 'Book Slot')}</a>
-            <a class="nav-link active" onclick="loadFarmerQueuePage()"><i class="fas fa-users-line"></i> ${getT('live_queue_tracker', 'Live Queue')}</a>
-          </aside>
-          <main class="main-content">
+        <div class="sp-app-layout">
+          ${typeof getFarmerSidebar === 'function' ? getFarmerSidebar(getCurrentUser(), 'farmer-queue') : (window.getFarmerSidebar ? window.getFarmerSidebar(getCurrentUser(), 'farmer-queue') : '')}
+          <main class="sp-main">
             <div class="glass-panel" style="padding:40px; text-align:center; max-width:700px; margin:40px auto;">
               <div style="font-size:3.5rem; color:var(--text-muted); margin-bottom:16px;"><i class="fas fa-ticket-alt"></i></div>
               <h2 style="color:var(--primary-navy); font-weight:800; margin-bottom:12px;">${getT('no_active_queue_token', 'No Active Queue Token')}</h2>
@@ -43,16 +38,10 @@ const loadFarmerQueuePage = async () => {
     const { queue, farmersAhead, currentlyServingToken, currentlyServingCounter, estimatedWaitMinutes, congestionLevel } = result;
 
     container.innerHTML = `
-      <div class="app-container">
-        <aside class="sidebar">
-          <div class="sidebar-heading">${getT('nav_portal')}</div>
-          <a class="nav-link" onclick="routeTo('#farmer-dashboard')"><i class="fas fa-arrow-left"></i> ${getT('nav_dashboard')}</a>
-          <a class="nav-link active" onclick="loadFarmerQueuePage()"><i class="fas fa-users-line"></i> ${getT('queue_tracker_title')}</a>
-          <a class="nav-link" onclick="routeTo('#my-bookings')"><i class="fas fa-ticket-alt"></i> ${getT('status_booked')}</a>
-          <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> ${getT('nav_display_board')}</a>
-        </aside>
+      <div class="sp-app-layout">
+        ${typeof getFarmerSidebar === 'function' ? getFarmerSidebar(getCurrentUser(), 'farmer-queue') : (window.getFarmerSidebar ? window.getFarmerSidebar(getCurrentUser(), 'farmer-queue') : '')}
 
-        <main class="main-content">
+        <main class="sp-main">
           <div style="max-width:900px; margin:0 auto;">
             <!-- Header -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">

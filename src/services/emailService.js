@@ -6,16 +6,25 @@ const nodemailer = require('nodemailer');
  * Supports both standard Brevo and SMTP environment variable conventions
  */
 const getBrevoConfig = () => {
+  const envKey = (process.env.BREVO_API_KEY || '').trim();
+  const isRestKey = envKey.startsWith('xkeysib-');
+  const isSmtpKey = envKey.startsWith('xsmtpsib-');
+
+  const smtpUser = process.env.EMAIL_HOST_USER || process.env.SMTP_USER || 'b82194001@smtp-brevo.com';
+  const smtpPass = process.env.EMAIL_HOST_PASSWORD || process.env.SMTP_PASS || (isSmtpKey ? envKey : '');
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.DEFAULT_FROM_EMAIL || 'bhutanibeena101@gmail.com';
+  const senderName = process.env.BREVO_SENDER_NAME || 'KPMS Govt Portal';
+
   return {
-    apiKey: process.env.BREVO_API_KEY || process.env.SMTP_PASS || '',
-    senderEmail: process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || 'upadhyayhem0@gmail.com',
-    senderName: process.env.BREVO_SENDER_NAME || 'KPMS Govt Portal',
-    defaultFrom: process.env.DEFAULT_FROM_EMAIL || process.env.SMTP_FROM || 'KPMS Govt Portal <upadhyayhem0@gmail.com>',
+    apiKey: isRestKey ? envKey : (process.env.BREVO_REST_API_KEY || ''),
+    senderEmail,
+    senderName,
+    defaultFrom: process.env.DEFAULT_FROM_EMAIL || process.env.SMTP_FROM || `"${senderName}" <${senderEmail}>`,
     smtp: {
       host: process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp-relay.brevo.com',
       port: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || '587', 10),
-      user: process.env.EMAIL_HOST_USER || process.env.SMTP_USER || 'b65525001@smtp-brevo.com',
-      pass: process.env.EMAIL_HOST_PASSWORD || process.env.SMTP_PASS || process.env.BREVO_API_KEY || ''
+      user: smtpUser,
+      pass: smtpPass
     }
   };
 };
@@ -70,8 +79,21 @@ const sendTransactionalEmail = async ({
   const finalHtml = htmlBody || htmlContent || '<p>KPMS Notification</p>';
   const finalText = textBody || textContent || '';
 
-  if (!config.apiKey) {
-    console.warn('⚠️ BREVO_API_KEY is not configured in .env. Attempting SMTP relay directly.');
+  // If we have a Brevo REST API key (starts with xkeysib-), use the REST HTTP API v3
+  const hasRestKey = config.apiKey && config.apiKey.startsWith('xkeysib-');
+  const hasSmtpConfig = config.smtp.user && config.smtp.pass;
+
+  if (!hasRestKey && hasSmtpConfig) {
+    return sendViaSmtp({
+      to: targetEmail,
+      subject,
+      html: finalHtml,
+      text: finalText
+    });
+  }
+
+  if (!hasRestKey && !hasSmtpConfig) {
+    console.warn('⚠️ Neither Brevo REST API key nor Brevo SMTP credentials configured in .env. Attempting fallback...');
     return sendViaSmtp({
       to: targetEmail,
       subject,
