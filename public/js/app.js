@@ -1010,19 +1010,19 @@ const initNearbyMandisMiniMap = () => {
         attributionControl: false
       });
 
-      // Free, high-reliability OpenStreetMap tile layer (No API key, no watermark)
-      const primaryTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // High-performance Esri World Street Map (Reliable, fast, zero watermark, no 403 blocks)
+      const primaryTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; Esri &copy; OpenStreetMap'
       });
 
-      // Fallback to Esri World Street Map if OSM experiences tile errors
+      // Fallback to Esri World Topo Map if needed
       primaryTileLayer.on('tileerror', function() {
         if (!window.spMiniMap._fallbackSet) {
           window.spMiniMap._fallbackSet = true;
-          L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+          L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 19,
-            attribution: '&copy; Esri &copy; OpenStreetMap'
+            attribution: '&copy; Esri Topo'
           }).addTo(window.spMiniMap);
         }
       });
@@ -1298,10 +1298,22 @@ const openNearbyMandisFullMap = () => {
         zoom: 9
       });
 
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      const fullMapLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(fullMap);
+        attribution: '&copy; Esri &copy; OpenStreetMap'
+      });
+
+      fullMapLayer.on('tileerror', function() {
+        if (!fullMap._fallbackSet) {
+          fullMap._fallbackSet = true;
+          L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: '&copy; Esri Topo'
+          }).addTo(fullMap);
+        }
+      });
+
+      fullMapLayer.addTo(fullMap);
 
       // Add user pin
       const uPin = L.marker([userLoc.lat, userLoc.lng || userLoc.lon], {

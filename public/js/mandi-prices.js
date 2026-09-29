@@ -714,11 +714,23 @@ const renderLeafletMandiMap = (mandis, userLoc, radiusKm, cropMeta) => {
   });
   mandiPriceState.mapInstance = map;
 
-  // OpenStreetMap Standard Tile Layer (Reliable, no API key watermark)
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors | Agmarknet India',
+  // High-performance Esri World Street Map (Reliable, fast, zero watermark, no 403 blocks)
+  const esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '&copy; Esri &copy; OpenStreetMap | Agmarknet India',
     maxZoom: 19
-  }).addTo(map);
+  });
+
+  esriLayer.on('tileerror', function() {
+    if (!map._fallbackSet) {
+      map._fallbackSet = true;
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri Topo | Agmarknet India',
+        maxZoom: 19
+      }).addTo(map);
+    }
+  });
+
+  esriLayer.addTo(map);
 
   setTimeout(() => {
     if (mandiPriceState.mapInstance) mandiPriceState.mapInstance.invalidateSize();

@@ -424,11 +424,23 @@ const initLeafletMap = (markers) => {
     // Default centered around Central India
     adminMapInstance = L.map('national-leaflet-map').setView([23.2599, 77.4126], 5);
 
-    // OpenStreetMap Standard Tile Layer (Reliable, no API key watermark)
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors | KPMS Gov India',
+    // High-performance Esri World Street Map (Reliable, fast, zero watermark, no 403 blocks)
+    const esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; Esri &copy; OpenStreetMap | KPMS Gov India',
       maxZoom: 19
-    }).addTo(adminMapInstance);
+    });
+
+    esriLayer.on('tileerror', function() {
+      if (!adminMapInstance._fallbackSet) {
+        adminMapInstance._fallbackSet = true;
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+          attribution: '&copy; Esri Topo | KPMS Gov India',
+          maxZoom: 19
+        }).addTo(adminMapInstance);
+      }
+    });
+
+    esriLayer.addTo(adminMapInstance);
 
     setTimeout(() => {
       if (adminMapInstance) adminMapInstance.invalidateSize();

@@ -268,6 +268,80 @@ const renderSmartProcureFarmerView = (data = {}) => {
                 <div class="sp-floating-stat-val">₹ 48-72 hrs</div>
               </div>
             </div>
+        <!-- FARMER VERIFICATION & REGISTRATION STATUS STRIP (6 CARDS) -->
+        <section style="margin-bottom:20px;">
+          <!-- Action Required Banner if Needs Correction -->
+          ${(farmer.registrationStatus === 'Needs Correction' || (data.application && data.application.verification?.registrationStatus === 'Needs Correction')) ? `
+            <div class="glass-card" style="padding:16px 20px; background:#FEF2F2; border:1.5px solid #F87171; border-radius:10px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div>
+                <div style="color:#991B1B; font-weight:800; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                  <i class="fas fa-triangle-exclamation" style="color:#EF4444; font-size:1.3rem;"></i>
+                  <span>⚠ Action Required: Your registration application requires correction</span>
+                </div>
+                <div style="color:#7F1D1D; font-size:0.88rem; margin-top:4px;">
+                  <strong>Authorized Officer's Remark:</strong> ${farmer.officerRemarks || (data.application && data.application.verification?.officerRemarks) || 'Please update your uploaded documents or land survey number for official verification.'}
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="openFarmerRegistrationModal()" style="background:#DC2626; border-color:#DC2626; font-weight:700; padding:10px 18px;">
+                <i class="fas fa-pen-to-square"></i> Correct Information
+              </button>
+            </div>
+          ` : ''}
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px;">
+            <!-- Registration Status Card -->
+            <div class="glass-card" style="padding:14px; border-radius:10px; border-top:3px solid #10B981; background:#FFFFFF;">
+              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Registration Status</div>
+              <div style="font-size:0.95rem; font-weight:800; color:#065F46; margin-top:6px; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-circle-check" style="color:#10B981;"></i> ${farmer.registrationStatus || '✓ Submitted'}
+              </div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">App ID: ${farmer.applicationId || farmer.farmerId || 'FMR-2026-000123'}</div>
+            </div>
+
+            <!-- KYC Status Card -->
+            <div class="glass-card" style="padding:14px; border-radius:10px; border-top:3px solid var(--saffron); background:#FFFFFF;">
+              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">KYC Status</div>
+              <div style="font-size:0.95rem; font-weight:800; color:var(--saffron); margin-top:6px; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-hourglass-half"></i> ${farmer.kycStatus || '⏳ Under Verification'}
+              </div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Aadhaar & Contact Validated</div>
+            </div>
+
+            <!-- Document Status Card -->
+            <div class="glass-card" style="padding:14px; border-radius:10px; border-top:3px solid #2563EB; background:#FFFFFF;">
+              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Document Status</div>
+              <div style="font-size:0.95rem; font-weight:800; color:#1E40AF; margin-top:6px; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-circle-check" style="color:#2563EB;"></i> ✓ 3/3 Uploaded
+              </div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Aadhaar, Bank, Land 7/12</div>
+            </div>
+
+            <!-- Land Information Card -->
+            <div class="glass-card" style="padding:14px; border-radius:10px; border-top:3px solid #16A34A; background:#FFFFFF;">
+              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Land Information</div>
+              <div style="font-size:0.95rem; font-weight:800; color:#14532D; margin-top:6px; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-circle-check" style="color:#16A34A;"></i> ✓ Added (${farmer.totalLandArea || 5.0} Acres)
+              </div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Survey No: ${farmer.surveyNumber || 'SUR-482/1'}</div>
+            </div>
+
+            <!-- Bank Status Card -->
+            <div class="glass-card" style="padding:14px; border-radius:10px; border-top:3px solid #9333EA; background:#FFFFFF;">
+              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Bank Status</div>
+              <div style="font-size:0.95rem; font-weight:800; color:#581C87; margin-top:6px; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-building-columns" style="color:#9333EA;"></i> ${farmer.bankStatus || '⏳ Verification Pending'}
+              </div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">A/C: ${farmer.accountNumber ? '******' + String(farmer.accountNumber).slice(-4) : '******3829'}</div>
+            </div>
+
+            <!-- Notifications Card -->
+            <div class="glass-card" style="padding:14px; border-radius:10px; border-top:3px solid #F59E0B; background:#FFFFFF; cursor:pointer;" onclick="openNotificationsModal()">
+              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Notifications</div>
+              <div style="font-size:0.95rem; font-weight:800; color:#B45309; margin-top:6px; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-bell" style="color:#F59E0B;"></i> ${window.unreadNotificationCount || 3} New Alerts
+              </div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Click to view Mandi advisories</div>
+            </div>
           </div>
         </section>
 

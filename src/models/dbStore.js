@@ -111,7 +111,21 @@ class Collection {
   async findByIdAndUpdate(id, update, options = { new: true }) {
     const list = this.getStore();
     const idx = list.findIndex(item => item._id === id || item.id === id);
-    if (idx === -1) return null;
+    if (idx === -1) {
+      if (options && options.upsert) {
+        const newDoc = {
+          _id: id,
+          id,
+          ...(update.$set || update),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        list.push(newDoc);
+        persistMemoryStore();
+        return { ...newDoc };
+      }
+      return null;
+    }
 
     const current = list[idx];
     const updated = {
@@ -217,12 +231,19 @@ module.exports = {
   Backups: new Collection('backups'),
   TemporaryRegistrations: new Collection('temporaryRegistrations'),
   CropForecasts: new Collection('cropForecasts'),
+  FarmerApplications: new Collection('farmerApplications'),
   generateId,
   generateFarmerId: async () => {
     const list = getMemoryStore().farmers || [];
     const year = new Date().getFullYear();
     const count = list.length + 1;
     return `FRM${year}${String(count).padStart(5, '0')}`;
+  },
+  generateFarmerApplicationId: async () => {
+    const list = getMemoryStore().farmerApplications || [];
+    const year = new Date().getFullYear();
+    const count = list.length + 1;
+    return `FMR-${year}-${String(count).padStart(6, '0')}`;
   },
   generateOfficerId: async () => {
     const list = (getMemoryStore().users || []).filter(u => u.role === 'officer');
@@ -237,3 +258,4 @@ module.exports = {
     return `SADM${year}${String(count).padStart(5, '0')}`;
   }
 };
+

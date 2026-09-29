@@ -21,7 +21,7 @@ const renderOfficerSidebar = (activeKey, user, center) => {
       <a class="nav-link" onclick="openGateScannerModal()"><i class="fas fa-qrcode"></i> ${getT('gate_qr_scanner', 'Gate QR Scanner')}</a>
       <a class="nav-link ${activeKey === 'queue' ? 'active' : ''}" onclick="loadOfficerQueueView()"><i class="fas fa-list-check"></i> ${getT('multi_counter_queue', 'Multi-Counter Queue')}</a>
       <a class="nav-link" onclick="openProcurementStepper()"><i class="fas fa-scale-balanced"></i> ${getT('weighbridge_quality', 'Weighbridge & Quality')}</a>
-      <a class="nav-link ${activeKey === 'crop-readiness' ? 'active' : ''}" onclick="scrollToOfficerReadiness()"><i class="fas fa-wheat-awn" style="color:var(--saffron);"></i> ${getT('crop_readiness_menu', 'Paddy / Rice Readiness Verification')}</a>
+      <a class="nav-link ${activeKey === 'farmer-applications' ? 'active' : ''}" onclick="loadOfficerFarmerApplicationsQueue()"><i class="fas fa-user-check" style="color:var(--green-gov);"></i> ${getT('farmer_verification_queue', 'Farmer Verification Queue')}</a>
       <a class="nav-link" onclick="openFarmerSearchModal()"><i class="fas fa-search"></i> ${getT('farmer_lookup', 'Universal Farmer Lookup')}</a>
       <a class="nav-link" onclick="openAnnouncementModal()"><i class="fas fa-bullhorn"></i> ${getT('mandi_announcements', 'Mandi Announcements')}</a>
       <a class="nav-link" onclick="routeTo('#tv-display')"><i class="fas fa-tv"></i> ${getT('tv_display_mode', 'Public Display TV Mode')}</a>
@@ -2984,3 +2984,294 @@ window.setAssistedQuickQty = setAssistedQuickQty;
 window.onAssistedCenterChange = onAssistedCenterChange;
 window.onAssistedDateChange = onAssistedDateChange;
 window.selectAssistedTimeSlot = selectAssistedTimeSlot;
+
+/**
+ * ----------------------------------------------------
+ * FARMER APPLICATIONS VERIFICATION QUEUE (OFFICER ROLE)
+ * ----------------------------------------------------
+ */
+const loadOfficerFarmerApplicationsQueue = async () => {
+  window.location.hash = '#officer-farmer-applications';
+  const token = localStorage.getItem('kpms_token');
+  const user = getCurrentUser();
+  if (!token || !user || (user.role !== 'officer' && user.role !== 'admin')) {
+    openLoginModal('officer');
+    return;
+  }
+
+  const container = document.getElementById('app-view-container');
+  container.innerHTML = `<div class="skeleton" style="height:400px; border-radius:12px;"></div>`;
+
+  try {
+    const res = await fetch('/api/registration/farmers/applications', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const result = await res.json();
+    const applications = (result.success && result.data) ? result.data : [];
+
+    container.innerHTML = `
+      <div class="app-container">
+        ${renderOfficerSidebar('farmer-applications', user, { name: user.assignedCenterId || 'APMC Center' })}
+
+        <main class="main-content">
+          <div class="glass-panel" style="padding:22px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border-left:6px solid var(--green-gov);">
+            <div>
+              <h2 style="font-size:1.8rem; font-weight:800; color:var(--primary-navy); margin:0 0 4px 0;">
+                <i class="fas fa-user-check" style="color:var(--green-gov); margin-right:8px;"></i> Farmer Applications Verification Queue
+              </h2>
+              <p style="color:var(--text-muted); font-size:0.88rem; margin:0;">
+                Verify submitted farmer registrations, inspect uploaded credentials (Aadhaar, Land 7/12, Bank Passbook), and approve or request corrections.
+              </p>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <span class="status-pill active" style="font-size:0.85rem; padding:6px 14px;">
+                ${applications.length} Total Applications
+              </span>
+            </div>
+          </div>
+
+          <!-- Applications Table -->
+          <div class="glass-card" style="padding:20px; overflow-x:auto;">
+            <table class="data-table" style="width:100%;">
+              <thead>
+                <tr>
+                  <th>Application ID</th>
+                  <th>Farmer Full Name</th>
+                  <th>Father / Husband Name</th>
+                  <th>Mobile / Email</th>
+                  <th>Location (Village, District)</th>
+                  <th>Land & Crop</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${applications.length === 0 ? `
+                  <tr>
+                    <td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">
+                      <i class="fas fa-inbox" style="font-size:2rem; color:#CBD5E1; margin-bottom:8px; display:block;"></i>
+                      No pending farmer applications in queue at this time.
+                    </td>
+                  </tr>
+                ` : applications.map(app => {
+                  const p = app.personal || {};
+                  const addr = app.address || {};
+                  const land = app.land || {};
+                  const acc = app.account || {};
+                  const ver = app.verification || {};
+                  const status = ver.registrationStatus || 'Registration Submitted';
+
+                  let statusClass = 'pending';
+                  if (status === 'Approved') statusClass = 'completed';
+                  if (status === 'Needs Correction') statusClass = 'waiting';
+                  if (status === 'Rejected') statusClass = 'danger';
+
+                  return `
+                    <tr>
+                      <td style="font-weight:700; font-family:monospace; color:var(--saffron);">${app.applicationId}</td>
+                      <td>
+                        <strong>${p.fullName || 'N/A'}</strong><br />
+                        <span style="font-size:0.75rem; color:var(--text-muted);">${p.farmerType || 'Individual'}</span>
+                      </td>
+                      <td>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">${p.relationshipToFarmer || 'Father'}:</span><br />
+                        <strong>${p.fatherOrHusbandName || p.fatherName || 'N/A'}</strong>
+                      </td>
+                      <td>
+                        <i class="fas fa-phone" style="font-size:0.72rem; color:var(--green-gov);"></i> +91 ${acc.mobile ? acc.mobile.slice(-4).padStart(10, '*') : ''}<br />
+                        <span style="font-size:0.75rem; color:var(--text-muted);">${acc.email || ''}</span>
+                      </td>
+                      <td>
+                        ${addr.village || ''}, ${addr.district || ''}<br />
+                        <span style="font-size:0.75rem; color:var(--text-muted);">${addr.state || ''}</span>
+                      </td>
+                      <td>
+                        <strong>${land.area || land.totalLandArea || 0} ${land.unit || 'Acre'}</strong><br />
+                        <span style="font-size:0.75rem; color:var(--text-muted);">${Array.isArray(land.crops) ? land.crops.join(', ') : (land.primaryCrop || 'Wheat')}</span>
+                      </td>
+                      <td>
+                        <span class="status-pill ${statusClass}" style="font-size:0.78rem;">${status}</span>
+                      </td>
+                      <td>
+                        <button class="btn btn-outline btn-sm" style="font-size:0.8rem; padding:4px 10px; border-color:var(--primary-navy);" onclick="reviewFarmerApplicationModal('${app.applicationId}')">
+                          <i class="fas fa-eye"></i> Review & Verify
+                        </button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    `;
+  } catch (err) {
+    showToast('Failed to load farmer applications: ' + err.message, 'error');
+  }
+};
+
+/**
+ * Open Review Modal for Officer
+ */
+const reviewFarmerApplicationModal = async (appId) => {
+  showToast(`Loading Application ${appId}...`, 'info');
+
+  try {
+    const res = await fetch(`/api/registration/farmer/application/${appId}`);
+    const result = await res.json();
+    if (!result.success || !result.data) {
+      showToast('Application details not found.', 'error');
+      return;
+    }
+
+    const app = result.data;
+    const p = app.personal || {};
+    const addr = app.address || {};
+    const land = app.land || {};
+    const bank = app.bank || {};
+    const docs = app.documents || {};
+    const ver = app.verification || {};
+
+    const modalHtml = `
+      <div id="officer-app-review-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:99999; display:flex; align-items:center; justify-content:center; padding:16px;">
+        <div class="glass-card" style="background:#FFF; width:100%; max-width:760px; max-height:90vh; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 48px rgba(0,0,0,0.35);">
+          <!-- Header -->
+          <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center; background:#0F2942; color:#FFF;">
+            <div>
+              <div style="font-size:0.75rem; color:#94A3B8; text-transform:uppercase; font-weight:700;">Officer Verification Console</div>
+              <strong style="font-size:1.15rem; color:#FFF;"><i class="fas fa-shield-halved" style="color:var(--saffron); margin-right:8px;"></i> Review Farmer Application: ${app.applicationId}</strong>
+            </div>
+            <button type="button" onclick="document.getElementById('officer-app-review-modal').remove()" style="border:none; background:transparent; font-size:1.5rem; color:#94A3B8; cursor:pointer;">&times;</button>
+          </div>
+
+          <!-- Body -->
+          <div style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px;" class="custom-scrollbar">
+            <!-- 1. Personal -->
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:14px;">
+              <div style="font-weight:800; color:var(--primary-navy); margin-bottom:8px; font-size:0.92rem;"><i class="fas fa-user" style="color:var(--saffron);"></i> Personal Information</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.85rem;">
+                <div><span style="color:var(--text-muted);">Farmer Full Name:</span> <strong>${p.fullName}</strong></div>
+                <div><span style="color:var(--text-muted);">${p.relationshipToFarmer || 'Father'}'s Name:</span> <strong>${p.fatherOrHusbandName || p.fatherName || 'N/A'}</strong></div>
+                <div><span style="color:var(--text-muted);">DOB / Gender:</span> <strong>${p.dateOfBirth || p.dob} | ${p.gender}</strong></div>
+                <div><span style="color:var(--text-muted);">Farmer Type:</span> <strong>${p.farmerType || 'Individual'}</strong></div>
+                <div><span style="color:var(--text-muted);">Aadhaar:</span> <strong>XXXX XXXX ${p.aadhaarReference ? p.aadhaarReference.slice(-4) : (app.aadhaarNumber ? app.aadhaarNumber.slice(-4) : '****')}</strong></div>
+                <div><span style="color:var(--text-muted);">Mobile:</span> <strong>+91 ${app.account?.mobile || ''}</strong></div>
+              </div>
+            </div>
+
+            <!-- 2. Land -->
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:14px;">
+              <div style="font-weight:800; color:var(--primary-navy); margin-bottom:8px; font-size:0.92rem;"><i class="fas fa-wheat-awn" style="color:var(--green-gov);"></i> Land & Crop Particulars</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.85rem;">
+                <div><span style="color:var(--text-muted);">Ownership:</span> <strong>${land.ownershipType || 'Owned'}</strong></div>
+                <div><span style="color:var(--text-muted);">Area:</span> <strong>${land.area || land.totalLandArea || 0} ${land.unit || 'Acre'}</strong></div>
+                <div><span style="color:var(--text-muted);">Survey / Gat No:</span> <strong>${land.surveyNumber || 'N/A'}</strong></div>
+                <div><span style="color:var(--text-muted);">Primary Crop(s):</span> <strong>${Array.isArray(land.crops) ? land.crops.join(', ') : (land.primaryCrop || 'Wheat')}</strong></div>
+              </div>
+            </div>
+
+            <!-- 3. Bank -->
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:14px;">
+              <div style="font-weight:800; color:var(--primary-navy); margin-bottom:8px; font-size:0.92rem;"><i class="fas fa-building-columns" style="color:#2563EB;"></i> Bank Payout Details</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.85rem;">
+                <div><span style="color:var(--text-muted);">Holder:</span> <strong>${bank.accountHolderName}</strong></div>
+                <div><span style="color:var(--text-muted);">Bank:</span> <strong>${bank.bankName}</strong></div>
+                <div><span style="color:var(--text-muted);">Account No:</span> <strong>******${bank.accountReference ? bank.accountReference.slice(-4) : (bank.accountNumber ? bank.accountNumber.slice(-4) : '****')}</strong></div>
+                <div><span style="color:var(--text-muted);">IFSC:</span> <strong>${bank.ifsc}</strong></div>
+              </div>
+            </div>
+
+            <!-- 4. Uploaded Documents -->
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:14px;">
+              <div style="font-weight:800; color:var(--primary-navy); margin-bottom:8px; font-size:0.92rem;"><i class="fas fa-file-shield" style="color:var(--saffron);"></i> Uploaded Proof Documents</div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                ${['aadhaar', 'bankPassbook', 'landRecord'].map(key => {
+                  const d = docs[key];
+                  if (!d) return `<div style="font-size:0.8rem; color:#EF4444;"><i class="fas fa-xmark"></i> ${key}: Not uploaded</div>`;
+                  return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; border:1px solid #E2E8F0; border-radius:6px; padding:8px 12px; font-size:0.82rem;">
+                      <div>
+                        <strong><i class="fas fa-file-lines" style="color:var(--saffron);"></i> ${d.fileName || key}</strong>
+                        <span style="color:var(--text-muted); font-size:0.75rem; margin-left:6px;">(${d.fileSize ? Math.round(d.fileSize/1024) + ' KB' : 'Verified'})</span>
+                      </div>
+                      ${d.fileUrl ? `<a href="${d.fileUrl}" target="_blank" class="btn btn-outline btn-sm" style="font-size:0.75rem; padding:3px 8px;"><i class="fas fa-arrow-up-right-from-square"></i> Inspect Document</a>` : '<span class="status-pill completed">Encrypted</span>'}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Officer Decision Actions -->
+            <div style="border-top:1px solid #E2E8F0; padding-top:14px;">
+              <label style="font-size:0.82rem; font-weight:700; color:var(--primary-navy); margin-bottom:4px; display:block;">Officer Review Remarks (Included in farmer notification & correction request)</label>
+              <textarea id="officer-decision-remarks" class="form-control" rows="2" placeholder="e.g. Approved following cross-verification with MP Bhulekh records. OR: Please upload a clearer copy of Land Record 7/12.">${ver.officerRemarks || ''}</textarea>
+            </div>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div style="padding:14px 20px; border-top:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('officer-app-review-modal').remove()">Close</button>
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn btn-outline btn-sm" style="border-color:#F59E0B; color:#B45309;" onclick="submitOfficerApplicationDecision('${app.applicationId}', 'Needs Correction')">
+                <i class="fas fa-triangle-exclamation"></i> Request Correction
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" style="border-color:#EF4444; color:#DC2626;" onclick="submitOfficerApplicationDecision('${app.applicationId}', 'Rejected')">
+                <i class="fas fa-ban"></i> Reject
+              </button>
+              <button type="button" class="btn btn-success btn-sm" style="font-weight:700;" onclick="submitOfficerApplicationDecision('${app.applicationId}', 'Approved')">
+                <i class="fas fa-check"></i> Approve Application
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  } catch (err) {
+    showToast('Failed to load application: ' + err.message, 'error');
+  }
+};
+
+/**
+ * Submit Officer Decision
+ */
+const submitOfficerApplicationDecision = async (appId, decision) => {
+  const remarks = document.getElementById('officer-decision-remarks')?.value?.trim() || '';
+  const token = localStorage.getItem('kpms_token');
+
+  if (decision === 'Needs Correction' && !remarks) {
+    showToast('Please provide remarks explaining what correction is required.', 'warning');
+    return;
+  }
+
+  try {
+    showToast(`Submitting decision (${decision}) for ${appId}...`, 'info');
+    const res = await fetch(`/api/registration/farmer/application/${appId}/review`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        status: decision,
+        remarks: remarks || `Application ${decision.toLowerCase()} by procurement officer.`
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      showToast(result.message || `Application ${decision} successfully!`, 'success');
+      document.getElementById('officer-app-review-modal')?.remove();
+      loadOfficerFarmerApplicationsQueue();
+    } else {
+      showToast(result.message || 'Decision submission failed', 'error');
+    }
+  } catch (err) {
+    showToast('Submission error: ' + err.message, 'error');
+  }
+};
+
+window.loadOfficerFarmerApplicationsQueue = loadOfficerFarmerApplicationsQueue;
+window.reviewFarmerApplicationModal = reviewFarmerApplicationModal;
+window.submitOfficerApplicationDecision = submitOfficerApplicationDecision;
+
